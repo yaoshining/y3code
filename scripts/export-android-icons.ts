@@ -15,7 +15,7 @@ type IconVariant = "dev" | "nightly" | "prod";
 
 const ADAPTIVE_CANVAS = 432;
 const SPLASH_CANVAS = 1152;
-const TEXT = { x: 15.53, y: 37, width: 94.5, height: 57 };
+const TEXT = { x: 16, y: 34, width: 96, height: 60.8 };
 const WORDMARK_FRACTION = 0.48;
 const COMPOSER_CANVAS_PT = 1024;
 const SVG_DENSITY = 300;

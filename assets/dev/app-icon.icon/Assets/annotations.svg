@@ -10,28 +10,28 @@
 
   <g stroke="#DDF7FF" stroke-linecap="round" stroke-linejoin="round">
     <g opacity="0.9" stroke-width="0.44">
-      <path d="M15.5309 31V25.6M64.3309 31V25.6M68.1653 31V25.6M107.365 31V25.6"/>
-      <path d="M16.9 27.2H62.96" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-      <path d="M69.54 27.2H105.99" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-      <path d="M33.4509 97.3V103M46.4109 97.3V103M65.3653 97.3V103M109.925 97.3V103"/>
-      <path d="M34.82 101.1H45.04" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-      <path d="M66.74 101.1H108.55" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-      <path d="M10.2 37H6.1M10.2 47.6H6.1M10.2 93H6.1"/>
-      <path d="M7.9 38.4V46.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-      <path d="M7.9 49V91.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+      <path d="M16 29.5V24M60 29.5V24M66 29.5V24M109 29.5V24"/>
+      <path d="M17.4 25.6H58.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+      <path d="M67.4 25.6H107.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+      <path d="M32 98.2V104M44 98.2V104M66 98.2V104M112 98.2V104"/>
+      <path d="M33.4 102.1H42.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+      <path d="M67.4 102.1H110.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+      <path d="M10.8 34H6.6M10.8 46H6.6M10.8 94H6.6"/>
+      <path d="M8.4 35.4V44.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+      <path d="M8.4 47.4V92.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
     </g>
 
     <g opacity="0.58" stroke-width="0.34">
-      <path d="M12.5 35.1H66.8M39.9309 94.8V44.5M64.3309 34.2V49.9M68.1653 34.2V49.9" stroke-dasharray="1.6 1.6"/>
-      <path d="M65.3653 65.2H109.925M87.2 32.7V98.2" stroke-dasharray="1.2 2"/>
-      <circle cx="87.2" cy="65.2" r="20.8"/>
-      <circle cx="87.2" cy="65.2" r="1.1"/>
+      <path d="M13 32.5H63M38 96V42M60 32V48M66 32V48" stroke-dasharray="1.6 1.6"/>
+      <path d="M66 76.5H112M89 32V98.5" stroke-dasharray="1.2 2"/>
+      <circle cx="89" cy="76.5" r="19"/>
+      <circle cx="89" cy="76.5" r="1.1"/>
     </g>
 
     <g opacity="0.76" stroke-width="0.4">
-      <path d="M24 20V24M22 22H26M101 17V21M99 19H103M114 106V110M112 108H116"/>
-      <path d="M54 107L57 110M57 107L54 110M16 74L19 77M19 74L16 77"/>
-      <path d="M74 22H82M78 18V26" stroke-dasharray="0.7 1.1"/>
+      <path d="M24 19V23M22 21H26M101 17V21M99 19H103M114 106V110M112 108H116"/>
+      <path d="M53 107L56 110M56 107L53 110M16 74L19 77M19 74L16 77"/>
+      <path d="M74 20H82M78 16V24" stroke-dasharray="0.7 1.1"/>
     </g>
   </g>
 </svg>

@@ -1,6 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="title">
-  <title id="title">Y3 Code</title>
-  <rect x="11" y="12" width="106" height="104" rx="17" fill="#0D1430"/>
-  <path d="M22 36h18l15 21 15-21h18L62 70v27H47V70z" fill="#52F59A"/>
-  <path d="M92 41h14v14H92zm0 20h14v14H92zm0 20h14v14H92z" fill="#48BFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none" role="img" aria-labelledby="y3-logo-title">
+  <title id="y3-logo-title">Y3 Code</title>
+  <defs>
+    <linearGradient id="y3-logo-bg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="128">
+      <stop offset="0" stop-color="#111216"/>
+      <stop offset="1" stop-color="#040507"/>
+    </linearGradient>
+    <linearGradient id="y3-logo-rim" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="128">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="y3-logo-mark" gradientUnits="userSpaceOnUse" x1="0" y1="34" x2="0" y2="94.8">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D8DEE9"/>
+    </linearGradient>
+  </defs>
+  <path d="M64 0C91 0 106.3 0 117.15 10.85C128 21.7 128 37 128 64C128 91 128 106.3 117.15 117.15C106.3 128 91 128 64 128C37 128 21.7 128 10.85 117.15C0 106.3 0 91 0 64C0 37 0 21.7 10.85 10.85C21.7 0 37 0 64 0Z" fill="url(#y3-logo-bg)"/>
+  <path d="M64 0C91 0 106.3 0 117.15 10.85C128 21.7 128 37 128 64C128 91 128 106.3 117.15 117.15C106.3 128 91 128 64 128C37 128 21.7 128 10.85 117.15C0 106.3 0 91 0 64C0 37 0 21.7 10.85 10.85C21.7 0 37 0 64 0Z" fill="none" stroke="url(#y3-logo-rim)" stroke-width="1.015873" transform="translate(1 1) scale(0.984375)"/>
+  <path d="M16 34H29.821L38 48.313L46.179 34H60L44 62V94H32V62ZM66 34H109V46L101.6 58.5H103C108.4 58.5 112 66.6 112 76.6C112 87.5 103.8 94.8 91.8 94.8C81.2 94.8 72.3 91.6 66 86L73.4 76.4C78.8 80.5 84.1 82.5 89 82.5H92C97.1 82.5 100 80.15 100 76.25C100 71.9 97.1 68.5 92 68.5H81.5V66.3L93.5 46H66Z" fill="url(#y3-logo-mark)"/>
 </svg>
