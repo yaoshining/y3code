@@ -8,12 +8,17 @@ import { enablePreparedServerCache } from "../../../scripts/lib/server-compile-c
 // AppImage mounts change paths each launch, so Node's path-keyed cache would miss and accumulate copies.
 try {
   if (!process.env.APPIMAGE || process.env.ELECTRON_RUN_AS_NODE === "1") {
+    // oxlint-disable-next-line t3code/no-global-process-runtime -- Loads before any Effect runtime.
+    const platform = process.platform;
     const cacheRoot =
-      // oxlint-disable-next-line t3code/no-global-process-runtime -- Loads before any Effect runtime.
-      process.platform === "linux"
+      platform === "linux"
         ? process.env.XDG_CACHE_HOME || NodePath.join(NodeOS.homedir(), ".cache")
         : NodeOS.tmpdir();
-    const directory = NodePath.join(cacheRoot, "t3code", "compile-cache");
+    const directory = NodePath.join(
+      cacheRoot,
+      platform === "darwin" ? "y3code" : "t3code",
+      "compile-cache",
+    );
     const prepared =
       process.env.ELECTRON_RUN_AS_NODE === "1" &&
       enablePreparedServerCache(process.argv[1] ?? "", directory);

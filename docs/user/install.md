@@ -2,6 +2,10 @@
 
 T3 Code runs coding agents on your computer (or server) and lets you control them from the desktop app, web app, or mobile app. Install T3 Code on the machine where your agents will run first.
 
+## Y3 Code on macOS
+
+To install this fork alongside T3 Code, open the `Y3-Code-…-arm64.dmg` and drag **Y3 Code** to Applications. Its desktop server uses `~/.y3code` by default, and its Electron profile lives in `~/Library/Application Support/Y3 Code/Profile/`. It starts with an empty profile; it does not migrate chats or settings from T3 Code. Set `Y3CODE_HOME` to override the server directory. The bundled command is available as `y3code`, leaving `t3` for the upstream app. The installers below are for upstream T3 Code.
+
 ## Requirements
 
 You need at least one installed, authenticated coding agent (provider) before starting a thread. You can launch T3 Code first and set up providers from the [Welcome page](./welcome-page.md) or **Settings → Providers**.

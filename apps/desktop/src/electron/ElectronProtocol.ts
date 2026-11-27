@@ -13,7 +13,11 @@ import * as Scope from "effect/Scope";
 import * as Electron from "electron";
 
 export const DESKTOP_HOST = "app";
-const DESKTOP_PRODUCTION_SCHEME = "t3code";
+const DESKTOP_PRODUCTION_SCHEME =
+  // oxlint-disable-next-line t3code/no-global-process-runtime -- Electron requires the scheme synchronously before app readiness.
+  process.platform === "darwin" && process.versions.electron && Electron.app.isPackaged
+    ? "y3code"
+    : "t3code";
 const DESKTOP_DEVELOPMENT_SCHEME = "t3code-dev";
 
 export function getDesktopScheme(isDevelopment: boolean): string {

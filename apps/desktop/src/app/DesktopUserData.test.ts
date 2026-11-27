@@ -42,6 +42,35 @@ it.effect.each(["t3code", "T3 Code (Alpha)"])(
     }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
+it.effect("migrates only an idle packaged Mac profile, without replacing an existing Profile", () =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const directory = yield* fs.makeTempDirectoryScoped();
+    const input = {
+      appDataDirectory: directory,
+      isDevelopment: false,
+      isPackaged: true,
+      platform: "darwin",
+    } as const;
+    const old = path.join(directory, "t3code-v2");
+    const profile = path.join(directory, "Profile");
+    assert.equal(yield* resolveUserDataPath(input), profile);
+    yield* fs.makeDirectory(old);
+    yield* fs.writeFileString(path.join(old, "Local State"), "saved");
+    const socket = path.join(old, "SingletonSocket");
+    yield* fs.writeFileString(socket, "");
+    assert.equal(yield* resolveUserDataPath(input), old);
+    yield* fs.remove(socket);
+    assert.equal(yield* resolveUserDataPath(input), profile);
+    assert.equal(yield* fs.readFileString(path.join(profile, "Local State")), "saved");
+    assert.isFalse(yield* fs.exists(old));
+    yield* fs.makeDirectory(old);
+    assert.equal(yield* resolveUserDataPath(input), profile);
+    assert.isTrue(yield* fs.exists(old));
+  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
+);
+
 const gpuCacheDirectories = [
   "GPUCache",
   "GrShaderCache",

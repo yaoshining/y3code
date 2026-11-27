@@ -155,7 +155,12 @@ const make = Effect.fn("desktop.environment.make")(function* (
           path.join(homeDirectory, "AppData", "Roaming"),
         )
       : input.platform === "darwin"
-        ? path.join(homeDirectory, "Library", "Application Support")
+        ? path.join(
+            homeDirectory,
+            "Library",
+            "Application Support",
+            ...(input.isPackaged ? ["Y3 Code"] : []),
+          )
         : Option.getOrElse(config.xdgConfigHome, () => path.join(homeDirectory, ".config"));
   const baseDir = resolveDesktopBaseDir({
     homeDirectory,
@@ -168,10 +173,17 @@ const make = Effect.fn("desktop.environment.make")(function* (
     input.isPackaged && input.platform === "win32"
       ? path.join(input.resourcesPath, "server.asar")
       : appRoot;
-  const branding = resolveDesktopAppBranding({
-    isDevelopment,
-    appVersion: input.appVersion,
-  });
+  const branding =
+    input.platform === "darwin" && input.isPackaged
+      ? {
+          baseName: "Y3 Code",
+          displayName: "Y3 Code",
+          stageLabel: resolveDesktopAppStageLabel({ isDevelopment, appVersion: input.appVersion }),
+        }
+      : resolveDesktopAppBranding({
+          isDevelopment,
+          appVersion: input.appVersion,
+        });
   const displayName = branding.displayName;
   const stateDir = resolveDesktopStateDir({
     baseDir,

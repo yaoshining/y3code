@@ -64,18 +64,18 @@ export function codexCallbackUrl(value: string, redirectUri: string, state: stri
   return callback;
 }
 
-export function codexAuthHandoffUrl(input: CodexAuthHandoff, development = false) {
-  const url = new URL(`${development ? "t3code-dev" : "t3code"}://auth/codex`);
+export function codexAuthHandoffUrl(input: CodexAuthHandoff, development = false, macFork = false) {
+  const url = new URL(`${development ? "t3code-dev" : macFork ? "y3code" : "t3code"}://auth/codex`);
   url.searchParams.set("request", encodeHandoff(input));
   return url.toString();
 }
 
-export function readCodexAuthHandoff(value: string, development: boolean) {
+export function readCodexAuthHandoff(value: string, development: boolean, macFork = false) {
   try {
     const url = new URL(value);
     if (
       value.length > 32_768 ||
-      url.protocol !== (development ? "t3code-dev:" : "t3code:") ||
+      url.protocol !== (development ? "t3code-dev:" : macFork ? "y3code:" : "t3code:") ||
       url.host !== "auth" ||
       url.pathname !== "/codex" ||
       url.username ||
