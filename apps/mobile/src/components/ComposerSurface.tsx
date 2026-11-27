@@ -14,7 +14,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAdaptiveWorkspaceLayout } from "../features/layout/AdaptiveWorkspaceLayout";
 import { useSidebarWorkspaceTabs } from "../features/layout/workspace/useSystemWorkspaceTabBar";
-import { useAndroidFloatingTabs } from "../features/settings/appearance/AppearancePreferencesProvider";
+import {
+  useAndroidFloatingTabs,
+  useMobileStockDark,
+} from "../features/settings/appearance/AppearancePreferencesProvider";
 import { compactEditorInsets } from "../features/threads/compactEditorInsets";
 import {
   useDeviceType,
@@ -175,6 +178,7 @@ export function ComposerSurface(props: {
   readonly animateLayout?: boolean;
 }) {
   const colors = useUniwindTheme();
+  const stockDark = useMobileStockDark();
   const targetBorderRadius =
     typeof props.style.borderRadius === "number" ? props.style.borderRadius : 0;
   const shouldAnimate = props.animateLayout !== false && Platform.OS !== "android";
@@ -210,15 +214,22 @@ export function ComposerSurface(props: {
       <AnimatedGlassSurface
         chrome="none"
         fallbackColor={colors["--color-composer-surface"]}
-        fallbackClassName="border border-composer-border"
+        fallbackClassName={stockDark ? undefined : "border border-composer-border"}
         glassEffectStyle="regular"
         pointerEvents="none"
-        tintColor="transparent"
+        tintColor={stockDark ? "#c2adff18" : "transparent"}
         layout={layoutTransition}
         style={[{ position: "absolute", inset: 0 }, animatedShapeStyle]}
       >
         {null}
       </AnimatedGlassSurface>
+      {stockDark ? (
+        <Animated.View
+          className="absolute inset-0 border border-focus/30"
+          pointerEvents="none"
+          style={animatedShapeStyle}
+        />
+      ) : null}
       <Animated.View
         collapsable={false}
         layout={layoutTransition}

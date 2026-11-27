@@ -10,6 +10,7 @@ import { SymbolView } from "../../../../components/ui/AppSymbol";
 import { AppText as Text } from "../../../../components/ui/AppText";
 import {
   getMobileThemePreviewColors,
+  isMobileStockDark,
   MOBILE_THEME_OPTIONS,
   type MobileThemeAppearance,
   type MobileThemeId,
@@ -57,10 +58,12 @@ const PreviewOrb = memo(function PreviewOrb(props: {
   const actionGradientId = `${idPrefix}-action-glow`;
   const { systemColorPalettes } = useAppearancePreferences();
   const palette = systemColorPalettes?.[props.appearance];
+  const stockDark = isMobileStockDark(props.themeId, props.appearance);
   const colors =
     props.themeId === "material-you" && palette
       ? { canvas: palette.surface, accent: palette.primary, messageAction: palette.tertiary }
       : getMobileThemePreviewColors(props.themeId, props.appearance);
+  const accent = stockDark ? "#c2adff" : colors.accent;
   const spec = THEME_PREVIEW_RENDER_SPECS[props.appearance];
   const accentRadius = Math.hypot(
     Math.max(spec.accent.center[0], 1 - spec.accent.center[0]),
@@ -74,8 +77,11 @@ const PreviewOrb = memo(function PreviewOrb(props: {
     <View
       className={`${props.compact ? "size-14" : "size-16"} overflow-hidden rounded-full border`}
       style={{
-        borderColor:
-          props.appearance === "dark" ? "rgba(255, 255, 255, 0.14)" : "rgba(0, 0, 0, 0.1)",
+        borderColor: stockDark
+          ? "#c2adff66"
+          : props.appearance === "dark"
+            ? "rgba(255, 255, 255, 0.14)"
+            : "rgba(0, 0, 0, 0.1)",
       }}
     >
       <Svg accessibilityElementsHidden height="100%" viewBox="0 0 64 64" width="100%">
@@ -88,18 +94,18 @@ const PreviewOrb = memo(function PreviewOrb(props: {
             id={accentGradientId}
             r={previewPercentage(accentRadius)}
           >
-            <Stop offset="0%" stopColor={colors.accent} stopOpacity={1} />
+            <Stop offset="0%" stopColor={accent} stopOpacity={1} />
             <Stop
               offset={previewPercentage(spec.accent.middleOffset)}
-              stopColor={colors.accent}
+              stopColor={accent}
               stopOpacity={spec.accent.middleOpacity}
             />
             <Stop
               offset={previewPercentage(spec.accent.endOffset)}
-              stopColor={colors.accent}
+              stopColor={accent}
               stopOpacity={0}
             />
-            <Stop offset="100%" stopColor={colors.accent} stopOpacity={0} />
+            <Stop offset="100%" stopColor={accent} stopOpacity={0} />
           </RadialGradient>
           <RadialGradient
             cx={previewPercentage(spec.action.center[0])}
@@ -156,7 +162,11 @@ function ThemeCard(props: {
       accessibilityState={{ disabled: props.disabled, selected }}
       className={cn(
         "size-[66px] items-center justify-center rounded-full border-[3px] active:scale-[0.94]",
-        selected ? "border-primary" : "border-transparent",
+        !selected
+          ? "border-transparent"
+          : isMobileStockDark(props.themeId, appearance)
+            ? "border-[#c2adff]"
+            : "border-primary",
       )}
       disabled={props.disabled}
       onPress={() => props.onSelect(appearance)}

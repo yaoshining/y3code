@@ -22,6 +22,10 @@ export type MobileThemeAppearance = ThemeAppearance;
 export type MobileThemeMode = MobileThemeAppearance | "system";
 export type MobileThemeIds = Readonly<Record<MobileThemeAppearance, MobileThemeId>>;
 
+export function isMobileStockDark(themeId: MobileThemeId, appearance: MobileThemeAppearance) {
+  return themeId === DEFAULT_MOBILE_THEME_ID && appearance === "dark";
+}
+
 export const MOBILE_THEME_OPTIONS: ReadonlyArray<{
   readonly id: MobileThemeId;
   readonly label: string;

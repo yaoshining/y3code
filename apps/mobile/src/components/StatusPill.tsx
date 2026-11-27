@@ -1,5 +1,6 @@
 import { View } from "react-native";
 
+import { useMobileStockDark } from "../features/settings/appearance/AppearancePreferencesProvider";
 import { AppText as Text } from "./ui/AppText";
 import { cn } from "../lib/cn";
 
@@ -15,12 +16,14 @@ export function StatusPill(
   },
 ) {
   const size = props.size ?? "default";
+  const stockDark = useMobileStockDark();
   return (
     <View
       className={cn(
         "rounded-full",
         size === "compact" ? "px-2.5 py-1" : "px-3 py-1.5",
         props.pillClassName,
+        stockDark && "border border-focus/25",
       )}
     >
       <Text

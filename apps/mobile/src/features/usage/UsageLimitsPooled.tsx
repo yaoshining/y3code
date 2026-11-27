@@ -33,6 +33,8 @@ import { ProviderIcon } from "../../components/ProviderIcon";
 import type { MessageResolver } from "../../i18n/messages";
 import { SettingsScreen } from "../settings/components/SettingsScreen";
 import { environmentPresentations } from "../../state/presentation";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
+import { MobileLedQuotaMeter } from "./MobileLedQuotaMeter";
 import { refillLabel, ResetCredits, resetLabels } from "./UsageLimitsSection";
 import { usageProviderKind, useProviderColors } from "./usageProviders";
 
@@ -190,6 +192,7 @@ function PoolWindowCard({
   const navigation = useNavigation();
   const gt = useGT();
   const m = useMessages();
+  const stockDark = useMobileStockDark();
   const [barWidth, setBarWidth] = useState(0);
   // Each segment needs room for its account, percent and reset to label itself.
   const segmentWidth = barWidth / Math.max(pool.columns.length, 1);
@@ -226,6 +229,13 @@ function PoolWindowCard({
           <Text className="text-xs text-foreground-tertiary">{m(PACE_LABEL[pool.pace])}</Text>
         ) : null}
       </View>
+      {stockDark ? (
+        <MobileLedQuotaMeter
+          label={label ?? pool.label}
+          remainingPercent={pool.remainingPercent}
+          stockDark={stockDark}
+        />
+      ) : null}
       {description ? <Text className="text-xs text-foreground-muted">{description}</Text> : null}
       {nextRefill ? (
         <Text className="text-xs tabular-nums text-foreground-muted">
@@ -638,6 +648,7 @@ export function UsageLimitAccountScreen({ route }: AccountScreenProps) {
   const reset = pool?.resets.find((candidate) => candidate.member.account.key === accountKey);
   const [revealed, setRevealed] = useState(false);
   const gt = useGT();
+  const stockDark = useMobileStockDark();
   return (
     <SettingsScreen title={gt("Account", { $context: "screen title" })}>
       <ScrollView
@@ -687,6 +698,14 @@ export function UsageLimitAccountScreen({ route }: AccountScreenProps) {
                   <Var>{remainingPercent(window)}</Var>% left
                 </T>
               </Text>
+              {stockDark ? (
+                <MobileLedQuotaMeter
+                  label={window.label}
+                  remainingPercent={remainingPercent(window)}
+                  paceRemainingPercent={evenPace}
+                  stockDark={stockDark}
+                />
+              ) : null}
               {window.resetsAt ? (
                 <Text selectable className="text-sm text-foreground-muted">
                   <T>

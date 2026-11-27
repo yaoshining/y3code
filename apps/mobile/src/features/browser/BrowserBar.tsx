@@ -17,7 +17,8 @@ import { withUniwind } from "uniwind";
 import { SymbolView, type AppSymbolName } from "../../components/ui/AppSymbol";
 import { AppText } from "../../components/ui/AppText";
 import { deriveSharedTopBand } from "../../lib/reserved-regions";
-import { isDarkThemeColor, themeColorWithAlpha } from "../../lib/mobileTheme";
+import { cn } from "../../lib/cn";
+import { isDarkThemeColor, isMobileStockDark, themeColorWithAlpha } from "../../lib/mobileTheme";
 import { useBarInset } from "../../components/ui/useBarInset";
 import { WorkspaceColumnMetricsContext } from "../../native/v5-workspace-context";
 import { isDuoDevice } from "../../lib/device-type";
@@ -118,8 +119,10 @@ function BrowserBar(
   const [draft, setDraft] = useState<string | null>(null);
   const layout = useBrowserBarLayout(props.inPane);
   const reduceMotion = useReducedMotion();
-  const { themeVariables } = useAppearancePreferences();
-  const surface = props.pageColor || themeVariables["--color-sheet-solid"];
+  const { themeId, themeAppearance, themeVariables } = useAppearancePreferences();
+  const silk = !props.pageColor && isMobileStockDark(themeId, themeAppearance);
+  const surface = props.pageColor || themeVariables[silk ? "--color-card" : "--color-sheet-solid"];
+  const addressRim = silk && "border border-focus/30";
   const ink: Ink = isDarkThemeColor(surface) ? "light" : "dark";
   const inkColor = ink === "light" ? "#ffffff" : "#000000";
   const compact = props.compact && draft === null;
@@ -191,7 +194,10 @@ function BrowserBar(
           ) : null}
           {/* On a tablet the address stays a readable width, centered between the buttons. */}
           <View className="min-w-0 flex-1 items-center">
-            <Glass ink={ink} className="h-11 w-full max-w-2xl flex-row items-center rounded-full">
+            <Glass
+              ink={ink}
+              className={cn("h-11 w-full max-w-2xl flex-row items-center rounded-full", addressRim)}
+            >
               <TextInput
                 accessibilityLabel={gt("Address", { $context: "browser address bar" })}
                 editable={props.editable}
@@ -258,7 +264,7 @@ function BrowserBar(
           accessibilityLabel={gt("Address {url}. Show the browser controls", { url: props.url })}
           onPress={props.onExpand}
         >
-          <Glass ink={ink} className="h-7 justify-center rounded-full px-3.5">
+          <Glass ink={ink} className={cn("h-7 justify-center rounded-full px-3.5", addressRim)}>
             <AppText numberOfLines={1} className="text-xs" style={{ color: inkColor }}>
               {hostOf(props.url)}
             </AppText>

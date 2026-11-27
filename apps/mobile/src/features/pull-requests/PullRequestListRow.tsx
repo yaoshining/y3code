@@ -8,6 +8,7 @@ import { SymbolView } from "../../components/ui/AppSymbol";
 import { Menu } from "../../components/ui/Menu";
 import type { MenuProps } from "../../components/ui/Menu.types";
 import { cn } from "../../lib/cn";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
 import { RelativeTime } from "../../components/RelativeTime";
 import {
   selectedThreadRowColors,
@@ -64,6 +65,7 @@ export const PullRequestListRow = memo(
     readonly onAction: (item: EnvironmentPullRequestListEntry, action: string) => void;
   }) {
     const { item } = props;
+    const stockDark = useMobileStockDark();
     const foreground = props.selected
       ? selectedThreadRowColors.foregroundClassName
       : props.sidebar
@@ -148,9 +150,12 @@ export const PullRequestListRow = memo(
             className={cn(
               "flex-row gap-3 overflow-hidden",
               !props.sidebar && "px-4 active:bg-row-hover",
-              props.sidebar && "bg-drawer",
+              props.sidebar && !stockDark && "bg-drawer",
+              stockDark && "my-0.5 border border-focus/15 bg-card",
+              stockDark && !props.sidebar && "mx-3 mb-1 rounded-2xl",
               props.sidebar && !props.selected && "active:bg-thread-hover",
               props.selected && "bg-thread-selected",
+              props.selected && stockDark && "border-focus/50",
               props.busy && "opacity-50",
             )}
           >
@@ -171,7 +176,8 @@ export const PullRequestListRow = memo(
             <View
               className={cn(
                 "min-w-0 flex-1 gap-1",
-                !props.sidebar && "border-b border-border-subtle py-2.5",
+                !props.sidebar && "py-2.5",
+                !props.sidebar && !stockDark && "border-b border-border-subtle",
               )}
             >
               <View className="flex-row items-center gap-1.5">

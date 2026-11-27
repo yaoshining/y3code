@@ -44,6 +44,7 @@ import { SettingsSection } from "../settings/components/SettingsSection";
 import { usageAxisDayLabel, usageAxisHourLabel } from "./usageAxisLabels";
 import { UsageDailyChart } from "./UsageDailyChart";
 import { toggleUsageEnvironment } from "./usageEnvironmentSelection";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
 import { useRefreshLimits } from "./UsageLimitsSection";
 import { UsageLimitsSection } from "./UsageLimitsPooled";
 import type { UsageChartMetric } from "./usageChartData";
@@ -467,6 +468,7 @@ function ChartCard(props: {
   const { merged, metric } = props;
   const colors = useProviderColors();
   const locale = useLocale();
+  const stockDark = useMobileStockDark();
   const hasActivity = props.daily.some((period) => period.totalTokens > 0);
   const [fillHeight, setFillHeight] = useState(0);
   const height = props.fill ? Math.max(fillHeight, props.height) : props.height;
@@ -482,7 +484,11 @@ function ChartCard(props: {
 
   return (
     <View
-      className={`gap-4 rounded-[24px] border-continuous bg-grouped-card p-4${props.fill ? " flex-1" : ""}`}
+      className={cn(
+        "gap-4 rounded-[24px] border-continuous p-4",
+        stockDark ? "border border-focus/25 bg-card" : "bg-grouped-card",
+        props.fill && "flex-1",
+      )}
     >
       {props.title ? (
         <Text className="text-sm font-t3-medium text-foreground">{props.title}</Text>
@@ -537,9 +543,12 @@ function ChartCard(props: {
 function UsageSummary(props: { readonly merged: MergedUsage; readonly metric: UsageChartMetric }) {
   const { merged, metric } = props;
   const gt = useGT();
+  const stockDark = useMobileStockDark();
   return (
     <View className="gap-0.5">
-      <Text className="text-sm text-foreground-muted">
+      <Text
+        className={cn("text-sm", stockDark ? "text-update-foreground" : "text-foreground-muted")}
+      >
         {metric === "cost" ? gt("Raw token cost") : gt("Processed tokens")}
       </Text>
       <Text className="text-4xl font-t3-bold tabular-nums text-foreground">

@@ -1,6 +1,7 @@
 import {
   getMobileThemeColors,
   getMobileThemeVariables,
+  isMobileStockDark,
   themeColorToNativeColor,
   type MobileThemeId,
 } from "../../lib/mobileTheme";
@@ -14,6 +15,7 @@ export interface TerminalTheme {
   readonly border: string;
   readonly cursorForeground: string;
   readonly cursorBackground: string;
+  readonly selectionBackground?: string;
   readonly palette: TerminalPalette;
 }
 
@@ -111,6 +113,9 @@ export function getMobileTerminalTheme(
     border: colors["--color-border"],
     cursorForeground: themeColorToNativeColor(palette.terminalCursor),
     cursorBackground: background,
+    ...(isMobileStockDark(themeId, scheme)
+      ? { selectionBackground: themeColorToNativeColor(palette.terminalSelection) }
+      : {}),
   };
 }
 
@@ -121,6 +126,10 @@ export function buildGhosttyThemeConfig(theme: TerminalTheme): string {
     `cursor-color = ${theme.cursorForeground}`,
     `cursor-text = ${theme.cursorBackground}`,
   ];
+
+  if (theme.selectionBackground) {
+    lines.push(`selection-background = ${theme.selectionBackground}`);
+  }
 
   for (const [index, color] of theme.palette.entries()) {
     lines.push(`palette = ${index}=${color}`);

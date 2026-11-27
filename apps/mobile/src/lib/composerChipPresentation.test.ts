@@ -105,7 +105,8 @@ describe("contextChipAccent", () => {
 
   it("keeps an accent that already reads everywhere", () => {
     const theme = getMobileThemeVariables("t3-code", "dark");
-    expect(contextChipAccent("#009f6e", theme, theme["--color-md-body"])).toBe("#009f6e");
+    const readableAccent = "#61e5b5";
+    expect(contextChipAccent(readableAccent, theme, theme["--color-md-body"])).toBe(readableAccent);
   });
 });
 

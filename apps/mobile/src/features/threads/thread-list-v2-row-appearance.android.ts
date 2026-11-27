@@ -1,5 +1,5 @@
 import { msg } from "gt-react-native";
-import type { ViewStyle } from "react-native";
+import { StyleSheet, type ViewStyle } from "react-native";
 
 import { m, type MessageResolver } from "../../i18n/messages";
 import type { MobileThemeVariables } from "../../lib/mobileTheme";
@@ -33,12 +33,23 @@ export function getThreadListV2RowAppearance(
   theme: MobileThemeVariables,
   sidebarPane: boolean,
   selected: boolean,
+  stockDark: boolean,
 ) {
-  const selectedBackgroundColor = theme["--color-thread-selected"];
   const backgroundColor = theme[sidebarPane ? "--color-drawer" : "--color-screen"];
+  const rowColor = selected
+    ? theme["--color-thread-selected"]
+    : stockDark
+      ? theme["--color-card"]
+      : backgroundColor;
   const style: ViewStyle = {
-    backgroundColor: selected ? selectedBackgroundColor : backgroundColor,
+    backgroundColor: rowColor,
     borderRadius: THREAD_LIST_V2_SIDEBAR_ROW_STYLE.borderRadius,
+    ...(stockDark
+      ? {
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: selected ? "#b896f27a" : theme["--color-border"],
+        }
+      : {}),
   };
   const swipeContainerStyle = THREAD_LIST_V2_SIDEBAR_ROW_CONTAINER_STYLE;
 
@@ -63,6 +74,6 @@ export function getThreadListV2RowAppearance(
     cardStyle: sidebarPane ? { ...style, ...THREAD_LIST_V2_SIDEBAR_ROW_STYLE } : style,
     swipeContainerStyle,
     swipeBackgroundColor: backgroundColor,
-    providerIconSurfaceColor: selected ? selectedBackgroundColor : backgroundColor,
+    providerIconSurfaceColor: rowColor,
   };
 }

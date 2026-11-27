@@ -1,5 +1,5 @@
 import { msg } from "gt-react-native";
-import type { ViewStyle } from "react-native";
+import { StyleSheet, type ViewStyle } from "react-native";
 
 import { m, type MessageResolver } from "../../i18n/messages";
 import type { MobileThemeVariables } from "../../lib/mobileTheme";
@@ -31,20 +31,35 @@ export function getThreadListV2RowAppearance(
   theme: MobileThemeVariables,
   sidebarPane: boolean,
   selected: boolean,
+  stockDark: boolean,
 ) {
-  const selectedBackgroundColor = theme["--color-thread-selected"];
-  const style: ViewStyle | undefined = sidebarPane
-    ? {
-        backgroundColor: selected ? selectedBackgroundColor : theme["--color-drawer"],
-        borderRadius: THREAD_LIST_V2_SIDEBAR_ROW_STYLE.borderRadius,
-      }
-    : undefined;
-  const swipeContainerStyle: ViewStyle | undefined = sidebarPane
-    ? THREAD_LIST_V2_SIDEBAR_ROW_CONTAINER_STYLE
-    : undefined;
+  const backgroundColor = theme[sidebarPane ? "--color-drawer" : "--color-screen"];
+  const rowColor = selected
+    ? theme["--color-thread-selected"]
+    : stockDark
+      ? theme["--color-card"]
+      : backgroundColor;
+  const style: ViewStyle | undefined =
+    sidebarPane || stockDark
+      ? {
+          backgroundColor: rowColor,
+          borderRadius: THREAD_LIST_V2_SIDEBAR_ROW_STYLE.borderRadius,
+          ...(stockDark
+            ? {
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: selected ? "#b896f27a" : theme["--color-border"],
+              }
+            : {}),
+        }
+      : undefined;
+  const swipeContainerStyle: ViewStyle | undefined = stockDark
+    ? { ...THREAD_LIST_V2_SIDEBAR_ROW_CONTAINER_STYLE, marginHorizontal: 8, marginVertical: 2 }
+    : sidebarPane
+      ? THREAD_LIST_V2_SIDEBAR_ROW_CONTAINER_STYLE
+      : undefined;
 
   return {
-    className: sidebarPane ? undefined : "bg-screen",
+    className: style ? undefined : "bg-screen",
     interactionClassName: sidebarPane ? "bg-thread-hover" : "bg-row-hover",
     interactionOpacity: selected ? 0 : 1,
     foregroundClassName: sidebarPane ? "text-drawer-foreground" : "text-foreground",
@@ -61,13 +76,9 @@ export function getThreadListV2RowAppearance(
       ? "accent-drawer-foreground-muted"
       : "accent-foreground-tertiary",
     style,
-    cardStyle: sidebarPane ? { ...style, ...THREAD_LIST_V2_SIDEBAR_ROW_STYLE } : undefined,
+    cardStyle: sidebarPane ? { ...style, ...THREAD_LIST_V2_SIDEBAR_ROW_STYLE } : style,
     swipeContainerStyle,
-    swipeBackgroundColor: theme[sidebarPane ? "--color-drawer" : "--color-screen"],
-    providerIconSurfaceColor: sidebarPane
-      ? selected
-        ? selectedBackgroundColor
-        : theme["--color-drawer"]
-      : theme["--color-screen"],
+    swipeBackgroundColor: backgroundColor,
+    providerIconSurfaceColor: style ? rowColor : backgroundColor,
   };
 }
