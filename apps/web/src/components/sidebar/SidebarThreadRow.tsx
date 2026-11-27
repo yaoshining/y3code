@@ -1043,8 +1043,23 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
     }
   };
 
+  const silkStatusTone =
+    status === "preparing" || status === "working"
+      ? "working"
+      : status === "approval" ||
+          status === "input" ||
+          status === "request" ||
+          status === "limited" ||
+          isWoke
+        ? "warning"
+        : status === "failed"
+          ? "failed"
+          : isUnread
+            ? "done"
+            : "default";
+
   const rowSurfaceClassName = cn(
-    "group/sidebar-row relative w-full cursor-pointer overflow-hidden rounded-md text-left outline-none select-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+    "group/sidebar-row relative w-full cursor-pointer overflow-hidden rounded-md text-left outline-none select-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring stock-dark:silk-thread-tone",
     variantAction === "unsettle" &&
       !props.isActive &&
       "[&:not(:hover):not(:focus-within)_*:not(.live-activity-focus_*)]:text-secondary-label",
@@ -1058,8 +1073,18 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
             ? "text-sidebar-muted-foreground/75 hover:bg-sidebar-row-hover hover:text-sidebar-foreground"
             : "bg-transparent text-sidebar-foreground hover:bg-sidebar-row-hover",
     props.isActive || isSelected
-      ? "stock-dark:silk-active-thread stock-dark:before:pointer-events-none stock-dark:before:absolute stock-dark:before:inset-y-1.5 stock-dark:before:start-0 stock-dark:before:w-0.5 stock-dark:before:rounded-full stock-dark:before:[background-image:var(--silk-accent)]"
-      : "stock-dark:hover:bg-silk-row-hover/90",
+      ? "stock-dark:silk-active-thread stock-dark:silk-thread-accent-bar"
+      : cn(
+          "stock-dark:hover:bg-silk-row-hover/90",
+          variant === "card" &&
+            !hasUnsentDraft &&
+            "stock-dark:silk-thread-card-idle stock-dark:silk-thread-accent-bar",
+          variant === "card" && hasUnsentDraft && "stock-dark:silk-thread-accent-bar",
+          variant !== "card" &&
+            silkStatusTone !== "default" &&
+            !shouldRecede &&
+            "stock-dark:silk-thread-accent-bar",
+        ),
     shouldRecede &&
       (status === "preparing" || status === "working") &&
       "opacity-70 transition-opacity hover:opacity-100 focus-within:opacity-100 motion-reduce:transition-none",
@@ -1362,6 +1387,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
               tabIndex={0}
               data-sidebar-row={threadKey}
               data-sidebar-parent={props.navigationParent}
+              data-silk-tone={silkStatusTone}
               aria-label={accessibility.label}
               aria-current={accessibility.current}
               data-testid={inFolder ? "sidebar-row-folder" : "sidebar-row-slim"}
@@ -1577,6 +1603,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
             tabIndex={0}
             data-sidebar-row={threadKey}
             data-sidebar-parent={props.navigationParent}
+            data-silk-tone={silkStatusTone}
             aria-label={accessibility.label}
             aria-current={accessibility.current}
             data-testid="sidebar-row-card"

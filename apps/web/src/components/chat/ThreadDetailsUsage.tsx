@@ -14,6 +14,7 @@ import {
 } from "@t3tools/shared/usageLimits";
 import { formatDuration, limitsNotice } from "@t3tools/shared/usageLimitsCopy";
 import { msg, useGT, useLocale, useMessages } from "gt-react";
+import { ChevronDownIcon } from "lucide-react";
 import type { MouseEventHandler, ReactNode } from "react";
 import { Badge } from "../ui/badge";
 import { LedQuotaMeter } from "../usage/LedQuotaMeter";
@@ -175,6 +176,261 @@ function InstanceRows({
       onSpotlight={onSpotlight}
     />
   ));
+}
+
+const TELEMETRY_RING_RADIUS = 5.25;
+const TELEMETRY_RING_CIRCUMFERENCE = 2 * Math.PI * TELEMETRY_RING_RADIUS;
+
+function compactQuotaWindowLabel(label: string) {
+  const normalized = label.trim().toLowerCase();
+  if (normalized === "weekly" || normalized === "7-day" || normalized === "7 days") return "7d";
+  if (normalized === "daily" || normalized === "1-day" || normalized === "24 hours") return "24h";
+  const hours = normalized.match(/^(\d+)\s*(?:-|\s)?(?:h|hr|hrs|hour|hours)$/);
+  if (hours) return `${hours[1]}h`;
+  const days = normalized.match(/^(\d+)\s*(?:-|\s)?(?:d|day|days)$/);
+  if (days) return `${days[1]}d`;
+  return label;
+}
+
+function TelemetryRing({
+  percent,
+  className,
+}: {
+  readonly percent: number;
+  readonly className: string;
+}) {
+  const clamped = Math.max(0, Math.min(100, percent));
+  const strokeDashoffset = TELEMETRY_RING_CIRCUMFERENCE * (1 - clamped / 100);
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 shrink-0 -rotate-90">
+      <circle
+        cx="8"
+        cy="8"
+        r={TELEMETRY_RING_RADIUS}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        className="text-border/80 stock-dark:text-(--silk-glass-border)"
+      />
+      <circle
+        cx="8"
+        cy="8"
+        r={TELEMETRY_RING_RADIUS}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeDasharray={TELEMETRY_RING_CIRCUMFERENCE}
+        strokeDashoffset={strokeDashoffset}
+        className={className}
+      />
+    </svg>
+  );
+}
+
+export function ComposerTelemetryStrip({
+  usage,
+  onOpenDetails,
+}: {
+  readonly usage: ThreadDetailsUsageInput;
+  readonly onOpenDetails?: (() => void) | undefined;
+}) {
+  const gt = useGT();
+  const m = useMessages();
+  const locale = useLocale();
+  const nowMinute = useNowMinute();
+  const now = Date.parse(`${nowMinute}:00Z`);
+
+  const ctx = usage.contextWindow;
+  const maxTokens = ctx?.maxTokens != null && ctx.maxTokens > 0 ? ctx.maxTokens : null;
+  const usedPercent =
+    maxTokens !== null && ctx?.usedPercentage != null
+      ? Math.round(Math.max(0, Math.min(100, ctx.usedPercentage)))
+      : null;
+  const usedTokens = ctx ? formatContextWindowTokens(ctx.usedTokens) : null;
+  const tokenSummary =
+    usedTokens !== null
+      ? maxTokens !== null
+        ? `${usedTokens}/${formatContextWindowTokens(maxTokens)}`
+        : usedTokens
+      : null;
+  const threshold = ctx?.autoCompactThreshold ?? null;
+  const compactionMessage =
+    threshold !== null && threshold > 0 ? formatContextWindowCompactionMessage(threshold, m) : null;
+
+  const resolvedLimits = resolveThreadDetailsLimits(
+    usage.providerInstanceId,
+    usage.model,
+    usage.providers,
+    usage.sources,
+    now,
+  );
+  const httpQuotas = resolveThreadHttpQuotas(usage.providerInstanceId, usage.sources);
+  const quotaItems: Array<{
+    readonly key: string;
+    readonly shortLabel: string;
+    readonly fullLabel: string;
+    readonly left: number;
+  }> = [];
+
+  if (resolvedLimits?.kind === "pool") {
+    for (const window of resolvedLimits.windows) {
+      quotaItems.push({
+        key: window.id,
+        shortLabel: compactQuotaWindowLabel(window.label),
+        fullLabel: window.label,
+        left: Math.round(window.remainingPercent),
+      });
+    }
+  } else if (resolvedLimits?.kind === "instance" && limitsNotice(resolvedLimits.limits) === null) {
+    for (const window of resolvedLimits.limits.windows) {
+      const left = Math.round(remainingPercent(window));
+      quotaItems.push({
+        key: window.id,
+        shortLabel: compactQuotaWindowLabel(window.label),
+        fullLabel: window.label,
+        left,
+      });
+    }
+  }
+  for (const quota of httpQuotas) {
+    if (quota.window.usedPercent !== undefined) {
+      quotaItems.push({
+        key: quota.key,
+        shortLabel: compactQuotaWindowLabel(quota.window.label),
+        fullLabel: quota.window.label,
+        left: Math.round(remainingPercent(quota.window)),
+      });
+    }
+  }
+
+  if (tokenSummary === null && quotaItems.length === 0) return null;
+
+  const visibleQuotas = quotaItems.slice(0, 2);
+  const extraQuotaCount = Math.max(0, quotaItems.length - visibleQuotas.length);
+  const pillClassName =
+    "inline-flex min-w-0 cursor-pointer items-center gap-2 rounded-full border border-border/70 bg-card/80 px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70 stock-dark:border-(--silk-glass-border) stock-dark:bg-(--silk-surface-recessed)/90 stock-dark:hover:bg-(--silk-surface-well)";
+  const contextBarClass =
+    usedPercent !== null && usedPercent >= 90
+      ? "bg-error stock-dark:silk-bar-error"
+      : usedPercent !== null && usedPercent >= 80
+        ? "bg-warning stock-dark:silk-bar-warning"
+        : "bg-primary stock-dark:silk-bar-context";
+  const contextAriaLabel =
+    usedPercent !== null
+      ? gt("Context: {used}% used", { used: usedPercent })
+      : gt("{usedTokens} tokens used", { usedTokens: usedTokens ?? "0" });
+
+  return (
+    <div
+      data-composer-telemetry-strip="true"
+      className="pointer-events-auto flex flex-wrap items-center justify-between gap-2 pt-2"
+    >
+      {tokenSummary !== null ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                data-composer-context-window="true"
+                aria-label={contextAriaLabel}
+                onClick={onOpenDetails}
+                className={pillClassName}
+              />
+            }
+          >
+            <span className="shrink-0">
+              {gt("Context", { $context: "context window row label" })}
+            </span>
+            {usedPercent !== null ? (
+              <span className="relative h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-muted-foreground/20 sm:w-16 stock-dark:bg-(--silk-surface-well)">
+                <span
+                  className={cn("absolute inset-y-0 left-0 rounded-full", contextBarClass)}
+                  style={{ width: `max(${usedPercent}%, 6px)` }}
+                />
+              </span>
+            ) : null}
+            <span className="font-medium text-foreground tabular-nums">{tokenSummary}</span>
+            {usedPercent !== null ? (
+              <span className="text-muted-foreground tabular-nums">{`${usedPercent}%`}</span>
+            ) : null}
+            <ChevronDownIcon aria-hidden="true" className="size-3 shrink-0 opacity-70" />
+          </TooltipTrigger>
+          <TooltipPopup side="top">
+            <div className="grid gap-0.5">
+              <span className="text-foreground">{contextAriaLabel}</span>
+              {maxTokens !== null && ctx ? (
+                <span className="text-muted-foreground">
+                  {gt("{used} of {max} tokens", {
+                    used: ctx.usedTokens.toLocaleString(locale),
+                    max: maxTokens.toLocaleString(locale),
+                  })}
+                </span>
+              ) : null}
+              {compactionMessage ? (
+                <span className="text-muted-foreground">{compactionMessage}</span>
+              ) : null}
+            </div>
+          </TooltipPopup>
+        </Tooltip>
+      ) : (
+        <span />
+      )}
+
+      {visibleQuotas.length > 0 ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                data-composer-quota-pill="true"
+                aria-label={gt("Usage limits")}
+                onClick={onOpenDetails}
+                className={cn(pillClassName, "ml-auto")}
+              />
+            }
+          >
+            {visibleQuotas.map((item, idx) => {
+              const tone = limitTone(item.left);
+              const ringColor =
+                tone === "error"
+                  ? "text-error-foreground"
+                  : tone === "warning"
+                    ? "text-warning-foreground"
+                    : idx === 0
+                      ? "text-success-foreground"
+                      : "text-primary stock-dark:text-(--silk-violet)";
+              return (
+                <span key={item.key} className="inline-flex items-center gap-1.5 tabular-nums">
+                  <TelemetryRing percent={item.left} className={ringColor} />
+                  <span>{item.shortLabel}</span>
+                  <span className="font-semibold text-foreground">{`${item.left}%`}</span>
+                </span>
+              );
+            })}
+            {extraQuotaCount > 0 ? (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="h-3 w-px bg-border/80 stock-dark:bg-(--silk-glass-border)"
+                />
+                <span className="text-muted-foreground tabular-nums">{`+${extraQuotaCount}`}</span>
+              </>
+            ) : null}
+          </TooltipTrigger>
+          <TooltipPopup side="top">
+            <div className="grid gap-0.5">
+              {quotaItems.map((item) => (
+                <span key={item.key} className="text-foreground tabular-nums">
+                  {gt("{label}: {left}% left", { label: item.fullLabel, left: item.left })}
+                </span>
+              ))}
+            </div>
+          </TooltipPopup>
+        </Tooltip>
+      ) : null}
+    </div>
+  );
 }
 
 /** The thread's context window. The bar fills as context is used; the tick marks auto-compaction. */
@@ -532,18 +788,18 @@ function UsageRow({
           {label}
         </span>
         {fill !== null ? (
-          <span className="relative h-[3px] rounded-full bg-muted-foreground/30 dark:bg-muted-foreground/20">
+          <span className="relative h-[3px] rounded-full bg-muted-foreground/30 dark:bg-muted-foreground/20 stock-dark:h-1 stock-dark:bg-(--silk-surface-well)">
             {fill > 0 ? (
               <span
                 className={cn(
                   "absolute inset-y-0 left-0 rounded-full",
                   tone === "error"
-                    ? "bg-error"
+                    ? "bg-error stock-dark:silk-bar-error"
                     : tone === "warning"
-                      ? "bg-warning"
+                      ? "bg-warning stock-dark:silk-bar-warning"
                       : muted
-                        ? "bg-muted-foreground"
-                        : "bg-foreground/80",
+                        ? "bg-muted-foreground stock-dark:silk-bar-context"
+                        : "bg-foreground/80 stock-dark:silk-bar-limits",
                 )}
                 style={{ width: `max(${fill}%, 6px)` }}
               />

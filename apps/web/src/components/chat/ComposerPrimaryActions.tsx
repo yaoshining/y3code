@@ -492,7 +492,7 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
     <button
       {...sendButtonProps}
       className={cn(
-        "relative isolate flex size-9 items-center justify-center overflow-hidden rounded-full bg-transparent text-white shadow-xs transition-all duration-150 enabled:cursor-pointer not-stock-dark:enabled:shadow-black/24 enabled:inset-shadow-control-highlight not-stock-dark:enabled:hover:brightness-110 hover:scale-105 active:inset-shadow-control-pressed active:shadow-none disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none disabled:hover:scale-100 sm:size-8 [&_svg]:pointer-events-none",
+        "relative isolate flex size-9 items-center justify-center overflow-hidden rounded-full stock-dark:rounded-xl bg-transparent text-white shadow-xs transition-all duration-150 enabled:cursor-pointer not-stock-dark:enabled:shadow-black/24 enabled:inset-shadow-control-highlight not-stock-dark:enabled:hover:brightness-110 hover:scale-105 active:inset-shadow-control-pressed active:shadow-none disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none disabled:hover:scale-100 sm:size-8 [&_svg]:pointer-events-none",
         silkActionClassName,
       )}
     >

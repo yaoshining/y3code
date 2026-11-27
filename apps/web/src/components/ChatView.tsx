@@ -339,6 +339,7 @@ import {
 } from "./chat/PanelLayoutControls";
 import type { ExpandedImagePreview } from "./chat/ExpandedImagePreview";
 import { ThreadDetailsPanel } from "./chat/ThreadDetailsPanel";
+import { ComposerTelemetryStrip } from "./chat/ThreadDetailsUsage";
 import { NoActiveThreadState } from "./NoActiveThreadState";
 import {
   offersWorkspaceModes,
@@ -3574,7 +3575,7 @@ export default function ChatView(props: ChatViewProps) {
             ref={threadPanelPopoverAnchorRef}
             data-chat-header
             className={cn(
-              "relative bg-background stock-dark:bg-silk-chat-glass/52 stock-dark:backdrop-blur-md stock-dark:border-b stock-dark:border-(--silk-soft-edge) [[data-panel-animations=true]_&]:motion-safe:transition-[padding-left] [[data-panel-animations=true]_&]:motion-safe:duration-(--panel-animation-duration) [[data-panel-animations=true]_&]:motion-safe:ease-out",
+              "relative bg-background stock-dark:bg-transparent stock-dark:border-b stock-dark:border-(--silk-soft-edge) [[data-panel-animations=true]_&]:motion-safe:transition-[padding-left] [[data-panel-animations=true]_&]:motion-safe:duration-(--panel-animation-duration) [[data-panel-animations=true]_&]:motion-safe:ease-out",
               isElectron
                 ? cn(
                     "drag-region flex h-[var(--workspace-topbar-height)] min-h-[var(--workspace-topbar-height)] shrink-0 items-center px-3 sm:px-5",
@@ -4094,6 +4095,19 @@ export default function ChatView(props: ChatViewProps) {
                                 />
                               </div>
                             )}
+                            {!embedded && isServerThread && !isDraftHeroState ? (
+                              <ComposerTelemetryStrip
+                                usage={{
+                                  providerInstanceId: activeProviderInstanceId,
+                                  model: activeUsageModel,
+                                  providers: providerStatuses,
+                                  sources:
+                                    serverConfig?.usageLimitSources ?? EMPTY_USAGE_LIMIT_SOURCES,
+                                  contextWindow: activeContextWindow,
+                                }}
+                                onOpenDetails={toggleThreadPanelStable}
+                              />
+                            ) : null}
                           </div>
                         </div>
                       </ComposerSurface.Shell>

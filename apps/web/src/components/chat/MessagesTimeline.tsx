@@ -1402,27 +1402,40 @@ const ConversationTimeline = memo(function ConversationTimeline({
       return next;
     });
   });
-  const renderItem = ({ item }: { item: MessagesTimelineRow }) => (
-    <TimelineRowCtx value={sharedState}>
-      <div
-        className="messages-timeline-row-frame"
-        onPlayCapture={(event) => onAudioPlaybackChange(item.id, event)}
-        onPauseCapture={(event) => onAudioPlaybackChange(item.id, event)}
-        onEndedCapture={(event) => onAudioPlaybackChange(item.id, event)}
-      >
+  const renderItem = ({ item, index }: { item: MessagesTimelineRow; index: number }) => {
+    const railPos =
+      rows.length <= 1
+        ? ("only" as const)
+        : index === 0
+          ? ("first" as const)
+          : index === rows.length - 1
+            ? ("last" as const)
+            : undefined;
+    return (
+      <TimelineRowCtx value={sharedState}>
         <div
-          ref={observeLaneWidth}
-          // An HTML preview can run wider than this lane, which stays the chat column's width.
-          className={cn("chat-content-lane", item.kind !== "html-render" && "overflow-x-clip")}
-          data-timeline-root="true"
+          className="messages-timeline-row-frame"
+          onPlayCapture={(event) => onAudioPlaybackChange(item.id, event)}
+          onPauseCapture={(event) => onAudioPlaybackChange(item.id, event)}
+          onEndedCapture={(event) => onAudioPlaybackChange(item.id, event)}
         >
-          <AudioPreviewUnmountContext value={onAudioUnmount}>
-            <TimelineRowContent row={item} />
-          </AudioPreviewUnmountContext>
+          <div
+            ref={observeLaneWidth}
+            // An HTML preview can run wider than this lane, which stays the chat column's width.
+            className={cn(
+              "chat-content-lane stock-dark:silk-timeline-lane",
+              item.kind !== "html-render" && "overflow-x-clip",
+            )}
+            data-timeline-root="true"
+          >
+            <AudioPreviewUnmountContext value={onAudioUnmount}>
+              <TimelineRowContent row={item} railPos={railPos} />
+            </AudioPreviewUnmountContext>
+          </div>
         </div>
-      </div>
-    </TimelineRowCtx>
-  );
+      </TimelineRowCtx>
+    );
+  };
   const listExtraData = { identity: listIdentityKey, rowCount: rows.length, sharedState };
   const timelineListFooter = (
     <TimelineListFooter
@@ -1433,12 +1446,21 @@ const ConversationTimeline = memo(function ConversationTimeline({
       {unmatchedPendingApprovals.length > 0 ? (
         <TimelineRowCtx value={sharedState}>
           <div className="messages-timeline-row-frame">
-            <div className="chat-content-lane overflow-x-clip" data-timeline-root="true">
-              <WorkLogBlock>
-                {unmatchedPendingApprovals.map((approval) => (
-                  <TimelinePendingApprovalRow key={approval.requestId} approval={approval} />
-                ))}
-              </WorkLogBlock>
+            <div
+              className="chat-content-lane stock-dark:silk-timeline-lane overflow-x-clip"
+              data-timeline-root="true"
+            >
+              <div
+                className="stock-dark:silk-timeline-row"
+                data-silk-rail="last"
+                data-silk-node="approval"
+              >
+                <WorkLogBlock>
+                  {unmatchedPendingApprovals.map((approval) => (
+                    <TimelinePendingApprovalRow key={approval.requestId} approval={approval} />
+                  ))}
+                </WorkLogBlock>
+              </div>
             </div>
           </div>
         </TimelineRowCtx>
@@ -1663,7 +1685,13 @@ function getItemType(item: MessagesTimelineRow) {
     : `message:${item.message.id}`;
 }
 
-const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: TimelineRow }) {
+const TimelineRowContent = memo(function TimelineRowContent({
+  row,
+  railPos,
+}: {
+  row: TimelineRow;
+  railPos?: "first" | "last" | "only" | undefined;
+}) {
   const isExpandedToolGroup = row.kind === "work" && row.isExpandedToolGroup;
   const isSubagentGroup = row.kind === "event" && row.projectedItem.item.type === "subagent";
   const isWorkLogRow =
@@ -1674,10 +1702,23 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
   const isExpandedToolGroupHeader =
     (row.kind === "work-toggle" || row.kind === "work-live" || row.kind === "thinking") &&
     row.expanded === true;
+  const silkNodeKind =
+    row.kind === "message" && row.message.role === "user"
+      ? "user"
+      : row.kind === "message" && row.message.role === "assistant"
+        ? "assistant"
+        : isSubagentGroup
+          ? "subagent"
+          : row.kind === "proposed-plan" || row.kind === "working"
+            ? "approval"
+            : (isWorkLogRow || row.kind === "event") && !row.continuesWorkLog
+              ? "work"
+              : undefined;
 
   return (
     <div
       className={cn(
+        "stock-dark:silk-timeline-row",
         isWorkLogRow || isSubagentGroup
           ? undefined
           : row.kind === "turn-fold" || row.kind === "working"
@@ -1701,6 +1742,8 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
           ? "group/assistant"
           : null,
       )}
+      data-silk-rail={railPos}
+      data-silk-node={silkNodeKind}
       data-timeline-row-id={row.id}
       data-timeline-row-kind={row.kind}
       data-message-id={
