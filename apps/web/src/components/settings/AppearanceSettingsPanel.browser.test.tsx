@@ -41,7 +41,7 @@ it("highlights the selected scheme, current theme, and checked switch only in st
   const dark = screen.getByRole("button", { name: "Use dark mode" });
   await dark.click();
   await expect.element(dark).toHaveAttribute("aria-pressed", "true");
-  const standardTheme = screen.getByRole("button", { name: "Use T3 Code theme", exact: true });
+  const standardTheme = screen.getByRole("button", { name: "Use Y3 Code theme", exact: true });
   const themeCard = standardTheme.element().closest("[data-theme-library-card]")!;
   const activeBorder = "rgba(209, 140, 240, 0.6)";
   expect(getComputedStyle(dark.element()).borderColor).toBe(activeBorder);

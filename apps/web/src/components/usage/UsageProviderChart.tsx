@@ -1,7 +1,7 @@
 import { ProviderInstanceIcon } from "../chat/ProviderInstanceIcon";
 import type { UsageProviderKind } from "@t3tools/contracts";
 import { T, useGT, useLocale, useMessages } from "gt-react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useId, useLayoutEffect, useRef, useState } from "react";
 
 import type { DailyTotals, HourlyTotals } from "@t3tools/shared/usageMerge";
 import {
@@ -287,6 +287,7 @@ function UsageChartPlot({
   periods,
   columns,
   stepX,
+  scaleMax,
   providers,
   loadingProviders,
   format,
@@ -296,6 +297,7 @@ function UsageChartPlot({
   readonly periods: readonly string[];
   readonly columns: readonly DayColumn[];
   readonly stepX: number;
+  readonly scaleMax: number;
   readonly providers: readonly UsageProviderKind[];
   readonly loadingProviders: ReadonlySet<UsageProviderKind>;
   readonly format: (value: number) => string;
@@ -359,6 +361,7 @@ function UsageChartPlot({
   };
 
   const hoveredPeriod = hoverIndex === null ? undefined : periods[hoverIndex];
+  const hoveredColumn = hoverIndex === null ? undefined : columns[hoverIndex];
 
   return (
     <div
@@ -371,7 +374,7 @@ function UsageChartPlot({
       }}
     >
       <svg
-        className="h-full w-full"
+        className="h-full w-full stock-dark:pointer-events-none stock-dark:overflow-visible"
         viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
         preserveAspectRatio="none"
         aria-hidden
@@ -389,13 +392,33 @@ function UsageChartPlot({
             vectorEffect="non-scaling-stroke"
           />
         )}
+        {hoverIndex !== null &&
+          hoveredColumn?.bands.map(({ provider, value }) => {
+            if (value <= 0 || !providers.includes(provider)) return null;
+            return (
+              <path
+                key={provider}
+                d={`M${hoverIndex * stepX},${valueToY(value, scaleMax)}h0`}
+                className={cn(
+                  "hidden stock-dark:block stock-dark:silk-usage-curve-glow",
+                  loadingProviders.has(provider) && "opacity-40",
+                )}
+                fill="none"
+                color={PROVIDER_PRESENTATION[provider].color}
+                stroke="currentColor"
+                strokeWidth={6}
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            );
+          })}
       </svg>
 
       {hoverIndex === null || hoveredPeriod === undefined ? null : (
         <UsageChartTooltip
           tooltipRef={tooltipRef}
           label={formatTooltipPeriod(hoveredPeriod)}
-          column={columns[hoverIndex]}
+          column={hoveredColumn}
           providers={providers}
           loadingProviders={loadingProviders}
           format={format}
@@ -421,6 +444,7 @@ export function UsageProviderChart({
   const gt = useGT();
   const locale = useLocale();
   const m = useMessages();
+  const gradientId = useId();
   const periods = resolution === "hour" ? hours : days;
   const totals: readonly (DailyTotals | HourlyTotals)[] = resolution === "hour" ? hourly : daily;
   const byPeriod = new Map(
@@ -436,7 +460,7 @@ export function UsageProviderChart({
 
   const toY = (value: number) => valueToY(value, scale.max);
   const seriesClassName = (loading: boolean) =>
-    cn("transition-opacity", loading && "opacity-40 delay-150");
+    cn("transition-opacity stock-dark:transition-none", loading && "opacity-40 delay-150");
   const format = metric === "tokens" ? formatTokens : (value: number) => formatUsd(value, locale);
   const formatPeriod = (period: string) =>
     resolution === "hour"
@@ -468,6 +492,7 @@ export function UsageProviderChart({
           periods={periods}
           columns={columns}
           stepX={stepX}
+          scaleMax={scale.max}
           providers={providers}
           loadingProviders={loadingProviders}
           format={format}
@@ -490,21 +515,41 @@ export function UsageProviderChart({
             );
           })}
 
+          <defs>
+            {paths.map(({ provider }) => (
+              <linearGradient key={provider} id={`${gradientId}-${provider}`} x2="0" y2="1">
+                <stop stopColor={PROVIDER_PRESENTATION[provider].color} stopOpacity={0.26} />
+                <stop
+                  offset="1"
+                  stopColor={PROVIDER_PRESENTATION[provider].color}
+                  stopOpacity={0.01}
+                />
+              </linearGradient>
+            ))}
+          </defs>
           {paths.map(({ provider, loading, area }) => (
             <path
               key={provider}
               d={area}
-              className={seriesClassName(loading)}
+              className={cn(
+                seriesClassName(loading),
+                "stock-dark:fill-(--usage-area-fill) stock-dark:[fill-opacity:1]",
+              )}
+              style={{ "--usage-area-fill": `url("#${gradientId}-${provider}")` } as CSSProperties}
               fill={PROVIDER_PRESENTATION[provider].color}
               fillOpacity={0.12}
             />
           ))}
-          {paths.map(({ provider, loading, line }) => (
+          {paths.map(({ provider, loading, line, total }) => (
             <path
               key={provider}
               d={line}
-              className={seriesClassName(loading)}
+              className={cn(
+                seriesClassName(loading),
+                total > 0 && "stock-dark:silk-usage-curve-glow",
+              )}
               fill="none"
+              color={PROVIDER_PRESENTATION[provider].color}
               stroke={PROVIDER_PRESENTATION[provider].color}
               strokeWidth={2}
               vectorEffect="non-scaling-stroke"

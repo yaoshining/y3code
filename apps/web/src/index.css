@@ -651,6 +651,12 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   }
 }
 
+@utility silk-usage-curve-glow {
+  stroke: color-mix(in srgb, currentColor 92%, white);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, currentColor 90%, transparent))
+    drop-shadow(0 0 5px color-mix(in srgb, currentColor 65%, transparent));
+}
+
 @utility silk-launchpad-glow {
   @variant stock-dark {
     position: relative;
