@@ -97,13 +97,20 @@ interface ThreadDetailsPanelProps extends Pick<
   ) => Promise<ProjectScriptActionResult>;
   onDeleteProjectScript: (scriptId: string) => Promise<ProjectScriptActionResult>;
   usage: ThreadDetailsUsageInput;
+  spotlight?: boolean;
+  onSpotlightChange?: (open: boolean) => void;
 }
 
 export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
   const visible = useClientSettings(resolveThreadDetailsVisibility);
   const gt = useGT();
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
-  const [spotlight, setSpotlight] = useState(false);
+  const [internalSpotlight, setInternalSpotlight] = useState(false);
+  const spotlight = props.spotlight ?? internalSpotlight;
+  const setSpotlight = (open: boolean) => {
+    setInternalSpotlight(open);
+    props.onSpotlightChange?.(open);
+  };
   const spotlightTrigger = useRef<HTMLButtonElement>(null);
   const backButton = useRef<HTMLButtonElement>(null);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- moves focus to the visible view after switching card content
@@ -176,6 +183,7 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
       threadRef={{ environmentId: props.environmentId, threadId: props.threadId }}
       anchor={props.anchor}
       handle={props.handle}
+      onPopoverClose={() => setSpotlight(false)}
       contentKey={
         spotlight
           ? "context-quotas"

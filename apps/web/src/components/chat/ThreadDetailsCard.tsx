@@ -26,6 +26,7 @@ export function ThreadDetailsCard({
   handle,
   contentKey,
   onContextMenu,
+  onPopoverClose,
   children,
 }: {
   threadRef: ScopedThreadRef;
@@ -34,6 +35,7 @@ export function ThreadDetailsCard({
   /** Changes when the set of rendered items changes, so cached heights are measured again. */
   contentKey: string;
   onContextMenu?: MouseEventHandler<HTMLDivElement>;
+  onPopoverClose?: () => void;
   children: (density: "full" | "compact" | "essential") => ReactNode;
 }) {
   const gt = useGT();
@@ -146,6 +148,7 @@ export function ThreadDetailsCard({
           return;
         }
         useRightPanelStore.getState().setThreadPanelOpen(threadRef, "popover", open);
+        if (!open) onPopoverClose?.();
       }}
     >
       {placement && inlineOpen ? (

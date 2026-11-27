@@ -2586,6 +2586,40 @@ export default function ChatView(props: ChatViewProps) {
     closeRightPanelSurface,
   });
   const pullRequestSurfaceAvailable = supportsPullRequests && pullRequestPanelTarget !== null;
+  const [threadDetailsSpotlight, setThreadDetailsSpotlight] = useState<{
+    readonly threadKey: string;
+    readonly open: boolean;
+  } | null>(null);
+  const threadDetailsSpotlightOpen =
+    activeThreadKey !== null &&
+    threadDetailsSpotlight?.threadKey === activeThreadKey &&
+    threadDetailsSpotlight.open;
+  const handleThreadDetailsSpotlightChangeStable = useStableCallback((open: boolean) => {
+    setThreadDetailsSpotlight(
+      open && activeThreadKey !== null ? { threadKey: activeThreadKey, open: true } : null,
+    );
+  });
+  const handleToggleThreadPanelControlStable = useStableCallback(() => {
+    setThreadDetailsSpotlight(null);
+    toggleThreadPanelStable();
+  });
+  const openContextQuotasSpotlightStable = useStableCallback(() => {
+    if (!activeThreadRef || activeThreadKey === null) return;
+    const store = useRightPanelStore.getState();
+    const isPanelOpen = selectThreadPanelOpen(
+      store.threadPanelVisibilityByThreadKey,
+      activeThreadRef,
+      threadPanelPresentation,
+    );
+    if (!isPanelOpen) {
+      setThreadDetailsSpotlight({ threadKey: activeThreadKey, open: true });
+      toggleThreadPanelStable();
+      return;
+    }
+    setThreadDetailsSpotlight(
+      threadDetailsSpotlightOpen ? null : { threadKey: activeThreadKey, open: true },
+    );
+  });
   const {
     acknowledgeActiveThreadWoke,
     activeBranchMismatchKey,
@@ -3515,7 +3549,7 @@ export default function ChatView(props: ChatViewProps) {
     rightPanelOpen,
     rightPanelShortcutLabel: shortcutLabelForCommand(keybindings, "rightPanel.toggle"),
     onToggleTerminal: toggleTerminalVisibilityStable,
-    onToggleThreadPanel: toggleThreadPanelStable,
+    onToggleThreadPanel: handleToggleThreadPanelControlStable,
     onToggleRightPanel: toggleRightPanelStable,
   } satisfies PanelLayoutControlsProps;
   const panelToggleControls = (
@@ -4105,7 +4139,7 @@ export default function ChatView(props: ChatViewProps) {
                                     serverConfig?.usageLimitSources ?? EMPTY_USAGE_LIMIT_SOURCES,
                                   contextWindow: activeContextWindow,
                                 }}
-                                onOpenDetails={toggleThreadPanelStable}
+                                onOpenDetails={openContextQuotasSpotlightStable}
                               />
                             ) : null}
                           </div>
@@ -4221,6 +4255,8 @@ export default function ChatView(props: ChatViewProps) {
                     sources: serverConfig?.usageLimitSources ?? EMPTY_USAGE_LIMIT_SOURCES,
                     contextWindow: activeContextWindow,
                   }}
+                  spotlight={threadDetailsSpotlightOpen}
+                  onSpotlightChange={handleThreadDetailsSpotlightChangeStable}
                 />
 
                 <PullRequestThreadDialogHost
