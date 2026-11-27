@@ -54,17 +54,18 @@ const buttonVariants = cva(
         "ghost-destructive":
           "[--control-icon-color:currentColor] border-transparent text-muted-foreground data-pressed:bg-accent [:hover,[data-pressed]]:bg-accent [:hover,[data-pressed]]:text-destructive",
         glass:
-          "surface-glass [--control-icon-color:var(--contrast-muted-foreground)] rounded-full border-border/60 text-foreground shadow-sm before:rounded-full [:hover,[data-pressed]]:border-border",
+          "surface-glass [--control-icon-color:var(--contrast-muted-foreground)] rounded-full border-border/60 text-foreground shadow-sm before:rounded-full not-stock-dark:[:hover,[data-pressed]]:border-border stock-dark:border-[var(--silk-glass-border)] stock-dark:bg-popover/75 stock-dark:[:hover,[data-pressed]]:bg-popover/95 stock-dark:[:hover,[data-pressed]]:shadow-[0_2px_12px_rgb(151_88_230/14%)]",
         link: "border-transparent underline-offset-4 [:hover,[data-pressed]]:underline",
         "media-close":
           "[--control-icon-color:currentColor] border-transparent bg-black/65 text-white shadow-sm ring-1 ring-white/20 [:hover,[data-pressed]]:bg-black/80 focus-visible:ring-white",
         "media-navigation":
           "[--control-icon-color:currentColor] absolute top-1/2 z-20 -translate-y-1/2 border-transparent text-white/90 [:hover,[data-pressed]]:bg-white/10 [:hover,[data-pressed]]:text-white focus-visible:ring-white focus-visible:ring-offset-transparent",
         outline:
-          "[--control-icon-color:var(--contrast-muted-foreground)] border-input bg-popover not-dark:bg-clip-padding text-foreground shadow-xs/5 not-disabled:not-active:not-data-pressed:before:shadow-[0_1px_--theme(--color-black/4%)] dark:bg-input/32 dark:not-disabled:before:shadow-[0_-1px_--theme(--color-white/2%)] dark:not-disabled:not-active:not-data-pressed:before:shadow-[0_-1px_--theme(--color-white/6%)] [:disabled,:active,[data-pressed]]:shadow-none [:hover,[data-pressed]]:bg-accent/50 dark:[:hover,[data-pressed]]:bg-input/64",
+          "[--control-icon-color:var(--contrast-muted-foreground)] border-input bg-popover not-dark:bg-clip-padding text-foreground shadow-xs/5 not-disabled:not-active:not-data-pressed:before:shadow-[0_1px_--theme(--color-black/4%)] dark:not-stock-dark:bg-input/32 dark:not-disabled:before:shadow-[0_-1px_--theme(--color-white/2%)] dark:not-disabled:not-active:not-data-pressed:before:shadow-[0_-1px_--theme(--color-white/6%)] [:disabled,:active,[data-pressed]]:shadow-none not-stock-dark:[:hover,[data-pressed]]:bg-accent/50 dark:not-stock-dark:[:hover,[data-pressed]]:bg-input/64 stock-dark:border-[var(--silk-glass-border)] stock-dark:bg-card stock-dark:[:hover,[data-pressed]]:bg-popover/90 stock-dark:hover:not-active:not-data-pressed:not-disabled:shadow-[0_2px_12px_rgb(151_88_230/12%)]",
         overlay: "border-transparent bg-black/70 text-white/65 [:hover,[data-pressed]]:bg-black/90",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground [:active,[data-pressed]]:bg-secondary/80 [:hover,[data-pressed]]:bg-secondary/90",
+        silk: "border-transparent not-stock-dark:bg-primary not-stock-dark:text-primary-foreground not-stock-dark:shadow-xs not-stock-dark:shadow-primary/24 not-stock-dark:[:hover,[data-pressed]]:bg-primary/90 stock-dark:[background-image:var(--silk-cta-bg)] stock-dark:text-[color:var(--silk-cta-foreground)] stock-dark:font-semibold stock-dark:shadow-[0_4px_20px_rgb(210_116_220/34%)] stock-dark:[:hover,[data-pressed]]:brightness-105 stock-dark:[:disabled,:active,[data-pressed]]:shadow-none",
         "warning-outline":
           "border-warning/32 bg-warning-surface text-warning-foreground shadow-xs/5 [:disabled,:active,[data-pressed]]:shadow-none [:hover,[data-pressed]]:border-warning/40 [:hover,[data-pressed]]:bg-warning/16 dark:[:hover,[data-pressed]]:bg-warning/24",
       },

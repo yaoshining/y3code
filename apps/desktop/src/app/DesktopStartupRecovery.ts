@@ -1,4 +1,5 @@
 import type { DesktopUpdateState } from "@t3tools/contracts";
+import { T3_CODE_DARK_THEME_COLORS } from "@t3tools/shared/themePalettes";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Option from "effect/Option";
@@ -150,9 +151,10 @@ function buildStartupRecoveryHtml(input: {
   const offer = describeOffer(input.offer);
   const output = input.failure.output.trim();
   const title = escapeHtml(m(msg("T3 Code could not start")));
+  const dark = T3_CODE_DARK_THEME_COLORS;
   return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>${title}</title><style>
 :root{color-scheme:light dark;--bg:#fff;--fg:#111;--muted:#666;--line:#ddd;--code:#f4f4f4}
-@media (prefers-color-scheme:dark){:root{--bg:#000;--fg:#fff;--muted:#999;--line:#333;--code:#111}}
+@media (prefers-color-scheme:dark){:root{--bg:${dark.chrome};--fg:${dark.text};--muted:${dark.textMuted};--line:${dark.border};--code:${dark.codeBackground}}}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--fg)}
 body{font:13px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
 h1{font-size:18px;margin:0}p{margin:0}.muted{color:var(--muted)}
@@ -304,7 +306,7 @@ export const listen: Effect.Effect<
           show: false,
           title: m(msg("T3 Code could not start")),
           autoHideMenuBar: true,
-          backgroundColor: shouldUseDarkColors ? "#000000" : "#ffffff",
+          backgroundColor: shouldUseDarkColors ? T3_CODE_DARK_THEME_COLORS.chrome : "#ffffff",
           webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,

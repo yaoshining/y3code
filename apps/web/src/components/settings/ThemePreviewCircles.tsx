@@ -47,13 +47,7 @@ const STANDARD_THEME_PREVIEW_COLORS: Record<
     messageSurface: "#e4e4e7",
     ...SHARED_STANDARD_THEME_PREVIEW_COLORS.light,
   },
-  dark: {
-    sidebar: "#0f0f10",
-    surface: "#121212",
-    accentSurface: "#27272a",
-    messageSurface: "#27272a",
-    ...SHARED_STANDARD_THEME_PREVIEW_COLORS.dark,
-  },
+  dark: SHARED_STANDARD_THEME_PREVIEW_COLORS.dark,
 };
 
 export const STANDARD_THEME_CARDS: ReadonlyArray<ThemeCardDefinition> = [

@@ -65,6 +65,22 @@ function contrastRatio(first: string, second: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+describe("stock dark palette", () => {
+  const colors = getStandardThemeColors("dark");
+
+  it.each([
+    ["accentForeground", "accent", 4.5],
+    ["messageActionForeground", "messageActionHover", 4.5],
+    ["text", "canvas", 7],
+    ["textMuted", "canvas", 4.5],
+    ["focus", "surfaceOverlay", 3],
+    ["terminalScrollbar", "terminalBackground", 3],
+    ["terminalScrollbarHover", "terminalBackground", 3],
+  ] as const)("keeps %s on %s at %s:1", (foreground, background, minimum) => {
+    expect(contrastRatio(colors[foreground], colors[background])).toBeGreaterThanOrEqual(minimum);
+  });
+});
+
 describe("theme files", () => {
   it("gives non-Latin theme names distinct stable ids", () => {
     const file = {
@@ -656,7 +672,7 @@ describe("context chip colors", () => {
   it("reads at 5:1 on the standard surfaces as index.css paints them", () => {
     const painted = {
       light: ["#fcfcfc", "#ffffff", "#ebebed"],
-      dark: ["#000000", "#0a0a0a", "#111111", "#141414", "#1e1e1e"],
+      dark: ["#090714", "#131024", "#18132d", "#19132e"],
     } as const;
     const properties = new Map<string, string>();
     vi.stubGlobal("window", { localStorage: { getItem: () => null } });

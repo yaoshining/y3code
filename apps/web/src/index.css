@@ -4,6 +4,7 @@
 
 @custom-variant dark (&:is(.dark, .dark *));
 @custom-variant light (&:not(.dark, .dark *));
+@custom-variant stock-dark (&:is(.dark:where(html:not([data-theme-id])) *));
 /* Window Controls Overlay: active when Electron exposes native titlebar control geometry. */
 @custom-variant wco (&:is(.wco, .wco *));
 
@@ -119,6 +120,21 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --glass-blur: 12px;
   --glass-opacity: 80%;
   --glass-saturation: 1.14;
+  --silk-accent: linear-gradient(90deg, #ec4899, #8b5cf6 55%, #22d3ee);
+  --silk-cta-bg: linear-gradient(110deg, #ffb3dd, #c8afff 60%, #9be5ef);
+  --silk-cta-foreground: #24112e;
+  --silk-glass-border: rgb(206 192 255 / 28%);
+  --silk-soft-edge: rgb(201 175 255 / 14%);
+  --silk-frame-bg:
+    radial-gradient(ellipse at 4% 1%, #cf489c 0, transparent 28%),
+    radial-gradient(ellipse at 93% 5%, #4827a7, transparent 50%),
+    radial-gradient(ellipse at 98% 97%, #35bfd0, transparent 35%),
+    radial-gradient(ellipse at 14% 103%, #7a3dd8, transparent 48%), #29173e;
+  --silk-green: #61e5b5;
+  --silk-cyan: #78e8fa;
+  --silk-rose: #ff91a8;
+  --silk-amber: #ffd18a;
+  --silk-violet: #c2adff;
   --desktop-window-right-resize-inset: 0px;
   --workspace-topbar-height: 52px;
   --workspace-controls-top: 0px;
@@ -145,11 +161,18 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
 
   @variant dark {
     --appearance-contrast-target: white;
-    /* Keeps the idle thumb above 3:1 (WCAG 1.4.11) on #000; 35% renders as gray 89, just under. */
     --app-scrollbar-thumb: rgb(255 255 255 / 36%);
     --app-scrollbar-thumb-hover: rgb(255 255 255 / 45%);
     --glass-blur: 16px;
     --glass-saturation: 1.08;
+
+    &:not([data-theme-id]) {
+      /* Keep the composited thumb above 3:1 on both the canvas and sidebar. */
+      --app-scrollbar-thumb: rgb(206 192 255 / 45%);
+      --app-scrollbar-thumb-hover: rgb(206 192 255 / 48%);
+      --glass-blur: 14px;
+      --glass-saturation: 1.16;
+    }
   }
 }
 
@@ -463,6 +486,19 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
       0 24px 72px -20px rgb(0 0 0 / 90%);
   }
 
+  @variant stock-dark {
+    background: linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--popover) 84%, transparent),
+      color-mix(in srgb, var(--card) 92%, transparent)
+    );
+    border-color: var(--silk-glass-border);
+    box-shadow:
+      inset 0 1px rgb(243 220 255 / 12%),
+      0 24px 72px -18px rgb(0 0 0 / 88%),
+      0 0 32px rgb(151 88 230 / 12%);
+  }
+
   @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     background: var(--popover) !important;
   }
@@ -488,8 +524,32 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   border: 1px solid color-mix(in srgb, var(--contrast-foreground) 10%, transparent);
 
+  @variant stock-dark {
+    border-color: var(--silk-glass-border);
+    box-shadow:
+      inset 0 1px rgb(243 220 255 / 10%),
+      0 16px 40px -12px rgb(0 0 0 / 78%);
+  }
+
   @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     background: var(--popover) !important;
+  }
+}
+
+@utility silk-hairline-top {
+  @variant stock-dark {
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline: 12%;
+      block-size: 1px;
+      pointer-events: none;
+      background: var(--silk-accent);
+      opacity: 0.65;
+    }
   }
 }
 
@@ -1219,45 +1279,55 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
 
   @variant dark {
     color-scheme: dark;
-    /* The canvas is true black, matching the sidebar. Raised surfaces keep the tone they had
-       over neutral-950, so cards, popovers, and the composer still lift. Borders and hover
-       states provide separation without milky gray fills. */
-    --background: #000;
-    --surface-raised: color-mix(in srgb, var(--color-neutral-950) 97%, var(--color-white));
-    --foreground: var(--color-neutral-100);
-    --card: color-mix(in srgb, var(--color-neutral-950) 97%, var(--color-white));
-    --card-foreground: var(--color-neutral-100);
-    --popover: color-mix(in srgb, var(--color-neutral-950) 97%, var(--color-white));
-    --popover-foreground: var(--color-neutral-100);
-    --primary: oklch(0.571 0.21 264);
-    --secondary: --alpha(var(--color-white) / 3%);
-    --secondary-foreground: var(--color-neutral-100);
-    --muted: --alpha(var(--color-white) / 3%);
-    --muted-foreground: var(--color-neutral-400);
-    --accent: --alpha(var(--color-white) / 4%);
-    --accent-foreground: var(--color-neutral-100);
-    /* A user turn sits above the composer tone, level with the selected sidebar row. */
-    --message-surface: color-mix(in srgb, var(--color-neutral-950) 92%, var(--color-white));
-    --error: color-mix(in srgb, var(--color-red-500) 90%, var(--color-white));
-    --error-foreground: var(--color-red-400);
-    --tool-error-icon: #fca5a5;
-    --error-surface: color-mix(in srgb, var(--error) 16%, transparent);
-    --border: --alpha(var(--color-white) / 8%);
-    --input: --alpha(var(--color-white) / 11%);
+    /* Stock dark paints before the theme engine runs. Mirror the shared palette. */
+    --background: #090714;
+    --toolbar-border: #251c3a;
+    --toolbar-control: var(--card);
+    --toolbar-control-hover: #1d1633;
+    --surface-raised: #18132d;
+    --foreground: #f8fafc;
+    --card: #131024;
+    --card-foreground: var(--foreground);
+    --popover: #261d37;
+    --popover-foreground: var(--foreground);
+    --primary: #7c3aed;
+    --secondary: #1b1530;
+    --secondary-foreground: var(--foreground);
+    --muted: #151127;
+    --muted-foreground: #b5acce;
+    --accent: #22193b;
+    --accent-foreground: var(--foreground);
+    --message-surface: #19132e;
+    --message-action-hover: #6d28d9;
+    --error: #fb4c74;
+    --error-foreground: var(--silk-rose);
+    --tool-error-icon: var(--error-foreground);
+    --error-surface: #311526;
+    --border: #32274b;
+    --input: #3f325c;
+    --ring: var(--silk-violet);
     --info-foreground: var(--color-blue-400);
     --guest-foreground: var(--color-fuchsia-300);
     --success-foreground: var(--color-emerald-400);
-    --warning-foreground: var(--color-amber-400);
-    --warning-surface: color-mix(in srgb, var(--warning) 16%, transparent);
-    --update-foreground: var(--color-blue-400);
-    --sidebar: var(--card);
-    --sidebar-control-surface: var(--muted);
-    --sidebar-row-hover: var(--accent);
-    --sidebar-row-active: var(--accent);
-    --sidebar-row-selected: var(--muted);
-    --sidebar-stage-fade: var(--card);
-    --terminal-cursor: rgb(180 203 255);
-    --terminal-selection-background: rgb(180 203 255 / 25%);
+    --warning: #f59e0b;
+    --warning-foreground: var(--silk-amber);
+    --warning-surface: #302212;
+    --update: #8b5cf6;
+    --update-foreground: var(--silk-violet);
+    --sidebar: #0c0919;
+    --sidebar-control-surface: #16112a;
+    --sidebar-row-hover: #1a1431;
+    --sidebar-row-active: #241b42;
+    --sidebar-row-selected: #1e1638;
+    --sidebar-border: #241b3a;
+    --code-background: #0c0b16;
+    --terminal-background: #0b0a13;
+    --terminal-cursor: var(--silk-cyan);
+    --terminal-selection-background: #3a2860;
+    --app-theme-search-match-background: #6b4f1d;
+    --app-theme-search-match-foreground: var(--foreground);
+    --app-theme-search-match-active-background: #f5b851;
+    --app-theme-search-match-active-foreground: #1c1208;
   }
 }
 
@@ -1286,27 +1356,24 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --sidebar-stage-fade: var(--sidebar);
 
   @variant dark {
-    --background: #000;
-    --foreground: #f1f3f7;
-    --card: #000;
+    --background: var(--sidebar);
+    --foreground: var(--sidebar-foreground);
+    --card: var(--sidebar);
     --card-foreground: var(--foreground);
-    --accent: #191a1d;
-    --accent-foreground: #f7f9ff;
-    --muted: #0a0a0a;
-    --muted-foreground: #a3a3a3;
-    --border: rgb(255 255 255 / 8%);
-    --input: rgb(255 255 255 / 18%);
-    --sidebar: var(--card);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-muted-foreground: var(--muted-foreground);
-    --sidebar-control-surface: var(--muted);
-    --sidebar-row-hover: color-mix(in srgb, var(--contrast-foreground) 8%, transparent);
-    --sidebar-row-active: color-mix(in srgb, var(--contrast-foreground) 11%, transparent);
-    --sidebar-row-selected: color-mix(in srgb, var(--contrast-foreground) 7%, transparent);
-    --sidebar-border: var(--border);
-    --sidebar-stage-fade: var(--card);
-    /* Row metadata sits a step below read titles (75% white). */
-    --secondary-label: #8f8f8f;
+    --accent: inherit;
+    --accent-foreground: inherit;
+    --muted: inherit;
+    --muted-foreground: var(--sidebar-muted-foreground);
+    --border: var(--sidebar-border);
+    --input: inherit;
+    --sidebar: inherit;
+    --sidebar-foreground: inherit;
+    --sidebar-muted-foreground: inherit;
+    --sidebar-control-surface: inherit;
+    --sidebar-row-hover: inherit;
+    --sidebar-row-active: inherit;
+    --sidebar-row-selected: inherit;
+    --sidebar-border: inherit;
   }
 }
 

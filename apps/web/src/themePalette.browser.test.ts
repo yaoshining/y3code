@@ -1,4 +1,4 @@
-import { converter } from "culori/fn";
+import { converter, wcagContrast } from "culori/fn";
 import { describe, expect, it } from "vite-plus/test";
 
 import "~/index.css";
@@ -42,6 +42,25 @@ describe("standard painted theme colors", () => {
               1.5,
             );
           });
+        }
+      }
+    } finally {
+      root.classList.remove("dark");
+    }
+  });
+
+  it("keeps the stock dark scrollbar visible on the canvas and sidebar", () => {
+    const root = document.documentElement;
+    root.classList.add("dark");
+    try {
+      for (const surface of ["--background", "--sidebar"]) {
+        const backdrop = paintedChannels(surface);
+        for (const thumb of ["--app-scrollbar-thumb", "--app-scrollbar-thumb-hover"]) {
+          const fill = paintedChannels(thumb, backdrop);
+          expect(
+            wcagContrast(`rgb(${fill.join(" ")})`, `rgb(${backdrop.join(" ")})`),
+            `${thumb} on ${surface}`,
+          ).toBeGreaterThanOrEqual(3);
         }
       }
     } finally {
