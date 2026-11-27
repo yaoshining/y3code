@@ -74,10 +74,12 @@ it("keeps the sidebar and workspace inside the frame and removes it in full-blee
   expect(workspace.dataset.sidebarState).toBe("expanded");
 
   await act(() => notifyFullscreen?.(true));
-  expect(frameInset()).toBe("0px");
-  expect(workspace.getBoundingClientRect().top).toBe(0);
+  expect(frameInset()).toBe("8px");
+  expect(workspace.getBoundingClientRect().top).toBe(8);
+  expect(control.element().getBoundingClientRect().left).toBeLessThan(90);
   await act(() => notifyFullscreen?.(false));
   expect(frameInset()).toBe("8px");
+  expect(control.element().getBoundingClientRect().left).toBeGreaterThan(90);
 
   const persist = vi.fn(async () => {});
   await act(() => persistClientSettingsPatch({ silkWindowFrame: false }, persist));

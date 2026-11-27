@@ -462,9 +462,7 @@ export function AppSidebarLayout({
     <PanelAnimationSuppressionProvider value={panelAnimationsSuppressed}>
       <div
         className="app-shell-frame"
-        data-app-shell-frame={
-          showSidebar && silkWindowFrame && !isWindowFullscreen ? "" : undefined
-        }
+        data-app-shell-frame={showSidebar && silkWindowFrame ? "" : undefined}
       >
         <SidebarProvider
           ref={observeWorkspaceWidth}
