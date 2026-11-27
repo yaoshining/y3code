@@ -227,7 +227,13 @@ export function GuestPage() {
   }, []);
 
   return (
-    <div className="flex h-dvh flex-col bg-background text-foreground">
+    <div
+      className={cn(
+        "flex h-dvh flex-col bg-background text-foreground",
+        access !== "session" &&
+          "stock-dark:overflow-y-auto stock-dark:[background-image:var(--silk-ambient-bg)]",
+      )}
+    >
       {access === "checking" ? (
         <Notice title={gt("Connecting...")} />
       ) : access === "name" && credential !== null ? (
@@ -370,7 +376,10 @@ function NameForm({
     else setError(failure);
   };
   return (
-    <form className="m-auto flex w-full max-w-xs flex-col gap-3 p-6" onSubmit={submit}>
+    <form
+      className="silk-hairline-top m-auto flex w-full max-w-xs flex-col gap-3 p-6 stock-dark:dialog-glass stock-dark:rounded-2xl stock-dark:border stock-dark:border-(--silk-glass-border)"
+      onSubmit={submit}
+    >
       <h1 className="text-base font-medium">
         <T>Join a shared thread</T>
       </h1>
@@ -390,7 +399,7 @@ function NameForm({
           {error}
         </p>
       ) : null}
-      <Button type="submit" disabled={submitting || name.trim() === ""}>
+      <Button type="submit" variant="silk" disabled={submitting || name.trim() === ""}>
         <T context="verb, join a shared thread">Join</T>
       </Button>
       <p className="text-xs text-muted-foreground">

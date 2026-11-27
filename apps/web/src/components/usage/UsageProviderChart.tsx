@@ -241,7 +241,7 @@ function UsageChartTooltip({
   return (
     <div
       ref={tooltipRef}
-      className="surface-glass pointer-events-none absolute z-10 min-w-36 max-w-full rounded-xl border border-border/50 px-2.5 py-2 text-xs shadow-lg"
+      className="surface-glass pointer-events-none absolute z-10 min-w-36 max-w-full rounded-xl border border-border/50 px-2.5 py-2 text-xs shadow-lg stock-dark:border-(--silk-glass-border)"
       style={{
         left: "var(--usage-tooltip-left, 0px)",
         top: "var(--usage-tooltip-top, 0px)",
@@ -484,7 +484,7 @@ export function UsageProviderChart({
                 y2={y}
                 stroke="currentColor"
                 strokeWidth={1}
-                className="text-border"
+                className="text-border stock-dark:text-(--silk-soft-edge)"
                 vectorEffect="non-scaling-stroke"
               />
             );

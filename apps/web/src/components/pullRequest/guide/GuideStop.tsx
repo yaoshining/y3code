@@ -84,7 +84,7 @@ export function GuideStop({
     <div
       className={cn("grid gap-8", hasNotes && "@min-[90rem]/guide:grid-cols-[minmax(0,1fr)_20rem]")}
     >
-      <article className="flex min-w-0 flex-col gap-5">
+      <article className="silk-hairline-top flex min-w-0 flex-col gap-5 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80 stock-dark:p-4 stock-dark:shadow-(--silk-card-shadow)">
         <Collapsible open={railOpen} onOpenChange={onRailOpenChange}>
           <header className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground tabular-nums @max-[56rem]/guide:hidden">
@@ -184,12 +184,15 @@ export function GuideStop({
               {stop.excerpts.length > 0 ? gt("Also in this stop") : gt("Files in this stop")}
             </h3>
             <DiffWorkerPoolProvider>
-              <ul className="flex flex-col overflow-hidden rounded-lg border border-border/60">
+              <ul className="flex flex-col overflow-hidden rounded-lg border border-border/60 stock-dark:border-(--silk-soft-edge)">
                 {otherFiles.map((file) => {
                   const diff = files.get(file.path);
                   const stat = diff === undefined ? null : getDiffLineStat([diff]);
                   return (
-                    <li key={file.path} className="border-border/60 not-first:border-t">
+                    <li
+                      key={file.path}
+                      className="border-border/60 not-first:border-t stock-dark:border-(--silk-soft-edge)"
+                    >
                       <Collapsible>
                         <CollapsibleTrigger className="group flex w-full min-w-0 items-center gap-2 px-3 py-2 text-left text-xs outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
                           <ChevronRightIcon
@@ -282,7 +285,7 @@ export function GuideStop({
           </section>
         ) : null}
 
-        <footer className="flex flex-wrap items-center justify-end gap-3 border-t border-border/60 pt-4">
+        <footer className="flex flex-wrap items-center justify-end gap-3 border-t border-border/60 pt-4 stock-dark:border-(--silk-soft-edge)">
           {nextTitle !== null ? (
             <Button size="multiline" className="max-w-full" onClick={() => onStep(1)}>
               <span className="min-w-0 break-words">

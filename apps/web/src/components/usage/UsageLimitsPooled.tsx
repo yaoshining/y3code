@@ -28,6 +28,7 @@ import {
 } from "react";
 
 import { ensureLocalApi } from "../../localApi";
+import { useRenderedStockDark } from "../../hooks/useTheme";
 import { usePrimarySettings } from "../../hooks/useSettings";
 import { cn } from "../../lib/utils";
 import { formatUpcomingTimestamp } from "../../timestampFormat";
@@ -39,6 +40,7 @@ import { OpenAI } from "../Icons";
 import { Alert, AlertTitle } from "../ui/alert";
 import { Popover, PopoverCreateHandle, PopoverPopup, PopoverTrigger } from "../ui/popover";
 import { PaceIcon, ResetCreditDialog, barColor, usePaceMark, useResetCredit } from "./UsageLimits";
+import { LedQuotaMeter } from "./LedQuotaMeter";
 import {
   collectExternalUsageLinks,
   collectLimitNotices,
@@ -371,6 +373,7 @@ function SegmentTriggers({
   const remaining = remainingPercent(window);
   const timeLeft = paceRemainingPercent(window, now);
   const [segmentRef, paceMark] = usePaceMark(timeLeft);
+  const stockDark = useRenderedStockDark();
   const m = useMessages();
   const resetsIn = formatResetsIn(window, now, m);
   const refillIn = formatResetsIn(window, now, m, "refill");
@@ -403,20 +406,30 @@ function SegmentTriggers({
           <button
             ref={segmentRef}
             type="button"
-            style={{ gridColumn: index, gridRow: 1, ...paceMark?.gappedTrack }}
+            style={{
+              gridColumn: index,
+              gridRow: 1,
+              ...(stockDark ? undefined : paceMark?.gappedTrack),
+            }}
             aria-label={segmentLabel}
-            className="relative h-5 min-w-0 cursor-pointer rounded-md bg-muted text-start outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[popup-open]:ring-1 data-[popup-open]:ring-inset data-[popup-open]:ring-border @2xl/pool:h-8"
+            className="relative h-5 min-w-0 cursor-pointer rounded-md bg-muted text-start stock-dark:bg-(--silk-surface-recessed) outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[popup-open]:ring-1 data-[popup-open]:ring-inset data-[popup-open]:ring-border @2xl/pool:h-8"
           />
         }
       >
         <div aria-hidden className="absolute inset-0 overflow-hidden rounded-md">
           {/* Clipped inside the rounded clip so the bar's own corners keep their antialiasing. */}
           <div className="absolute inset-0" style={paceMark?.gap}>
-            <div
-              aria-hidden
-              className="absolute inset-y-0 left-0 rounded-md opacity-35"
-              style={{ width: `${remaining}%`, backgroundColor: color }}
-            />
+            {stockDark ? (
+              <div className="absolute inset-0 flex flex-col justify-center">
+                <LedQuotaMeter remainingPercent={remaining} ariaLabel={segmentLabel} size="md" />
+              </div>
+            ) : (
+              <div
+                aria-hidden
+                className="absolute inset-y-0 left-0 rounded-md opacity-35"
+                style={{ width: `${remaining}%`, backgroundColor: color }}
+              />
+            )}
             {remaining < 100 && reset && refillPercent > 0 ? (
               <div
                 aria-hidden
@@ -440,7 +453,7 @@ function SegmentTriggers({
         ) : null}
         <span
           aria-hidden
-          className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-md text-3xs leading-none font-semibold text-foreground/80 tabular-nums @2xl/pool:hidden"
+          className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-md text-3xs leading-none font-semibold text-foreground/80 tabular-nums stock-dark:text-foreground stock-dark:text-shadow-(--silk-meter-label-shadow) @2xl/pool:hidden"
         >
           {index}
         </span>
@@ -609,7 +622,7 @@ function PoolWindowCard({
   const m = useMessages();
   const nextRefill = pool.resets.find((reset) => reset.at > now && reset.restoresPercent > 0);
   return (
-    <div className="grid items-center gap-x-6 gap-y-3 rounded-lg border border-border/60 p-4 md:grid-cols-[11rem_minmax(0,1fr)]">
+    <div className="silk-hairline-top grid items-center gap-x-6 gap-y-3 rounded-lg border border-border/60 p-4 md:grid-cols-[11rem_minmax(0,1fr)] stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80">
       <div className="flex flex-col gap-1">
         {label !== null ? (
           <span className="text-sm font-medium text-foreground">{label ?? pool.label}</span>

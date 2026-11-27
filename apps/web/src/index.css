@@ -123,6 +123,12 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --silk-accent: linear-gradient(90deg, #ec4899, #8b5cf6 55%, #22d3ee);
   --silk-cta-bg: linear-gradient(110deg, #ffb3dd, #c8afff 60%, #9be5ef);
   --silk-cta-foreground: #24112e;
+  --silk-cta-shadow: 0 4px 18px rgb(210 116 220 / 36%);
+  --silk-floating-shadow: 0 24px 72px -18px rgb(0 0 0 / 80%), 0 0 32px rgb(151 88 230 / 12%);
+  --silk-emblem-bg: linear-gradient(135deg, #502756, #25254e);
+  --silk-emblem-shadow: 0 0 20px rgb(210 116 220 / 25%);
+  --silk-meter-label-shadow: 0 0 3px black, 0 1px 3px black;
+  --silk-ambient-bg: radial-gradient(ellipse 72% 54% at 50% 0%, #29173d 0%, transparent 100%);
   --silk-glass-border: rgb(206 192 255 / 28%);
   --silk-soft-edge: rgb(201 175 255 / 14%);
   --silk-frame-bg:
@@ -1329,6 +1335,7 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
     --accent: #22193b;
     --accent-foreground: var(--foreground);
     --message-surface: #19132e;
+    --message-action: #7c3aed;
     --message-action-hover: #6d28d9;
     --error: #fb4c74;
     --error-foreground: var(--silk-rose);

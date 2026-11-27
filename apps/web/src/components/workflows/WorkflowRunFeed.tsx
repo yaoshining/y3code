@@ -161,11 +161,11 @@ export function WorkflowChip({ name }: { readonly name: string }) {
 
 // The thread list's own colours for the same states, so a run reads like a thread does.
 const WORKFLOW_TONE_CLASS: Record<WorkflowRunTone, string> = {
-  input: "text-warning-foreground",
-  failed: "text-destructive",
-  working: "text-info-foreground",
+  input: "text-warning-foreground stock-dark:text-(--silk-amber)",
+  failed: "text-destructive stock-dark:text-(--silk-rose)",
+  working: "text-info-foreground stock-dark:text-(--silk-cyan)",
   quiet: "text-muted-foreground",
-  done: "text-success-foreground",
+  done: "text-success-foreground stock-dark:text-(--silk-green)",
 };
 
 export function WorkflowStateWord({ node }: { readonly node: WorkflowRunNode }) {
@@ -174,12 +174,12 @@ export function WorkflowStateWord({ node }: { readonly node: WorkflowRunNode }) 
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center gap-1 text-xs font-medium whitespace-nowrap",
+        "flex shrink-0 items-center gap-1 text-xs font-medium whitespace-nowrap stock-dark:rounded-full stock-dark:border stock-dark:border-current/20 stock-dark:bg-(--silk-surface-recessed) stock-dark:px-1.5",
         WORKFLOW_TONE_CLASS[state.tone],
       )}
     >
       {state.tone === "working" ? (
-        <span aria-hidden className="size-1.5 rounded-full bg-info" />
+        <span aria-hidden className="size-1.5 rounded-full bg-info stock-dark:bg-current" />
       ) : state.tone === "done" ? (
         <CheckIcon aria-hidden className="size-3" />
       ) : null}
@@ -458,7 +458,7 @@ export function WorkflowRunFeed({
         aria-label={run.title}
         className="mx-auto flex w-full max-w-5xl min-w-0 flex-col px-5 pt-5 pb-10"
       >
-        <header className="space-y-1">
+        <header className="silk-hairline-top space-y-1 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80 stock-dark:p-4 stock-dark:shadow-(--silk-card-shadow)">
           <Button
             size="sm"
             variant="ghost"
@@ -551,7 +551,7 @@ export function WorkflowRunFeed({
             ) : null}
             {/* A question the run already asks is answerable without its step history. */}
             {run.status === "paused" ? (
-              <div className="mt-4 border-t border-border pt-4">
+              <div className="mt-4 border-t border-border pt-4 stock-dark:border-(--silk-soft-edge)">
                 <div className="max-w-2xl">{pause(null, run.pauses, run.detail)}</div>
               </div>
             ) : null}

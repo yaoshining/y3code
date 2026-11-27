@@ -43,6 +43,8 @@ import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "rea
 import { TYPOGRAPHY_ADVANCED_STORAGE_KEY } from "../../appearanceFonts";
 import { MOBILE_APP_URL } from "../../branding";
 import { isElectron } from "../../env";
+import { useRenderedStockDark } from "../../hooks/useTheme";
+import { T3Wordmark } from "../T3Wordmark";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { usePersistEnvironmentProviderInstanceMutation } from "../../hooks/useSettings";
 import { useCloudLinkState } from "../../cloud/cloudLinkState";
@@ -144,6 +146,7 @@ export function WelcomePage({
   // The same access Settings → Sharing & access checks.
   const canReadRelay = useEnvironmentScope(environmentId, AuthRelayReadScope);
   const canWriteRelay = useEnvironmentScope(environmentId, AuthRelayWriteScope);
+  const stockDark = useRenderedStockDark();
   const showPhone = welcomeOffersPhone({
     isPrimary,
     cloud: hasCloudPublicConfig(),
@@ -274,36 +277,53 @@ export function WelcomePage({
       role="main"
       className="h-dvh min-h-0 overflow-hidden overscroll-y-none"
     >
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background stock-dark:[background-image:var(--silk-ambient-bg)]">
         {/* The desktop window only moves where CSS opts in, so keep a titlebar strip. */}
         {isElectron ? <WorkspacePageHeader electron /> : null}
         <div className="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-both">
-          <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-6 pt-12 pb-8 sm:pt-20">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              <T>Welcome to T3 Code</T>
-            </h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              <T>
-                Setting up{" "}
-                <span className="text-foreground">
-                  <Var>{label}</Var>
-                </span>
-                .
-              </T>
-            </p>
-            <div className="mt-10 border-t border-border/60">
+          <div className="silk-hairline-top mx-auto flex min-h-full w-full max-w-3xl flex-col px-6 pt-12 pb-8 sm:pt-20 stock-dark:my-8 stock-dark:min-h-0 stock-dark:w-[calc(100%_-_2rem)] stock-dark:rounded-2xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:bg-card/90 stock-dark:pt-6 stock-dark:shadow-(--silk-floating-shadow) sm:stock-dark:my-12 sm:stock-dark:p-8">
+            <div className="stock-dark:flex stock-dark:items-center stock-dark:gap-4">
+              <span
+                aria-hidden
+                className="hidden stock-dark:grid stock-dark:h-12 stock-dark:w-14 stock-dark:shrink-0 stock-dark:place-items-center stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:[background-image:var(--silk-emblem-bg)] stock-dark:text-(--silk-violet) stock-dark:shadow-(--silk-emblem-shadow)"
+              >
+                <T3Wordmark className="h-4 w-auto" />
+              </span>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                  {stockDark ? gt("Welcome to Y3 Code") : <T>Welcome to T3 Code</T>}
+                </h1>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  <T>
+                    Setting up{" "}
+                    <span className="text-foreground">
+                      <Var>{label}</Var>
+                    </span>
+                    .
+                  </T>
+                </p>
+              </div>
+            </div>
+            <div className="mt-10 border-t border-border/60 stock-dark:mt-6 stock-dark:border-(--silk-soft-edge)">
               <AgentsSection
                 environmentId={environmentId}
                 label={label}
                 isPrimary={isPrimary}
+                showCliPathSetup={!(stockDark && showPhone)}
                 onImportSourceEnabled={() => scans[0]?.refresh()}
               />
               <ProjectsSection
                 scan={scans[0]}
+                stockDark={stockDark}
                 projectImport={projectImport}
                 isImporting={isImporting}
               />
-              {showPhone ? <PhoneSection environmentId={environmentId} /> : null}
+              {showPhone ? (
+                <PhoneSection
+                  environmentId={environmentId}
+                  showCliPathSetup={stockDark && isPrimary}
+                />
+              ) : null}
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               {agentReady ? (
@@ -319,7 +339,7 @@ export function WelcomePage({
                     <T>Set up one agent to start.</T>
                   </span>
                 )}
-                <Button disabled={!agentReady || isImporting} onClick={start}>
+                <Button variant="silk" disabled={!agentReady || isImporting} onClick={start}>
                   {isImporting
                     ? selected.length > 0
                       ? gt("Importing…")
@@ -347,7 +367,7 @@ function TelemetryNotice({ environmentId }: { readonly environmentId: Environmen
   const messages = useMessages();
   const telemetryOff = managedTelemetryOffMessage(useManagedPolicy(environmentId), messages);
   return (
-    <p className="mt-auto pt-12 text-2xs leading-relaxed text-muted-foreground/70">
+    <p className="mt-auto pt-12 text-2xs leading-relaxed text-muted-foreground/70 stock-dark:pt-6">
       {telemetryOff === undefined ? (
         <T>
           T3 Code collects anonymous usage data to improve the app. To opt out, see the{" "}
@@ -391,7 +411,7 @@ function WelcomeSection({
   readonly children: ReactNode;
 }) {
   return (
-    <section className="grid gap-x-10 border-b border-border/60 py-4 sm:grid-cols-[6rem_minmax(0,1fr)]">
+    <section className="grid gap-x-10 border-b border-border/60 py-4 sm:grid-cols-[6rem_minmax(0,1fr)] stock-dark:border-(--silk-soft-edge)">
       <h2 className="text-sm leading-10 text-muted-foreground">{title}</h2>
       <div className="min-w-0">{children}</div>
     </section>
@@ -446,11 +466,13 @@ function AgentsSection({
   environmentId,
   label,
   isPrimary,
+  showCliPathSetup,
   onImportSourceEnabled,
 }: {
   readonly environmentId: EnvironmentId;
   readonly label: string;
   readonly isPrimary: boolean;
+  readonly showCliPathSetup: boolean;
   // The project scan only reads agents that are on, so turning one on can find more history.
   readonly onImportSourceEnabled: () => void;
 }) {
@@ -693,7 +715,7 @@ function AgentsSection({
           <ChevronDownIcon className="ml-auto size-4 text-muted-foreground group-data-panel-open:rotate-180" />
         </CollapsibleTrigger>
         <CollapsiblePanel>
-          <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 stock-dark:gap-x-2 stock-dark:gap-y-1.5">
             {available.map((provider) => (
               <AgentRow
                 key={provider.instanceId}
@@ -705,7 +727,7 @@ function AgentsSection({
             ))}
           </div>
           {acpAllowed ? (
-            <div className="flex min-h-9 items-center gap-3">
+            <div className="flex min-h-9 items-center gap-3 stock-dark:mt-2 stock-dark:border-t stock-dark:border-(--silk-soft-edge) stock-dark:pt-2">
               <RowIcon>
                 <ACPRegistryIcon className="size-4" />
               </RowIcon>
@@ -736,7 +758,7 @@ function AgentsSection({
           />
         </div>
       ) : null}
-      {isPrimary ? <CliPathSetup /> : null}
+      {isPrimary && showCliPathSetup ? <CliPathSetup /> : null}
       {terminalSession !== null ? (
         <AgentInstallTerminal
           key={`${terminalSession.environmentId}:${terminalSession.providerInstanceId}:${terminalSession.driver}`}
@@ -799,7 +821,9 @@ function ProjectsSection({
   scan,
   projectImport,
   isImporting,
+  stockDark,
 }: {
+  readonly stockDark: boolean;
   readonly scan: ReturnType<typeof useProjectScans>[number] | undefined;
   readonly projectImport: ReturnType<typeof useProjectImport>;
   readonly isImporting: boolean;
@@ -900,7 +924,7 @@ function ProjectsSection({
         </label>
         {canWrite ? (
           <Button
-            variant="ghost-muted"
+            variant={stockDark ? "glass" : "ghost-muted"}
             size="xs"
             aria-expanded={reviewing}
             onClick={() => setReviewing((open) => !open)}
@@ -958,7 +982,10 @@ function ProjectsSection({
         </fieldset>
       ) : null}
       {scan.data?.truncated ? (
-        <p className="pl-8 text-xs text-muted-foreground" role="status">
+        <p
+          className="pl-8 text-xs text-muted-foreground stock-dark:text-(--silk-amber)"
+          role="status"
+        >
           {m(SCAN_LIMIT_MESSAGE)}
         </p>
       ) : null}
@@ -978,49 +1005,65 @@ function ProjectsSection({
   );
 }
 
-function PhoneSection({ environmentId }: { readonly environmentId: EnvironmentId }) {
+function PhoneSection({
+  environmentId,
+  showCliPathSetup,
+}: {
+  readonly environmentId: EnvironmentId;
+  readonly showCliPathSetup: boolean;
+}) {
   const gt = useGT();
   const [open, setOpen] = useState(false);
   return (
-    <WelcomeSection title={gt("Phone")}>
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <div className="flex min-h-10 items-center gap-3 py-1">
-          <RowIcon>
-            <SmartphoneIcon className="size-4" />
-          </RowIcon>
-          <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
-            <T>Use T3 Code on your phone</T>
-          </span>
-          <CollapsibleTrigger render={<Button variant="ghost-muted" size="xs" />}>
-            {open ? gt("Hide") : gt("Set up")}
-            <ChevronDownIcon className={cn("size-3.5", open && "rotate-180")} />
-          </CollapsibleTrigger>
-        </div>
-        <CollapsiblePanel>
-          <div className="flex items-center gap-8 pt-2 pb-3 pl-8">
-            <ol className="min-w-0 flex-1 space-y-5">
-              <PhoneStep step={1}>
-                <p className="text-sm text-foreground">
-                  <T>Scan with your phone to get the app.</T>
-                </p>
-              </PhoneStep>
-              <PhoneStep step={2}>
-                <PhoneConnectLink environmentId={environmentId} />
-              </PhoneStep>
-            </ol>
-            {/* One code for both stores: the link opens the store that matches the phone. */}
-            <div className="shrink-0 rounded-lg bg-white p-1.5">
-              <QRCodeSvg
-                value={MOBILE_APP_URL}
-                size={124}
-                level="M"
-                marginSize={2}
-                title={gt("T3 Code app for iPhone and Android")}
-              />
+    <WelcomeSection title={showCliPathSetup ? gt("Companion") : gt("Phone")}>
+      <div
+        className={cn(
+          showCliPathSetup &&
+            "stock-dark:grid stock-dark:items-start stock-dark:gap-2 md:stock-dark:grid-cols-2",
+        )}
+      >
+        <div className="stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:px-2.5">
+          <Collapsible open={open} onOpenChange={setOpen}>
+            <div className="flex min-h-10 items-center gap-3 py-1">
+              <RowIcon>
+                <SmartphoneIcon className="size-4" />
+              </RowIcon>
+              <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
+                <T>Use T3 Code on your phone</T>
+              </span>
+              <CollapsibleTrigger render={<Button variant="ghost-muted" size="xs" />}>
+                {open ? gt("Hide") : gt("Set up")}
+                <ChevronDownIcon className={cn("size-3.5", open && "rotate-180")} />
+              </CollapsibleTrigger>
             </div>
-          </div>
-        </CollapsiblePanel>
-      </Collapsible>
+            <CollapsiblePanel>
+              <div className="flex items-center gap-8 pt-2 pb-3 pl-8 stock-dark:flex-wrap stock-dark:gap-3 stock-dark:pl-0">
+                <ol className="min-w-0 flex-1 space-y-5">
+                  <PhoneStep step={1}>
+                    <p className="text-sm text-foreground">
+                      <T>Scan with your phone to get the app.</T>
+                    </p>
+                  </PhoneStep>
+                  <PhoneStep step={2}>
+                    <PhoneConnectLink environmentId={environmentId} />
+                  </PhoneStep>
+                </ol>
+                {/* One code for both stores: the link opens the store that matches the phone. */}
+                <div className="shrink-0 rounded-lg bg-white p-1.5">
+                  <QRCodeSvg
+                    value={MOBILE_APP_URL}
+                    size={124}
+                    level="M"
+                    marginSize={2}
+                    title={gt("T3 Code app for iPhone and Android")}
+                  />
+                </div>
+              </div>
+            </CollapsiblePanel>
+          </Collapsible>
+        </div>
+        {showCliPathSetup ? <CliPathSetup /> : null}
+      </div>
     </WelcomeSection>
   );
 }
@@ -1250,7 +1293,12 @@ function AgentRow({
             getProviderSummary(provider, messages).headline)
           : (brokenMessage ?? getProviderSummary(provider, messages).headline);
   return (
-    <div className={cn("flex items-center gap-3", compact ? "min-h-9" : "min-h-10 py-1")}>
+    <div
+      className={cn(
+        "flex items-center gap-3 stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:px-2.5",
+        compact ? "min-h-9" : "min-h-10 py-1 stock-dark:mb-1.5",
+      )}
+    >
       <RowIcon>
         <ProviderInstanceIcon
           driverKind={provider.driver}
@@ -1270,7 +1318,7 @@ function AgentRow({
       </div>
       <div className="shrink-0">
         {state === "ready" ? (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success-foreground">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success-foreground stock-dark:text-(--silk-green)">
             <CheckIcon className="size-3.5" />
             <T context="agent status">Ready</T>
           </span>
@@ -2001,7 +2049,7 @@ function CliPathSetup() {
   const setup = state?.pathSetup;
   if (!setup) return null;
   return (
-    <div className="flex min-h-10 items-center gap-3">
+    <div className="flex min-h-10 items-center gap-3 stock-dark:flex-wrap stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-2.5">
       <RowIcon>
         <TerminalIcon className="size-4" />
       </RowIcon>

@@ -890,6 +890,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: "font-medium text-sidebar-muted-foreground/80",
         outline: "bg-sidebar-control-surface ring-1 ring-sidebar-border",
+        silk: "font-medium text-sidebar-muted-foreground/80 stock-dark:data-[active=true]:bg-(--silk-surface-selected) stock-dark:data-[active=true]:inset-shadow-(--silk-selection-mark) stock-dark:data-[active=true]:text-(--silk-violet) stock-dark:data-[active=true]:[&>svg]:text-(--silk-violet)",
       },
     },
   },

@@ -17,7 +17,6 @@ import {
   ListPlusIcon,
 } from "lucide-react";
 import { useEnvironmentIdentificationMode } from "~/hooks/useSettings";
-import { useRenderedStockDark } from "~/hooks/useTheme";
 import type { MessageResolver } from "~/i18n/messages";
 import { formatContextWindowTokens } from "~/lib/contextWindow";
 import { cn, isMacPlatform } from "~/lib/utils";
@@ -100,6 +99,9 @@ const formatPendingPrimaryActionLabel = (
 const STOP_PENDING_MAX_MS = 10_000;
 // The action that takes Stop's place ignores clicks this long, so repeat Stop clicks can't resume.
 const STOP_LANDED_CLICK_GUARD_MS = 500;
+
+const silkActionClassName =
+  "stock-dark:[background-image:var(--silk-cta-bg)] stock-dark:text-(--silk-cta-foreground) stock-dark:shadow-(--silk-cta-shadow) stock-dark:hover:brightness-105 stock-dark:disabled:opacity-45 stock-dark:disabled:shadow-none";
 
 const messageActionPillClassName =
   "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-message-action font-medium text-base text-message-action-foreground shadow-xs shadow-message-action/24 outline-none hover:bg-message-action-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none sm:text-sm";
@@ -266,7 +268,6 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
 }: ComposerPrimaryActionsProps) {
   const gt = useGT();
   const m = useMessages();
-  const stockDark = useRenderedStockDark();
   const [stopPhase, setStopPhase] = useStopPhase({ runId, canInterrupt, canOperateThread });
   const pointerFocusProps = preserveComposerFocusOnPointerDown
     ? { onPointerDown: preventPointerFocus }
@@ -350,14 +351,15 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
           )
         ) : null}
         {children}
-        {stockDark ? (
-          <Button variant="silk" size="sm-pill" {...submitProps} />
-        ) : (
-          <button
-            className={cn(messageActionPillClassName, "h-8 sm:h-7", compact ? "px-3" : "px-4")}
-            {...submitProps}
-          />
-        )}
+        <button
+          className={cn(
+            messageActionPillClassName,
+            silkActionClassName,
+            "h-8 sm:h-7",
+            compact ? "px-3" : "px-4",
+          )}
+          {...submitProps}
+        />
         {canInterrupt || stopPhase === "pending" || stopPhase === "timedOut"
           ? renderStopGenerationButton(true)
           : null}
@@ -456,7 +458,10 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
   const sendButtonContent = (
     <>
       {stageBackdropVariant ? (
-        <span className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <span
+          className="pointer-events-none absolute inset-0 -z-10 stock-dark:hidden"
+          aria-hidden="true"
+        >
           <StageBackdropButtonArt variant={stageBackdropVariant} />
         </span>
       ) : null}
@@ -486,7 +491,10 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
   const sendButton = stageBackdropVariant ? (
     <button
       {...sendButtonProps}
-      className="relative isolate flex size-9 items-center justify-center overflow-hidden rounded-full bg-transparent text-white shadow-xs transition-all duration-150 enabled:cursor-pointer enabled:shadow-black/24 enabled:inset-shadow-control-highlight enabled:hover:brightness-110 hover:scale-105 active:inset-shadow-control-pressed active:shadow-none disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none disabled:hover:scale-100 sm:size-8 [&_svg]:pointer-events-none"
+      className={cn(
+        "relative isolate flex size-9 items-center justify-center overflow-hidden rounded-full bg-transparent text-white shadow-xs transition-all duration-150 enabled:cursor-pointer not-stock-dark:enabled:shadow-black/24 enabled:inset-shadow-control-highlight not-stock-dark:enabled:hover:brightness-110 hover:scale-105 active:inset-shadow-control-pressed active:shadow-none disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none disabled:hover:scale-100 sm:size-8 [&_svg]:pointer-events-none",
+        silkActionClassName,
+      )}
     >
       {sendButtonContent}
     </button>

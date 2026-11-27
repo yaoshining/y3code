@@ -151,7 +151,7 @@ export function WorkflowsPage() {
           <WorkspacePageHeader
             electron={isElectron}
             reserveNativeControls={!paneOpen}
-            className="border-b"
+            className="border-b stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80"
           >
             <WorkspaceBreadcrumb ariaLabel={gt("Workflows breadcrumb")} className="flex-1">
               <WorkspaceBreadcrumbItem current={!editing}>
@@ -325,7 +325,7 @@ export function WorkflowsPage() {
         {environmentId === null || !paneOpen ? null : (
           <aside
             aria-label={gt("Beside the run")}
-            className="min-h-0 w-full shrink-0 bg-background md:w-1/2 md:max-w-2xl md:border-s"
+            className="min-h-0 w-full shrink-0 bg-background md:w-1/2 md:max-w-2xl md:border-s stock-dark:border-(--silk-glass-border) stock-dark:bg-(--silk-surface-deep)"
           >
             <WorkflowPane
               environmentId={environmentId}

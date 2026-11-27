@@ -127,11 +127,13 @@ function WindowBar({
   window,
   now,
   stockDark,
+  compact,
 }: {
   readonly color: string;
   readonly window: ServerProviderUsageWindow;
   readonly now: number;
   readonly stockDark: boolean;
+  readonly compact: boolean;
 }) {
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const gt = useGT();
@@ -201,6 +203,7 @@ function WindowBar({
         <LedQuotaMeter
           remainingPercent={remaining}
           paceRemainingPercent={timeLeft}
+          size={compact ? "sm" : "md"}
           ariaLabel={summary}
         />
       ) : (
@@ -264,7 +267,13 @@ export function LimitWindows({
                 {gt("{remaining}% left", { remaining: remainingPercent(window) })}
               </span>
             </span>
-            <WindowBar color={color} window={window} now={now} stockDark={stockDark} />
+            <WindowBar
+              color={color}
+              window={window}
+              now={now}
+              stockDark={stockDark}
+              compact={compact}
+            />
             <span className="flex items-center gap-2 text-xs whitespace-nowrap text-muted-foreground tabular-nums">
               {pace ? <PaceIcon pace={pace} /> : null}
               <span className="ms-auto shrink-0">{resetsIn ?? ""}</span>

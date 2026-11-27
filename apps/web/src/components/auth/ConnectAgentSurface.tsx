@@ -138,6 +138,7 @@ export function McpConsent({
   transport,
   acceptsCode = false,
   requireLevelChoice = false,
+  variant = "default",
   environmentLabel,
   footer,
 }: {
@@ -145,6 +146,7 @@ export function McpConsent({
   readonly transport: McpApprovalTransport;
   readonly acceptsCode?: boolean;
   readonly requireLevelChoice?: boolean;
+  readonly variant?: "default" | "silk";
   readonly environmentLabel?: string | undefined;
   readonly footer?: ReactNode;
 }) {
@@ -229,7 +231,7 @@ export function McpConsent({
 
   if (loaded.status === "loading") {
     return (
-      <StandalonePage>
+      <StandalonePage variant={variant}>
         <ConnectAgentHeading
           title={gt("Checking the sign-in request")}
           description={gt("One moment while this environment verifies the agent's request.")}
@@ -241,7 +243,7 @@ export function McpConsent({
 
   if (loaded.status === "invalid") {
     return (
-      <StandalonePage>
+      <StandalonePage variant={variant}>
         <ConnectAgentHeading
           title={gt("This sign-in cannot continue")}
           description={loaded.message}
@@ -265,7 +267,7 @@ export function McpConsent({
   const approveLevel = codeAccess ?? access;
 
   return (
-    <StandalonePage>
+    <StandalonePage variant={variant}>
       <ConnectAgentHeading
         title={gt("Connect {app}", { app: details.clientName })}
         description={
@@ -400,7 +402,7 @@ export function McpConsent({
         ) : null}
 
         <div className="flex flex-wrap gap-2">
-          <Button disabled={!canApprove} type="submit">
+          <Button variant={variant} disabled={!canApprove} type="submit">
             {pending === "approve"
               ? gt("Approving…")
               : approveLevel === null

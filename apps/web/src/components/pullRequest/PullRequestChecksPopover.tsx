@@ -84,7 +84,7 @@ function ChecksBody({
       <ScrollArea className="-me-3 w-auto max-h-64">
         <ul
           className={cn(
-            "grid gap-x-2 gap-y-1 pe-3",
+            "grid gap-x-2 gap-y-1 pe-3 stock-dark:me-3 stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-2",
             hasDetails
               ? "grid-cols-[auto_minmax(0,1fr)_auto_auto]"
               : "grid-cols-[auto_minmax(0,1fr)_auto]",

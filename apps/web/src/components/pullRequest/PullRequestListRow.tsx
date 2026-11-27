@@ -17,10 +17,10 @@ import {
 import { SharedTooltipTrigger } from "../ui/shared-tooltip";
 
 export const PULL_REQUEST_ROW_CLASS =
-  "group/pr-row flex w-full items-center gap-2 rounded-md py-1 pr-1 text-left";
+  "group/pr-row flex w-full items-center gap-2 rounded-md py-1 pr-1 text-left stock-dark:shadow-(--silk-divider-bottom-inset) stock-dark:hover:bg-(--silk-surface-well) stock-dark:aria-current:bg-(--silk-surface-selected) stock-dark:aria-current:inset-shadow-(--silk-selection-mark)";
 
 export const PULL_REQUEST_ROW_NUMBER_CLASS =
-  "shrink-0 font-mono text-xs tabular-nums text-muted-foreground";
+  "shrink-0 font-mono text-xs tabular-nums text-muted-foreground stock-dark:text-(--silk-violet)";
 
 export function PullRequestRowGlyph({
   state,

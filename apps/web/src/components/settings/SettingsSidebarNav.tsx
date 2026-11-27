@@ -418,6 +418,7 @@ export function SettingsSidebarNav({ pathname }: { pathname: string }) {
                                   data-settings-section={to}
                                   aria-current={isActive ? "page" : undefined}
                                   isActive={isActive}
+                                  variant="silk"
                                   onPointerEnter={() => preloadSection(to)}
                                   onFocus={() => preloadSection(to)}
                                   onClick={() => handleSectionClick(to)}
