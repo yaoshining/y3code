@@ -176,6 +176,19 @@ export function AppearanceSettingsPanel() {
 
       <SettingsSection id="appearance-interface" title={gt("Interface")}>
         <SettingsRow
+          {...searchableSetting("silk-window-frame")}
+          description={gt(
+            "Show the colorful window border in the default dark theme on wide screens.",
+          )}
+          control={
+            <Switch
+              aria-label={gt("Nebula Silk frame")}
+              checked={settings.silkWindowFrame}
+              onCheckedChange={(silkWindowFrame) => updateSettings({ silkWindowFrame })}
+            />
+          }
+        />
+        <SettingsRow
           {...searchableSetting("setting-appearance-contrast")}
           description={gt("Adjust the contrast of colors and borders across the interface.")}
           resetAction={

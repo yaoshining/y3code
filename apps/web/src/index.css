@@ -136,6 +136,7 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --silk-amber: #ffd18a;
   --silk-violet: #c2adff;
   --desktop-window-right-resize-inset: 0px;
+  --app-shell-frame-inset: 0px;
   --workspace-topbar-height: 52px;
   --workspace-controls-top: 0px;
   --workspace-controls-left: calc(env(safe-area-inset-left) + 0.75rem);
@@ -300,6 +301,7 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --color-card-foreground: var(--contrast-card-foreground);
   --color-card: var(--card);
   --color-code: var(--code-background);
+  --color-toolbar-border: var(--toolbar-border);
   --color-foreground: var(--contrast-foreground);
   --color-background: var(--background);
   --color-message: var(--message-surface);
@@ -549,6 +551,24 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
       pointer-events: none;
       background: var(--silk-accent);
       opacity: 0.65;
+    }
+  }
+}
+
+@utility silk-launchpad-glow {
+  @variant stock-dark {
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+      inset: -4rem 0;
+      background:
+        radial-gradient(ellipse at 42% 48%, rgb(147 81 225 / 16%), transparent 64%),
+        radial-gradient(ellipse at 64% 42%, rgb(225 77 173 / 9%), transparent 58%);
     }
   }
 }
@@ -1919,6 +1939,38 @@ code {
   --pele-border: color-mix(in srgb, var(--foreground) 28%, transparent);
   --pele-accent: var(--primary);
   --pele-critical: var(--destructive);
+}
+
+.app-shell-frame {
+  height: 100dvh;
+}
+
+@media (width >= 768px) {
+  /* Body shares the frame inset with body-portaled app route modals. */
+  body:has([data-app-shell-frame]) {
+    @variant stock-dark {
+      --app-shell-frame-inset: 8px;
+    }
+  }
+
+  .app-shell-frame[data-app-shell-frame] {
+    @variant stock-dark {
+      padding: var(--app-shell-frame-inset);
+      background: var(--silk-frame-bg);
+
+      > [data-slot="sidebar-wrapper"] {
+        /* Anchor and clip fixed sidebar and titlebar controls against the inner shell. */
+        contain: layout;
+        overflow: hidden;
+        border: 1px solid rgb(224 199 255 / 38%);
+        border-radius: 14px;
+        background: var(--background);
+        box-shadow:
+          0 0 26px rgb(31 18 54 / 68%),
+          inset 0 0 1px rgb(236 224 255 / 22%);
+      }
+    }
+  }
 }
 
 /* Window drag region (frameless titlebar) */

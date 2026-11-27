@@ -2,6 +2,7 @@ import {
   commandHighlightLanguage,
   withVisibleControlCharacters,
 } from "@t3tools/client-runtime/work-log/command-label";
+import { TerminalIcon } from "lucide-react";
 import { Suspense, use } from "react";
 
 import { useRenderedAppearance } from "../../hooks/useTheme";
@@ -53,12 +54,20 @@ export function ShellCommandBlock({ command }: { command: string }) {
   if (!code) return null;
   const plain = <PlainWords code={code} />;
   return (
-    <div className="text-foreground/85">
-      <RenderErrorBoundary fallback={plain} resetKeys={[code]}>
-        <Suspense fallback={plain}>
-          <HighlightedCommand code={code} theme={resolvedTheme} />
-        </Suspense>
-      </RenderErrorBoundary>
+    <div className="text-foreground/85 stock-dark:overflow-hidden stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-code stock-dark:font-mono stock-dark:text-foreground/95">
+      <div
+        className="hidden stock-dark:block stock-dark:border-b stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/85 stock-dark:px-3 stock-dark:py-1"
+        aria-hidden
+      >
+        <TerminalIcon className="size-3.5 text-muted-foreground" />
+      </div>
+      <div className="stock-dark:px-3 stock-dark:py-2">
+        <RenderErrorBoundary fallback={plain} resetKeys={[code]}>
+          <Suspense fallback={plain}>
+            <HighlightedCommand code={code} theme={resolvedTheme} />
+          </Suspense>
+        </RenderErrorBoundary>
+      </div>
     </div>
   );
 }

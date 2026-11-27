@@ -2,6 +2,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { msg, T, useGT, useMessages } from "gt-react";
 import { type ReactNode, useSyncExternalStore } from "react";
 
+import { useRenderedStockDark } from "~/hooks/useTheme";
 import type { MessageResolver } from "~/i18n/messages";
 import { cn } from "~/lib/utils";
 import { environmentIdsKey } from "~/state/environmentAtomList";
@@ -96,6 +97,7 @@ export function SidebarUpdateCapsule({
   const now = useNow(run.phase === "countdown" ? 1_000 : hasActiveMachine ? 30_000 : null);
   const gt = useGT();
   const m = useMessages();
+  const stockDark = useRenderedStockDark();
   const view = describeUpdateCapsule(run, machines, local, now, m);
   const updateServer = useServerUpdate();
   const failed = machines.some(({ status }) => status === "failed");
@@ -126,7 +128,7 @@ export function SidebarUpdateCapsule({
     <Popover>
       <div
         className={cn(
-          "relative ml-auto flex h-8 w-8 shrink-0 items-center justify-end rounded-full bg-sidebar-control-surface text-sidebar-foreground transition-[width] duration-200 ease-out motion-reduce:transition-none",
+          "relative ml-auto flex h-8 w-8 shrink-0 items-center justify-end rounded-full bg-sidebar-control-surface text-sidebar-foreground stock-dark:bg-popover/80 stock-dark:inset-ring-1 stock-dark:inset-ring-(--silk-soft-edge) transition-[width] duration-200 ease-out motion-reduce:transition-none",
           restartSeconds === null
             ? "@min-[5rem]/sidebar-update:w-full"
             : "@min-[12rem]/sidebar-update:w-full",
@@ -147,7 +149,7 @@ export function SidebarUpdateCapsule({
         />
         <span
           className={cn(
-            "pointer-events-none relative hidden min-w-0 flex-1 truncate pl-3 text-xs transition-opacity duration-200 ease-out starting:opacity-0 motion-reduce:transition-none",
+            "pointer-events-none relative hidden min-w-0 flex-1 truncate pl-3 text-xs stock-dark:font-medium stock-dark:tracking-tight transition-opacity duration-200 ease-out starting:opacity-0 motion-reduce:transition-none",
             expandedControlClassName,
           )}
         >
@@ -198,7 +200,11 @@ export function SidebarUpdateCapsule({
               <span>
                 <T>This app</T>
               </span>
-              <Button size="xs" variant="outline" onClick={() => void onRestart()}>
+              <Button
+                size="xs"
+                variant={stockDark ? "glass" : "outline"}
+                onClick={() => void onRestart()}
+              >
                 <T>Restart to update</T>
               </Button>
             </div>
@@ -226,7 +232,7 @@ export function SidebarUpdateCapsule({
           ))}
           {view.action !== null ? (
             <div className="mt-1 flex justify-end gap-1">
-              <Button size="xs" variant="outline" onClick={runAction}>
+              <Button size="xs" variant={stockDark ? "glass" : "outline"} onClick={runAction}>
                 {actionLabel}
               </Button>
               {settled && failed && view.action !== "dismiss" ? (

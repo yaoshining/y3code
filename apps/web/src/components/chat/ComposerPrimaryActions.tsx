@@ -2,6 +2,7 @@ import {
   memo,
   useEffect,
   useState,
+  type MouseEvent,
   type MouseEventHandler,
   type PointerEventHandler,
   type ReactNode,
@@ -16,6 +17,7 @@ import {
   ListPlusIcon,
 } from "lucide-react";
 import { useEnvironmentIdentificationMode } from "~/hooks/useSettings";
+import { useRenderedStockDark } from "~/hooks/useTheme";
 import type { MessageResolver } from "~/i18n/messages";
 import { formatContextWindowTokens } from "~/lib/contextWindow";
 import { cn, isMacPlatform } from "~/lib/utils";
@@ -264,6 +266,7 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
 }: ComposerPrimaryActionsProps) {
   const gt = useGT();
   const m = useMessages();
+  const stockDark = useRenderedStockDark();
   const [stopPhase, setStopPhase] = useStopPhase({ runId, canInterrupt, canOperateThread });
   const pointerFocusProps = preserveComposerFocusOnPointerDown
     ? { onPointerDown: preventPointerFocus }
@@ -305,6 +308,21 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
   );
 
   if (pendingAction) {
+    const submitProps = {
+      type: "submit" as const,
+      ...pointerFocusProps,
+      onClick: (event: MouseEvent<HTMLButtonElement>) => {
+        if (stopPhase === "landed") event.preventDefault();
+      },
+      disabled:
+        !canOperateThread ||
+        isEnvironmentUnavailable ||
+        isSendDisabled ||
+        pendingAction.isResponding ||
+        (!voiceInputActive &&
+          (pendingAction.isLastQuestion ? !pendingAction.isComplete : !pendingAction.canAdvance)),
+      children: formatPendingPrimaryActionLabel({ compact, ...pendingAction }, m),
+    };
     return (
       <div className={cn("flex items-center justify-end", compact ? "gap-1.5" : "gap-2")}>
         {pendingAction.questionIndex > 0 ? (
@@ -332,34 +350,14 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
           )
         ) : null}
         {children}
-        <button
-          type="submit"
-          className={cn(messageActionPillClassName, "h-8 sm:h-7", compact ? "px-3" : "px-4")}
-          {...pointerFocusProps}
-          onClick={(event) => {
-            if (stopPhase === "landed") event.preventDefault();
-          }}
-          disabled={
-            !canOperateThread ||
-            isEnvironmentUnavailable ||
-            isSendDisabled ||
-            pendingAction.isResponding ||
-            (!voiceInputActive &&
-              (pendingAction.isLastQuestion
-                ? !pendingAction.isComplete
-                : !pendingAction.canAdvance))
-          }
-        >
-          {formatPendingPrimaryActionLabel(
-            {
-              compact,
-              isLastQuestion: pendingAction.isLastQuestion,
-              isResponding: pendingAction.isResponding,
-              questionIndex: pendingAction.questionIndex,
-            },
-            m,
-          )}
-        </button>
+        {stockDark ? (
+          <Button variant="silk" size="sm-pill" {...submitProps} />
+        ) : (
+          <button
+            className={cn(messageActionPillClassName, "h-8 sm:h-7", compact ? "px-3" : "px-4")}
+            {...submitProps}
+          />
+        )}
         {canInterrupt || stopPhase === "pending" || stopPhase === "timedOut"
           ? renderStopGenerationButton(true)
           : null}

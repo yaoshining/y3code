@@ -284,7 +284,9 @@ const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard(
                 const className = cn(
                   questionTextAlign,
                   "group flex w-full items-start gap-2.5 rounded-md bg-transparent py-1.5 ps-2 sm:ps-1.5 outline-none transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/25",
-                  isSelected ? "text-foreground" : "text-foreground/70 hover:bg-muted/30",
+                  isSelected
+                    ? "text-foreground stock-dark:bg-(--silk-violet)/13 stock-dark:inset-ring-1 stock-dark:inset-ring-(--silk-soft-edge)"
+                    : "text-foreground/70 hover:bg-muted/30",
                   (disabled || isResponding) && "opacity-50 cursor-not-allowed",
                   !disabled && !isResponding && "cursor-pointer",
                 );
@@ -364,7 +366,7 @@ function OptionRadio({ checked }: { checked: boolean }) {
       )}
     >
       {checked ? (
-        <span className="-inset-px absolute flex items-center justify-center rounded-full bg-primary before:size-2 before:rounded-full before:bg-primary-foreground sm:before:size-1.5" />
+        <span className="-inset-px absolute flex items-center justify-center rounded-full bg-primary stock-dark:bg-(--silk-violet) before:size-2 before:rounded-full before:bg-primary-foreground sm:before:size-1.5" />
       ) : null}
     </span>
   );

@@ -42,12 +42,14 @@ import { SidebarUpdateArchitectureWarning, SidebarUpdatePill } from "./SidebarUp
 import { PullRequestGlyph } from "~/components/pullRequest/pullRequestIcons";
 import { observeResize } from "~/lib/observeResize";
 import { SharedTooltipTrigger } from "../ui/shared-tooltip";
+import { useRenderedStockDark } from "../../hooks/useTheme";
 
 export const SidebarChromeHeader = memo(function SidebarChromeHeader({
   isElectron,
 }: {
   isElectron: boolean;
 }) {
+  const stockDark = useRenderedStockDark();
   const stageLabel = useEnvironmentStageLabel();
   const environmentIdentificationMode = useEnvironmentIdentificationMode();
   const gt = useGT();
@@ -63,7 +65,7 @@ export const SidebarChromeHeader = memo(function SidebarChromeHeader({
   return (
     <div
       className={cn(
-        "relative flex h-[var(--workspace-topbar-height)] shrink-0 flex-row items-center gap-2 pr-3",
+        "relative flex h-[var(--workspace-topbar-height)] shrink-0 flex-row items-center gap-2 pr-3 stock-dark:border-b stock-dark:border-(--silk-soft-edge)",
         isElectron && "drag-region",
       )}
     >
@@ -87,7 +89,11 @@ export const SidebarChromeHeader = memo(function SidebarChromeHeader({
         </div>
         {pillLabel ? (
           <div className="ml-1 flex h-7 items-center">
-            <Badge data-environment-identification="pill" size="sm" variant="secondary">
+            <Badge
+              data-environment-identification="pill"
+              size={stockDark ? "pill-sm" : "sm"}
+              variant={stockDark ? "silk" : "secondary"}
+            >
               {pillLabel}
             </Badge>
           </div>
@@ -186,7 +192,7 @@ function SidebarBrand({ onBackdrop }: { onBackdrop: boolean }) {
 
 function SidebarBrandMark({ onBackdrop }: { onBackdrop: boolean }) {
   return (
-    <span className="inline-flex min-w-0 items-baseline gap-1 text-sm font-medium tracking-tight">
+    <span className="inline-flex min-w-0 items-baseline gap-1 text-sm font-medium tracking-tight stock-dark:tracking-tighter">
       <T3Wordmark aria-label="Y3" className="h-[1cap] w-auto shrink-0" />
       <span
         className={cn(

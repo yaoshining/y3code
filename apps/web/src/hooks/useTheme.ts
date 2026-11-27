@@ -505,6 +505,17 @@ export function getRenderedAppearance(): ThemeAppearance {
   return getThemePreviewAppearance() ?? getSnapshot().resolvedTheme;
 }
 
+function readRenderedStockDark() {
+  return (
+    typeof document !== "undefined" &&
+    document.documentElement.matches(".dark:not([data-theme-id])")
+  );
+}
+
+export function useRenderedStockDark() {
+  return useSyncExternalStore(subscribeRenderedAppearance, readRenderedStockDark, () => false);
+}
+
 export function useRenderedAppearance() {
   const { resolvedTheme } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const previewAppearance = useSyncExternalStore(

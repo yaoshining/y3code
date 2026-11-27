@@ -367,7 +367,10 @@ export const ChatHeader = memo(function ChatHeader({
               }
               label={activeThreadTitle}
             >
-              <h2 className="min-w-0" dir={textDirection(activeThreadTitle)}>
+              <h2
+                className="min-w-0 stock-dark:tracking-tight"
+                dir={textDirection(activeThreadTitle)}
+              >
                 <WorkspaceBreadcrumbText>{activeThreadTitle}</WorkspaceBreadcrumbText>
               </h2>
               <ChevronDownIcon

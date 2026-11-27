@@ -36,6 +36,7 @@ import {
 import { stackedThreadToast, toastManager } from "../ui/toast";
 import { projectEnvironment } from "~/state/projects";
 import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
+import { useRenderedStockDark } from "~/hooks/useTheme";
 import { useAtomCommand } from "~/state/use-atom-command";
 import { readEnvironmentScope, useEnvironmentScope } from "~/state/session";
 
@@ -56,6 +57,7 @@ export const ProposedPlanCard = memo(function ProposedPlanCard({
 }) {
   const gt = useGT();
   const messages = useMessages();
+  const stockDark = useRenderedStockDark();
   const [expanded, setExpanded] = useState(false);
   const canWriteFiles = useEnvironmentScope(environmentId, AuthFilesystemWriteScope);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -167,10 +169,15 @@ export const ProposedPlanCard = memo(function ProposedPlanCard({
   };
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card/70 p-4 sm:p-5">
+    <div className="silk-hairline-top rounded-2xl border border-border/80 bg-card/70 p-4 sm:p-5 stock-dark:border-(--silk-glass-border) stock-dark:bg-card/95 stock-dark:shadow-lg/30">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Badge variant="secondary">{gt("Plan", { $context: "badge, noun" })}</Badge>
+          <Badge
+            variant={stockDark ? "silk" : "secondary"}
+            size={stockDark ? "pill-sm" : "default"}
+          >
+            {gt("Plan", { $context: "badge, noun" })}
+          </Badge>
           {}
           <h3 data-thread-find-text="true" className="truncate text-sm font-medium text-foreground">
             {title}
@@ -229,10 +236,10 @@ export const ProposedPlanCard = memo(function ProposedPlanCard({
           ) : null}
         </div>
         {canCollapse ? (
-          <div className="mt-4 flex justify-center">
+          <div className="mt-4 flex justify-center stock-dark:border-t stock-dark:border-(--silk-soft-edge) stock-dark:pt-3">
             <Button
               size="sm"
-              variant="outline"
+              variant={stockDark ? "glass" : "outline"}
               data-scroll-anchor-ignore
               onClick={() => setExpanded((value) => !value)}
             >

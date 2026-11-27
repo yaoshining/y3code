@@ -33,7 +33,8 @@ import { selectActiveRightPanel, useRightPanelStore } from "../rightPanelStore";
 import { selectThreadTerminalUiState, useTerminalUiStateStore } from "../terminalUiStateStore";
 import { cn, isMacPlatform } from "../lib/utils";
 import { primaryServerKeybindingsAtom } from "../state/server";
-import { useEnvironmentIdentificationMode } from "../hooks/useSettings";
+import { useClientSettings, useEnvironmentIdentificationMode } from "../hooks/useSettings";
+import { observeResize } from "../lib/observeResize";
 import {
   PanelAnimationSuppressionProvider,
   usePanelAnimationSettings,
@@ -69,15 +70,6 @@ import { resolveThreadRouteRef } from "../threadRoutes";
 import { SharedTooltipTrigger } from "./ui/shared-tooltip";
 
 const MACOS_TRAFFIC_LIGHTS_LEFT_INSET = "var(--desktop-window-controls-inset, 90px)";
-
-function subscribeToViewportWidth(onChange: () => void): () => void {
-  window.addEventListener("resize", onChange);
-  return () => window.removeEventListener("resize", onChange);
-}
-
-function readViewportWidth(): number {
-  return window.innerWidth;
-}
 
 // Cache the synchronous fullscreen IPC read until subscription.
 let windowFullscreenSnapshot: boolean | null = null;
@@ -436,11 +428,13 @@ export function AppSidebarLayout({
   const routePanelAnimationsActive = panelAnimationsActive && !panelAnimationsSuppressed;
   const isMacosDesktop = isElectron && isMacPlatform(navigator.platform);
   const [sidebarWidth, setSidebarWidth] = useState(readInitialThreadSidebarWidth);
-  // A clamped drag may not change width, so viewport changes need a separate subscription.
-  const viewportWidth = useSyncExternalStore(subscribeToViewportWidth, readViewportWidth);
+  const silkWindowFrame = useClientSettings((settings) => settings.silkWindowFrame);
+  const [workspaceWidth, setWorkspaceWidth] = useState(() => window.innerWidth);
+  const observeWorkspaceWidth = (workspace: HTMLDivElement) =>
+    observeResize(workspace, () => setWorkspaceWidth(workspace.clientWidth));
   const [brandWidth, setBrandWidth] = useState(0);
   const sidebarMinimumWidth = resolveThreadSidebarMinimumWidth(brandWidth);
-  const sidebarMaximumWidth = resolveThreadSidebarMaximumWidth(viewportWidth, sidebarMinimumWidth);
+  const sidebarMaximumWidth = resolveThreadSidebarMaximumWidth(workspaceWidth, sidebarMinimumWidth);
   const resetSidebarWidth = () => {
     try {
       removeLocalStorageItem(THREAD_SIDEBAR_WIDTH_STORAGE_KEY);
@@ -466,44 +460,52 @@ export function AppSidebarLayout({
 
   return (
     <PanelAnimationSuppressionProvider value={panelAnimationsSuppressed}>
-      <SidebarProvider
-        className="h-dvh! min-h-0!"
-        data-panel-animations={routePanelAnimationsActive ? "true" : "false"}
-        storageKey="chat_thread_sidebar_open"
-        style={sidebarProviderStyle}
+      <div
+        className="app-shell-frame"
+        data-app-shell-frame={
+          showSidebar && silkWindowFrame && !isWindowFullscreen ? "" : undefined
+        }
       >
-        {showSidebar ? (
-          <>
-            <SidebarBrandWidthProbe isElectron={isElectron} onWidthChange={setBrandWidth} />
-            <Sidebar
-              side="left"
-              collapsible="offcanvas"
-              data-app-sidebar=""
-              {...sidebarArea}
-              role="navigation"
-              aria-label={gt("Threads")}
-              resizable={{
-                collapseOnResize: true,
-                maxWidth: sidebarMaximumWidth,
-                minWidth: sidebarMinimumWidth,
-                shouldAcceptWidth: ({ currentWidth, nextWidth, wrapper }) =>
-                  nextWidth <= currentWidth ||
-                  wrapper.clientWidth - nextWidth >= THREAD_MAIN_CONTENT_MIN_WIDTH,
-                storageKey: THREAD_SIDEBAR_WIDTH_STORAGE_KEY,
-                onResize: setSidebarWidth,
-              }}
-              style={windowControlsInsetStyle}
-            >
-              <ThreadSidebar routeReveal={sidebarRouteReveal} />
-              <SidebarRail onDoubleClick={resetSidebarWidth} />
-            </Sidebar>
-          </>
-        ) : null}
-        {children}
-        <BackgroundThreadAnnouncer />
-        <SidebarControl showSidebar={showSidebar} />
-        {isElectron ? <HistorySwipeNavigation /> : null}
-      </SidebarProvider>
+        <SidebarProvider
+          ref={observeWorkspaceWidth}
+          className="h-full min-h-0!"
+          data-panel-animations={routePanelAnimationsActive ? "true" : "false"}
+          storageKey="chat_thread_sidebar_open"
+          style={sidebarProviderStyle}
+        >
+          {showSidebar ? (
+            <>
+              <SidebarBrandWidthProbe isElectron={isElectron} onWidthChange={setBrandWidth} />
+              <Sidebar
+                side="left"
+                collapsible="offcanvas"
+                data-app-sidebar=""
+                {...sidebarArea}
+                role="navigation"
+                aria-label={gt("Threads")}
+                resizable={{
+                  collapseOnResize: true,
+                  maxWidth: sidebarMaximumWidth,
+                  minWidth: sidebarMinimumWidth,
+                  shouldAcceptWidth: ({ currentWidth, nextWidth, wrapper }) =>
+                    nextWidth <= currentWidth ||
+                    wrapper.clientWidth - nextWidth >= THREAD_MAIN_CONTENT_MIN_WIDTH,
+                  storageKey: THREAD_SIDEBAR_WIDTH_STORAGE_KEY,
+                  onResize: setSidebarWidth,
+                }}
+                style={windowControlsInsetStyle}
+              >
+                <ThreadSidebar routeReveal={sidebarRouteReveal} />
+                <SidebarRail onDoubleClick={resetSidebarWidth} />
+              </Sidebar>
+            </>
+          ) : null}
+          {children}
+          <BackgroundThreadAnnouncer />
+          <SidebarControl showSidebar={showSidebar} />
+        </SidebarProvider>
+      </div>
+      {isElectron ? <HistorySwipeNavigation /> : null}
     </PanelAnimationSuppressionProvider>
   );
 }
