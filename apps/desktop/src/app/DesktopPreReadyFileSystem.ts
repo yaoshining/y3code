@@ -49,6 +49,7 @@ export const make = FileSystem.makeNoop({
     syncFs("makeDirectory", path, () => {
       NodeFS.mkdirSync(path, { recursive: options?.recursive ?? false });
     }),
+  rename: (from, to) => syncFs("rename", from, () => NodeFS.renameSync(from, to)),
   remove: (path, options) =>
     syncFs("remove", path, () =>
       NodeFS.rmSync(path, {

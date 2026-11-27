@@ -7,7 +7,7 @@ import * as Schema from "effect/Schema";
 export class DesktopUserDataInitializationError extends Schema.TaggedError<DesktopUserDataInitializationError>()(
   "DesktopUserDataInitializationError",
   {
-    operation: Schema.Literals(["inspect", "read", "create-directory", "write"]),
+    operation: Schema.Literals(["inspect", "read", "create-directory", "write", "rename"]),
     resourcePath: Schema.String,
     category: Schema.String,
     cause: Schema.Defect(),
@@ -34,6 +34,7 @@ export class DesktopUserDataInitializationError extends Schema.TaggedError<Deskt
 export const resolveUserDataPath = Effect.fn("desktop.userData.resolveUserDataPath")(
   function* (input: {
     readonly appDataDirectory: string;
+    readonly isPackaged?: boolean;
     readonly isDevelopment: boolean;
     readonly platform: NodeJS.Platform;
   }) {
@@ -52,6 +53,20 @@ export const resolveUserDataPath = Effect.fn("desktop.userData.resolveUserDataPa
             DesktopUserDataInitializationError.fromFileSystem(cause, "inspect", resourcePath),
           ),
         );
+    if (input.platform === "darwin" && input.isPackaged && !input.isDevelopment) {
+      const profile = path.join(input.appDataDirectory, "Profile");
+      if ((yield* inspect(profile)) || !(yield* inspect(destinationPath))) return profile;
+      // Let the existing Electron instance receive the launch instead of moving its open databases.
+      if (yield* inspect(path.join(destinationPath, "SingletonSocket"))) return destinationPath;
+      yield* fs
+        .rename(destinationPath, profile)
+        .pipe(
+          Effect.mapError((cause) =>
+            DesktopUserDataInitializationError.fromFileSystem(cause, "rename", destinationPath),
+          ),
+        );
+      return profile;
+    }
     if (input.isDevelopment) {
       return (yield* inspect(legacyPath)) ? legacyPath : destinationPath;
     }

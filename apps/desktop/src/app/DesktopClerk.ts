@@ -172,7 +172,11 @@ export const make = Effect.gen(function* () {
 
       const startProviderAuthHandoff = (value: string | undefined) => {
         if (!value) return false;
-        const request = readCodexAuthHandoff(value, environment.isDevelopment);
+        const request = readCodexAuthHandoff(
+          value,
+          environment.isDevelopment,
+          environment.platform === "darwin" && environment.isPackaged,
+        );
         if (!request) return false;
         void runPromise(
           Effect.gen(function* () {

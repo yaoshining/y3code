@@ -1,3 +1,4 @@
+import { isMacPlatform } from "@t3tools/shared/keybindings";
 import { thrownErrorMessage } from "@t3tools/client-runtime/errors";
 import { m as resolveMessage } from "~/i18n/messages";
 import { useAtomValue } from "@effect/atom-react";
@@ -695,6 +696,7 @@ function ManagedCodexSetup({
             flowId: auth.flowId,
           },
           import.meta.env.DEV,
+          isMacPlatform(navigator.platform),
         )
       : null;
   const waitingControl = (
