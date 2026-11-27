@@ -55,11 +55,13 @@ const variantColors: Record<ComposerBannerVariant, string> = {
 function Surface({
   variant = "default",
   detached = false,
+  interactive = false,
   className,
   ...props
 }: ComponentProps<"div"> & {
   variant?: ComposerBannerVariant;
   detached?: boolean;
+  interactive?: boolean;
 }) {
   return (
     <div
@@ -75,7 +77,10 @@ function Surface({
             "[--chat-composer-attachment-overlap:calc(1rem+1px)] before:rounded-t-2xl before:mask-t-from-transparent before:mask-t-from-4 before:mask-t-to-black before:mask-t-to-4",
         "before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:border before:border-(--chat-composer-attached-outline)",
         "before:bg-(--chat-composer-attached-surface)/(--glass-opacity) before:bg-linear-to-b before:from-(--chat-composer-attached-tint) before:to-(--chat-composer-attached-tint) before:backdrop-blur-(--glass-blur) before:backdrop-saturate-(--glass-saturation)",
-        "before:shadow-composer dark:before:shadow-composer-dark stock-dark:before:bg-(--chat-composer-attached-surface)/95 stock-dark:before:[background-image:var(--composer-banner-hairline,var(--silk-accent)),linear-gradient(var(--chat-composer-attached-tint),var(--chat-composer-attached-tint))] stock-dark:before:[background-size:76%_1px,100%_100%] stock-dark:before:bg-top stock-dark:before:bg-no-repeat",
+        "before:shadow-composer dark:before:shadow-composer-dark stock-dark:before:bg-(--chat-composer-attached-surface)/95",
+        interactive
+          ? "stock-dark:before:silk-interactive-card stock-dark:before:[--silk-card-hairline:var(--composer-banner-hairline,var(--silk-accent))]"
+          : "stock-dark:before:[background-image:var(--composer-banner-hairline,var(--silk-accent)),linear-gradient(var(--chat-composer-attached-tint),var(--chat-composer-attached-tint))] stock-dark:before:[background-size:76%_1px,100%_100%] stock-dark:before:bg-top stock-dark:before:bg-no-repeat",
         !detached &&
           "dark:not-stock-dark:supports-[(backdrop-filter:blur(1px))_or_(-webkit-backdrop-filter:blur(1px))]:before:bg-composer-seam-above",
         "not-supports-[((backdrop-filter:blur(1px))_or_(-webkit-backdrop-filter:blur(1px)))]:before:bg-(--chat-composer-attached-surface)",

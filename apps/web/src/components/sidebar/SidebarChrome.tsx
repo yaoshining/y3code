@@ -77,7 +77,12 @@ export const SidebarChromeHeader = memo(function SidebarChromeHeader({
           aria-label={gt("Toggle main sidebar")}
         />
       </div>
-      <div className="relative z-10 flex h-8 min-w-0 flex-1 flex-wrap content-start items-center gap-x-2 overflow-hidden py-0.5">
+      <div
+        className={cn(
+          "relative z-10 flex h-8 min-w-0 flex-1 flex-wrap content-start items-center gap-x-2 overflow-hidden py-0.5",
+          !pillLabel && "stock-dark:overflow-visible",
+        )}
+      >
         <div className="flex shrink-0 items-center gap-1">
           <SidebarBrand onBackdrop={backdropVariant !== null} />
           {isElectron ? (
@@ -180,7 +185,7 @@ function SidebarBrand({ onBackdrop }: { onBackdrop: boolean }) {
     <Link
       aria-label={gt("T3 Code home")}
       className={cn(
-        "relative z-10 ml-[var(--workspace-titlebar-content-left)] hidden h-7 w-fit min-w-0 shrink-0 items-center overflow-hidden rounded-md outline-hidden ring-ring focus-visible:ring-2 focus-visible:ring-inset md:flex",
+        "relative z-10 ml-[var(--workspace-titlebar-content-left)] hidden h-7 w-fit min-w-0 shrink-0 items-center overflow-hidden rounded-md outline-hidden ring-ring focus-visible:ring-2 focus-visible:ring-inset md:flex stock-dark:overflow-visible",
         onBackdrop ? "text-white" : "text-foreground",
       )}
       to="/"
@@ -192,11 +197,13 @@ function SidebarBrand({ onBackdrop }: { onBackdrop: boolean }) {
 
 function SidebarBrandMark({ onBackdrop }: { onBackdrop: boolean }) {
   return (
-    <span className="inline-flex min-w-0 items-baseline gap-1 text-sm font-medium tracking-tight stock-dark:tracking-tighter">
-      <T3Wordmark aria-label="Y3" className="h-[1cap] w-auto shrink-0" />
+    <span className="inline-flex min-w-0 items-baseline gap-1 text-sm font-medium tracking-tight stock-dark:items-center stock-dark:tracking-tighter">
+      <span className="contents stock-dark:inline-flex stock-dark:items-center stock-dark:justify-center stock-dark:border stock-dark:px-1.5 stock-dark:py-1 stock-dark:silk-brand-badge">
+        <T3Wordmark aria-label="Y3" className="h-[1cap] w-auto shrink-0" />
+      </span>
       <span
         className={cn(
-          "truncate [text-box:trim-both_cap_alphabetic] supports-[text-box:trim-both_cap_alphabetic]:py-1",
+          "truncate [text-box:trim-both_cap_alphabetic] supports-[text-box:trim-both_cap_alphabetic]:py-1 stock-dark:font-semibold stock-dark:text-foreground",
           onBackdrop ? "text-white/70" : "text-muted-foreground",
         )}
       >

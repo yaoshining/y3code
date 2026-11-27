@@ -1057,8 +1057,9 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
           : shouldRecede
             ? "text-sidebar-muted-foreground/75 hover:bg-sidebar-row-hover hover:text-sidebar-foreground"
             : "bg-transparent text-sidebar-foreground hover:bg-sidebar-row-hover",
-    (props.isActive || isSelected) &&
-      "stock-dark:bg-sidebar-row-selected stock-dark:inset-ring-1 stock-dark:inset-ring-(--silk-soft-edge) stock-dark:before:pointer-events-none stock-dark:before:absolute stock-dark:before:inset-y-1.5 stock-dark:before:start-0 stock-dark:before:w-0.5 stock-dark:before:rounded-full stock-dark:before:[background-image:var(--silk-accent)]",
+    props.isActive || isSelected
+      ? "stock-dark:silk-active-thread stock-dark:before:pointer-events-none stock-dark:before:absolute stock-dark:before:inset-y-1.5 stock-dark:before:start-0 stock-dark:before:w-0.5 stock-dark:before:rounded-full stock-dark:before:[background-image:var(--silk-accent)]"
+      : "stock-dark:hover:bg-silk-row-hover/90",
     shouldRecede &&
       (status === "preparing" || status === "working") &&
       "opacity-70 transition-opacity hover:opacity-100 focus-within:opacity-100 motion-reduce:transition-none",
@@ -1347,6 +1348,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
         className={cn(
           "list-none [content-visibility:auto] [contain-intrinsic-size:auto_--spacing(9)]",
           metaLine !== null && multiline && "[contain-intrinsic-size:auto_--spacing(13.5)]",
+          (props.isActive || isSelected) && "stock-dark:[content-visibility:visible]",
           sortable?.isDragging && "relative z-20",
         )}
       >
@@ -1561,6 +1563,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
       className={cn(
         "list-none py-0.5 [content-visibility:auto] [contain-intrinsic-size:auto_78px]",
         metaLineEmpty && "[contain-intrinsic-size:auto_60px]",
+        (props.isActive || isSelected) && "stock-dark:[content-visibility:visible]",
         sortable?.isDragging && "relative z-20",
       )}
     >

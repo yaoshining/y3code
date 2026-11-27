@@ -316,7 +316,7 @@ function Sidebar({
       <SidebarInstanceContext value={instanceContextValue}>
         <div
           className={cn(
-            "flex h-full w-(--sidebar-width) flex-col bg-sidebar surface-grain text-sidebar-foreground",
+            "flex h-full w-(--sidebar-width) flex-col bg-sidebar surface-grain text-sidebar-foreground stock-dark:silk-sidebar-canvas",
             className,
           )}
           data-slot="sidebar"
@@ -365,7 +365,7 @@ function Sidebar({
             </SheetHeader>
             <div
               className={cn(
-                "flex h-full w-full flex-col pb-safe pt-safe",
+                "flex h-full w-full flex-col pb-safe pt-safe stock-dark:silk-sidebar-canvas",
                 SIDEBAR_TITLEBAR_CONTROL_SIZE,
                 side === "left" ? "pl-safe" : "pr-safe",
               )}
@@ -419,7 +419,7 @@ function Sidebar({
           {...props}
         >
           <div
-            className="flex h-full w-full flex-col bg-sidebar surface-grain group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm/5"
+            className="flex h-full w-full flex-col bg-sidebar surface-grain stock-dark:silk-sidebar-canvas group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm/5"
             data-sidebar="sidebar"
             data-slot="sidebar-inner"
           >
@@ -763,11 +763,18 @@ function SidebarInput({ className, ...props }: Omit<InputProps, "unstyled" | "va
   );
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+function SidebarInset({
+  className,
+  surface = "chat",
+  ...props
+}: React.ComponentProps<"main"> & { surface?: "chat" | "secondary" }) {
   return (
     <main
       className={cn(
         "relative flex min-w-0 w-full flex-1 flex-col bg-background surface-grain stock-dark:md:in-data-[app-shell-frame]:max-h-full",
+        surface === "secondary"
+          ? "stock-dark:silk-modal-canvas stock-dark:silk-hairline-top"
+          : "stock-dark:silk-chat-canvas",
         "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ms-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ms-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm/5",
         className,
       )}

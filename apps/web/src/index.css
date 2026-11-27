@@ -218,6 +218,9 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
 }
 
 @theme inline {
+  --color-silk-chat-glass: #140e22;
+  --color-silk-row-hover: #1e1733;
+
   /* Two steps below Tailwind's text-xs (12px) for dense UI: metadata rows,
      badges, counters, keyboard hints and diagnostics tables. 2xs is 11px,
      3xs is 10px. Provider icon overlays use 4xs (8px) and 5xs (7px) to fit
@@ -491,6 +494,81 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   );
 }
 
+@utility silk-sidebar-canvas {
+  background:
+    radial-gradient(ellipse at 7% 0%, #99297b46, transparent 54%),
+    radial-gradient(ellipse at 90% 95%, #343c9261, transparent 58%),
+    linear-gradient(180deg, #131024, #0d0a1a);
+}
+
+@utility silk-chat-canvas {
+  background:
+    radial-gradient(ellipse 460px 360px at 0% 0%, #d347ad42, transparent 82%),
+    radial-gradient(ellipse 480px 380px at 96% 94%, #3eadd533, transparent 56%),
+    linear-gradient(150deg, #191324, #100d1d 59%, #171228);
+}
+
+@utility silk-workbench-canvas {
+  background:
+    radial-gradient(ellipse 380px 280px at 90% 6%, #8b5cf624, transparent 70%),
+    radial-gradient(ellipse 360px 280px at 14% 94%, #22d3ee1c, transparent 68%), #0c0b16;
+}
+
+@utility silk-modal-canvas {
+  background:
+    radial-gradient(ellipse 440px 300px at 6% 0%, #c0399e28, transparent 74%),
+    radial-gradient(ellipse 440px 300px at 94% 96%, #22d3ee20, transparent 66%),
+    linear-gradient(155deg, #171128, #0f0c1d 60%, #141026);
+}
+
+@utility silk-active-thread {
+  background-image: linear-gradient(110deg, #3b2833, #372134 76%);
+  box-shadow: 0 2px 12px #ee69981c;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid #e69a695e;
+    border-radius: inherit;
+  }
+}
+
+@utility silk-active-tab {
+  background-image: linear-gradient(105deg, #50274a, #3a2957);
+  border-color: #d18cf070;
+  color: #f0c8ff;
+}
+
+@utility silk-brand-badge {
+  border-radius: 7px;
+  border-color: #ec92f49a;
+  color: #ffe6fc;
+  background-image: linear-gradient(132deg, #6c245c, #413c8c 61%, #19545c);
+  box-shadow: 0 0 16px #e259cb5c;
+}
+
+@utility silk-message-bubble {
+  background-image: linear-gradient(105deg, #2a1c3c, #1e1733 70%, #172436);
+  border-color: #cec0ff28;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 32%);
+}
+
+@utility silk-interactive-card {
+  background-image:
+    var(--silk-card-hairline, none), linear-gradient(105deg, #2b1d42, #1c1532 68%, #152436);
+  background-size:
+    76% 1px,
+    100% 100%;
+  background-position: top;
+  background-repeat: no-repeat;
+  border-color: #9c79f55c;
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 52%),
+    0 0 20px rgb(151 88 230 / 14%);
+}
+
 @utility dialog-glass {
   background: color-mix(in srgb, var(--background) var(--glass-opacity), transparent);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
@@ -506,11 +584,7 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   }
 
   @variant stock-dark {
-    background: linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--popover) 84%, transparent),
-      color-mix(in srgb, var(--card) 92%, transparent)
-    );
+    @apply silk-modal-canvas;
     border-color: var(--silk-glass-border);
     box-shadow:
       inset 0 1px rgb(243 220 255 / 12%),

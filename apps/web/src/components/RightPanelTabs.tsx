@@ -1105,7 +1105,7 @@ function RightPanelTab(
         "cursor-pointer group/tab flex h-6 max-w-36 shrink-0 items-center gap-0.5 rounded-md pr-2 pl-1.5 text-xs",
         props.ownsDesktopTitleBar && "[-webkit-app-region:no-drag]",
         props.active
-          ? "silk-hairline-top bg-accent text-foreground stock-dark:bg-(--silk-surface-selected)/85 stock-dark:ring-1 stock-dark:ring-inset stock-dark:ring-(--silk-soft-edge)"
+          ? "silk-hairline-top bg-accent text-foreground stock-dark:border stock-dark:silk-active-tab"
           : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
         isDragging && "relative z-10",
       )}
@@ -1479,7 +1479,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
     >
       <div
         className={cn(
-          "flex h-[var(--workspace-topbar-height)] min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-1 pl-2 stock-dark:bg-(--silk-surface-recessed)/80 stock-dark:shadow-(--silk-divider-bottom-inset)",
+          "flex h-[var(--workspace-topbar-height)] min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-1 pl-2 stock-dark:[background-image:linear-gradient(100deg,#21182f,#1b172b_60%,#161e30)] stock-dark:shadow-(--silk-divider-bottom-inset)",
           props.mode === "inline" && !props.layoutControls ? "pr-28" : "pr-3",
           ownsDesktopTitleBar && "drag-region",
           ownsDesktopTitleBar && "wco:pr-(--workspace-native-controls-inset)",
@@ -1679,7 +1679,10 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
           />
         ) : null}
       </div>
-      <div className="flex min-h-0 flex-1 flex-col" data-right-panel-surface-content>
+      <div
+        className="flex min-h-0 flex-1 flex-col stock-dark:silk-workbench-canvas"
+        data-right-panel-surface-content
+      >
         {props.activeSurfaceId === null ? (
           <RightPanelEmptyState
             onAddBrowser={props.onAddBrowser}

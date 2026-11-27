@@ -194,7 +194,7 @@ function PendingSecretRequestForm(props: {
   return (
     <form
       data-v2-item-type={item.type}
-      className="silk-hairline-top flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 stock-dark:border-(--silk-glass-border) stock-dark:bg-card/95 stock-dark:shadow-lg/30"
+      className="silk-hairline-top flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 stock-dark:silk-interactive-card"
       onSubmit={onSubmit}
       autoComplete="off"
       // On click, not pointerdown: the mousedown that follows a pointerdown
