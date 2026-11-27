@@ -144,7 +144,10 @@ function ThemeLibraryCard({
       render={
         <div
           className={cn(
-            "silk-hairline-top cursor-pointer overflow-hidden rounded-xl border border-border/70 bg-card/60 transition-colors hover:bg-accent/10 stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80 stock-dark:shadow-(--silk-card-shadow)",
+            "silk-hairline-top cursor-pointer overflow-hidden rounded-xl border border-border/70 bg-card/60 transition-colors hover:bg-accent/10 stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80",
+            activeModes.includes("dark")
+              ? "stock-dark:border-(--silk-selection-edge-strong) stock-dark:shadow-(--silk-selection-halo)"
+              : "stock-dark:shadow-(--silk-card-shadow)",
             isActive && "bg-accent/30",
           )}
           data-theme-library-card={theme.id}
@@ -732,7 +735,7 @@ export function ThemeLibrary({
               // The accent ring marks the picked tile; focus is a neutral ring set inside it with a gap.
               "silk-hairline-top flex cursor-pointer flex-col items-stretch gap-1.5 rounded-xl border p-2 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-7 focus-visible:outline-foreground/60",
               isActive
-                ? "border-transparent bg-accent/30 ring-2 ring-inset ring-ring"
+                ? "border-transparent bg-accent/30 ring-2 ring-inset ring-ring stock-dark:border-(--silk-selection-edge-strong) stock-dark:ring-0 stock-dark:shadow-(--silk-selection-halo)"
                 : "border-border/70 bg-card/60 hover:bg-accent/10 stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80",
             )}
             key={mode}

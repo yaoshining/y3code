@@ -131,6 +131,11 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --silk-ambient-bg: radial-gradient(ellipse 72% 54% at 50% 0%, #29173d 0%, transparent 100%);
   --silk-glass-border: rgb(206 192 255 / 28%);
   --silk-soft-edge: rgb(201 175 255 / 14%);
+  --silk-selection-edge: #d18cf066;
+  --silk-selection-edge-strong: #d18cf099;
+  --silk-selection-halo: 0 0 20px rgb(161 78 213 / 28%);
+  --silk-settings-card-bg: linear-gradient(150deg, rgb(31 23 49 / 66%), rgb(17 13 30 / 84%));
+  --silk-settings-card-shadow: 0 8px 24px rgb(0 0 0 / 28%), inset 0 1px rgb(243 220 255 / 8%);
   --silk-frame-bg:
     radial-gradient(ellipse at 4% 1%, #cf489c 0, transparent 28%),
     radial-gradient(ellipse at 93% 5%, #4827a7, transparent 50%),
@@ -1259,6 +1264,39 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
     box-shadow:
       inset 0 0 0 1px var(--background),
       inset 0 0 0 3px var(--ring);
+  }
+
+  @media (forced-colors: none) {
+    .settings-slider {
+      @variant stock-dark {
+        &::-webkit-slider-runnable-track {
+          background: var(--silk-accent) left / var(--settings-slider-fill-position) 100% no-repeat
+            color-mix(in srgb, var(--contrast-muted-foreground) 22%, transparent);
+        }
+
+        &::-moz-range-progress {
+          background: var(--silk-accent);
+        }
+
+        &::-webkit-slider-thumb {
+          border-color: var(--silk-selection-edge-strong);
+          background: white;
+        }
+
+        &::-moz-range-thumb {
+          border-color: var(--silk-selection-edge-strong);
+          background: white;
+        }
+
+        &:not(:focus-visible)::-webkit-slider-thumb {
+          box-shadow: 0 0 10px rgb(168 85 247 / 58%);
+        }
+
+        &:not(:focus-visible)::-moz-range-thumb {
+          box-shadow: 0 0 10px rgb(168 85 247 / 58%);
+        }
+      }
+    }
   }
 
   @media (forced-colors: active) {

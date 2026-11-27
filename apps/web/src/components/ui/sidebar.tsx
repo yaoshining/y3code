@@ -897,7 +897,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: "font-medium text-sidebar-muted-foreground/80",
         outline: "bg-sidebar-control-surface ring-1 ring-sidebar-border",
-        silk: "font-medium text-sidebar-muted-foreground/80 stock-dark:data-[active=true]:bg-(--silk-surface-selected) stock-dark:data-[active=true]:inset-shadow-(--silk-selection-mark) stock-dark:data-[active=true]:text-(--silk-violet) stock-dark:data-[active=true]:[&>svg]:text-(--silk-violet)",
+        silk: "font-medium text-sidebar-muted-foreground/80 stock-dark:border stock-dark:border-transparent stock-dark:data-[active=true]:border-(--silk-selection-edge) stock-dark:data-[active=true]:bg-linear-to-r stock-dark:data-[active=true]:from-[#3b2848]/90 stock-dark:data-[active=true]:to-[#281e42]/80 stock-dark:data-[active=true]:shadow-[0_2px_12px_rgb(161_78_213/18%)] stock-dark:data-[active=true]:inset-shadow-(--silk-selection-mark) stock-dark:data-[active=true]:text-(--silk-violet) stock-dark:data-[active=true]:[&>svg]:text-(--silk-violet)",
       },
     },
   },
