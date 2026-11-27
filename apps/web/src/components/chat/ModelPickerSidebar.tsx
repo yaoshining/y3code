@@ -47,6 +47,9 @@ function describeUnavailableInstance(
 const PICKER_TOOLTIP_SIDE = "left" as const;
 const PICKER_TOOLTIP_SIDE_OFFSET = 8;
 
+const PROVIDER_BUTTON_CLASS =
+  "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-none stock-dark:aria-pressed:bg-(--silk-surface-selected) stock-dark:aria-pressed:ring-1 stock-dark:aria-pressed:ring-inset stock-dark:aria-pressed:ring-(--silk-soft-edge)";
+
 export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   selectedInstanceId: ProviderInstanceId | "favorites";
   onSelectInstance: (instanceId: ProviderInstanceId | "favorites") => void;
@@ -88,7 +91,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
 
   return (
     <Toolbar.Root
-      className="w-11 shrink-0 overflow-hidden bg-muted/30"
+      className="w-11 shrink-0 overflow-hidden bg-muted/30 stock-dark:bg-(--silk-surface-recessed)"
       data-model-picker-sidebar="true"
       aria-label={m(msg("Providers"))}
       orientation="vertical"
@@ -106,7 +109,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
           {selectedIndicatorTop !== null ? (
             <div
               data-model-picker-selected-indicator="true"
-              className="pointer-events-none absolute right-1 z-10 h-5 w-0.75 rounded-full bg-primary transition-[top] duration-200 ease-out"
+              className="pointer-events-none absolute right-1 z-10 h-5 w-0.75 rounded-full bg-primary transition-[top] duration-200 ease-out motion-reduce:transition-none stock-dark:bg-(--silk-violet) stock-dark:shadow-(--silk-led-glow)"
               style={{ top: selectedIndicatorTop }}
             />
           ) : null}
@@ -117,9 +120,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   <TooltipTrigger
                     render={
                       <Toolbar.Button
-                        className={cn(
-                          "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-none",
-                        )}
+                        className={PROVIDER_BUTTON_CLASS}
                         onClick={() => handleSelect("favorites")}
                         type="button"
                         aria-label={m(msg("Favorites"))}
@@ -138,7 +139,10 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   </TooltipPopup>
                 </Tooltip>
               </div>
-              <div className="border-b border-border/70" aria-hidden="true" />
+              <div
+                className="border-b border-border/70 stock-dark:border-(--silk-soft-edge)"
+                aria-hidden="true"
+              />
             </>
           ) : null}
 
@@ -162,7 +166,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
             const button = (
               <Toolbar.Button
                 className={cn(
-                  "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-none",
+                  PROVIDER_BUTTON_CLASS,
                   isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent",
                 )}
                 data-provider-accent-color={entry.accentColor}

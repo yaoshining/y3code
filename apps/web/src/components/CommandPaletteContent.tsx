@@ -68,7 +68,7 @@ export function CommandPaletteContent({
   return (
     <div className="contents" data-testid={testId}>
       <Command {...commandProps}>
-        <div className="relative">
+        <div className="relative stock-dark:in-data-silk-command:shadow-(--silk-divider-bottom)">
           <CommandInput
             autoFocus={false}
             {...inputProps}

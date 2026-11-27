@@ -23,6 +23,7 @@ import { msg, T, useGT, useMessages } from "gt-react";
 import { Fragment, useLayoutEffect, useState } from "react";
 
 import { usePrimarySettings } from "../../hooks/useSettings";
+import { useRenderedStockDark } from "../../hooks/useTheme";
 import { observeResize } from "../../lib/observeResize";
 import { environmentPresentations } from "../../state/presentation";
 import { useEnvironmentScope, readEnvironmentScope } from "../../state/session";
@@ -39,6 +40,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
+import { LedQuotaMeter } from "./LedQuotaMeter";
 import { UsageLimitsPooled } from "./UsageLimitsPooled";
 import { formatResetsIn, resetCreditChoices } from "@t3tools/shared/usageLimitsCopy";
 import { PROVIDER_PRESENTATION } from "./usageProviders";
@@ -124,10 +126,12 @@ function WindowBar({
   color,
   window,
   now,
+  stockDark,
 }: {
   readonly color: string;
   readonly window: ServerProviderUsageWindow;
   readonly now: number;
+  readonly stockDark: boolean;
 }) {
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const gt = useGT();
@@ -162,11 +166,11 @@ function WindowBar({
     <SharedTooltipTrigger
       render={
         <div
-          ref={barRef}
-          role="img"
-          aria-label={summary}
+          ref={stockDark ? undefined : barRef}
+          role={stockDark ? "group" : "img"}
+          aria-label={stockDark ? undefined : summary}
           tabIndex={0}
-          className="relative h-6 cursor-default rounded-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="relative flex h-6 cursor-default flex-col justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         />
       }
       label={
@@ -193,23 +197,33 @@ function WindowBar({
         </>
       }
     >
-      {/* Clip both layers so the gap exposes even a translucent composer surface. */}
-      <div className="absolute inset-0" style={paceMark?.gap}>
-        <div className="absolute inset-x-0 inset-y-1.5 rounded-full bg-muted" />
-        {remaining > 0 ? (
-          <div
-            className="absolute inset-y-1.5 left-0 rounded-full"
-            style={{ width: `${remaining}%`, backgroundColor: color }}
-          />
-        ) : null}
-      </div>
-      {paceMark ? (
-        <span
-          aria-hidden
-          className="absolute inset-y-1 w-0.5 -translate-x-1/2 rounded-full bg-foreground"
-          style={paceMark.tick}
+      {stockDark ? (
+        <LedQuotaMeter
+          remainingPercent={remaining}
+          paceRemainingPercent={timeLeft}
+          ariaLabel={summary}
         />
-      ) : null}
+      ) : (
+        <>
+          {/* Clip both layers so the gap exposes even a translucent composer surface. */}
+          <div className="absolute inset-0" style={paceMark?.gap}>
+            <div className="absolute inset-x-0 inset-y-1.5 rounded-full bg-muted" />
+            {remaining > 0 ? (
+              <div
+                className="absolute inset-y-1.5 left-0 rounded-full"
+                style={{ width: `${remaining}%`, backgroundColor: color }}
+              />
+            ) : null}
+          </div>
+          {paceMark ? (
+            <span
+              aria-hidden
+              className="absolute inset-y-1 w-0.5 -translate-x-1/2 rounded-full bg-foreground"
+              style={paceMark.tick}
+            />
+          ) : null}
+        </>
+      )}
     </SharedTooltipTrigger>
   );
 }
@@ -227,6 +241,7 @@ export function LimitWindows({
   readonly now: number;
   readonly compact?: boolean;
 }) {
+  const stockDark = useRenderedStockDark();
   const color = normalizeProviderAccentColor(accentColor) ?? barColor(driver);
   const gt = useGT();
   const m = useMessages();
@@ -249,7 +264,7 @@ export function LimitWindows({
                 {gt("{remaining}% left", { remaining: remainingPercent(window) })}
               </span>
             </span>
-            <WindowBar color={color} window={window} now={now} />
+            <WindowBar color={color} window={window} now={now} stockDark={stockDark} />
             <span className="flex items-center gap-2 text-xs whitespace-nowrap text-muted-foreground tabular-nums">
               {pace ? <PaceIcon pace={pace} /> : null}
               <span className="ms-auto shrink-0">{resetsIn ?? ""}</span>

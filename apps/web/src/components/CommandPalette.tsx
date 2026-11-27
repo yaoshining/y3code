@@ -393,6 +393,7 @@ function CommandPaletteDialog(props: {
 
   return (
     <CommandDialogPopup
+      variant={props.mode === "command" ? "silk" : "default"}
       aria-label={
         props.mode === "files"
           ? gt("File picker")

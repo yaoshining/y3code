@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
+import { cn } from "~/lib/utils";
 import { SharedTooltipTrigger } from "~/components/ui/shared-tooltip";
 
 interface PanelTabCloseButtonProps {
@@ -7,6 +8,7 @@ interface PanelTabCloseButtonProps {
   label: string;
   onClick: () => void;
   tooltip?: string;
+  tone?: "silk";
 }
 
 export function PanelTabCloseButton({
@@ -14,11 +16,16 @@ export function PanelTabCloseButton({
   label,
   onClick,
   tooltip,
+  tone,
 }: PanelTabCloseButtonProps) {
   const button = (
     <button
       type="button"
-      className="cursor-pointer group/close relative flex size-4 shrink-0 items-center justify-center rounded-sm hover:bg-muted"
+      className={cn(
+        "cursor-pointer group/close relative flex size-4 shrink-0 items-center justify-center rounded-sm hover:bg-muted",
+        tone === "silk" &&
+          "stock-dark:hover:bg-(--silk-surface-hover) stock-dark:hover:text-(--silk-rose)",
+      )}
       aria-label={label}
       onClick={onClick}
     >

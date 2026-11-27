@@ -133,7 +133,7 @@ Type `/` for commands or `$` for skills from the selected environment and provid
 - `/compact` reduces context usage when supported by the provider.
 - `/clear` starts a fresh provider session in the same thread (earlier messages and diffs stay visible above a **New session** divider).
 - After adding or changing skills, plugins, or MCP servers, run **Restart agent session** from the command palette so your next message picks up the new config.
-- Turn on **Settings → Appearance → Thread details → Context window** to view reported context usage. For automatic idle compaction on Claude, see [compact long conversations](./providers-claude.md#compact-long-conversations).
+- Turn on **Settings → Appearance → Thread details → Context window** to view reported context usage. Select the Context row (or the Usage limits row, if shown) to see token usage, the auto-compaction threshold when reported, and remaining provider quota together. For automatic idle compaction on Claude, see [compact long conversations](./providers-claude.md#compact-long-conversations).
 
 ## Goals
 

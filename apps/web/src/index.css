@@ -135,6 +135,17 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --silk-rose: #ff91a8;
   --silk-amber: #ffd18a;
   --silk-violet: #c2adff;
+  --silk-surface-deep: #0c0b16;
+  --silk-surface-recessed: #130f20;
+  --silk-surface-glass: #191327;
+  --silk-surface-well: #231b35;
+  --silk-surface-selected: #2f2242;
+  --silk-surface-hover: #392851;
+  --silk-divider-bottom: 0 1px var(--silk-soft-edge);
+  --silk-divider-bottom-inset: inset 0 -1px var(--silk-soft-edge);
+  --silk-selection-mark: inset 2px 0 0 var(--silk-violet);
+  --silk-led-glow: 0 0 5px rgb(195 171 255 / 28%);
+  --silk-card-shadow: 0 5px 18px rgb(5 3 13 / 32%);
   --desktop-window-right-resize-inset: 0px;
   --app-shell-frame-inset: 0px;
   --workspace-topbar-height: 52px;

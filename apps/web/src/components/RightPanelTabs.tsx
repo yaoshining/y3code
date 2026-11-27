@@ -988,7 +988,11 @@ function RightPanelTab(
   const sideChatState = sideChatTabState(sideChatShell);
   const content = (
     <>
-      <PanelTabCloseButton label={gt("Close {title}", { title })} onClick={() => onClose(surface)}>
+      <PanelTabCloseButton
+        tone="silk"
+        label={gt("Close {title}", { title })}
+        onClick={() => onClose(surface)}
+      >
         <SurfaceIcon
           surface={surface}
           previewUrl={props.previewUrl}
@@ -1101,7 +1105,7 @@ function RightPanelTab(
         "cursor-pointer group/tab flex h-6 max-w-36 shrink-0 items-center gap-0.5 rounded-md pr-2 pl-1.5 text-xs",
         props.ownsDesktopTitleBar && "[-webkit-app-region:no-drag]",
         props.active
-          ? "bg-accent text-foreground"
+          ? "silk-hairline-top bg-accent text-foreground stock-dark:bg-(--silk-surface-selected)/85 stock-dark:ring-1 stock-dark:ring-inset stock-dark:ring-(--silk-soft-edge)"
           : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
         isDragging && "relative z-10",
       )}
@@ -1475,7 +1479,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
     >
       <div
         className={cn(
-          "flex h-[var(--workspace-topbar-height)] min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-1 pl-2",
+          "flex h-[var(--workspace-topbar-height)] min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-1 pl-2 stock-dark:bg-(--silk-surface-recessed)/80 stock-dark:shadow-(--silk-divider-bottom-inset)",
           props.mode === "inline" && !props.layoutControls ? "pr-28" : "pr-3",
           ownsDesktopTitleBar && "drag-region",
           ownsDesktopTitleBar && "wco:pr-(--workspace-native-controls-inset)",
@@ -1549,7 +1553,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
                       aria-label={gt("Add panel surface")}
                       className="shrink-0"
                       size="icon-xs"
-                      variant="ghost-muted"
+                      variant="glass-ghost"
                     />
                   }
                 >

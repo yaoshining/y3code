@@ -13,9 +13,11 @@ import {
   remainingPercent,
 } from "@t3tools/shared/usageLimits";
 import { formatDuration, limitsNotice } from "@t3tools/shared/usageLimitsCopy";
-import { Link } from "@tanstack/react-router";
 import { msg, useGT, useLocale, useMessages } from "gt-react";
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
+import { Badge } from "../ui/badge";
+import { LedQuotaMeter } from "../usage/LedQuotaMeter";
+import { PaceIcon } from "../usage/UsageLimits";
 
 import { usePrimarySettings } from "../../hooks/useSettings";
 import { useNowMinute } from "../../hooks/useNowMinute";
@@ -48,6 +50,10 @@ export interface ThreadDetailsUsageInput {
 }
 
 type UsageTone = "error" | "warning" | null;
+type SpotlightTrigger = MouseEventHandler<HTMLButtonElement>;
+
+const SPOTLIGHT_CARD =
+  "relative silk-hairline-top flex flex-col gap-2 rounded-xl border border-border bg-card p-3 stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-glass) stock-dark:shadow-(--silk-card-shadow)";
 
 function limitTone(left: number): UsageTone {
   if (left <= 10) return "error";
@@ -55,37 +61,80 @@ function limitTone(left: number): UsageTone {
   return null;
 }
 
-/** The selected provider's limit windows. Each row reads as room left and opens the usage page. */
 export function ThreadDetailsUsage({
   providerInstanceId,
   model,
   providers,
   sources,
-}: Omit<ThreadDetailsUsageInput, "contextWindow">) {
+  spotlight = false,
+  onSpotlight,
+}: Omit<ThreadDetailsUsageInput, "contextWindow"> & {
+  readonly spotlight?: boolean;
+  readonly onSpotlight?: SpotlightTrigger;
+}) {
   const gt = useGT();
   const nowMinute = useNowMinute();
   const now = Date.parse(`${nowMinute}:00Z`);
   const resolved = resolveThreadDetailsLimits(providerInstanceId, model, providers, sources, now);
   const quotas = resolveThreadHttpQuotas(providerInstanceId, sources);
-  if (!resolved && quotas.length === 0) return null;
+  if (!resolved && quotas.length === 0 && !spotlight) return null;
 
+  const rows = (
+    <>
+      {resolved?.kind === "pool"
+        ? resolved.windows.map((window) => (
+            <PoolRow
+              key={window.id}
+              window={window}
+              now={now}
+              spotlight={spotlight}
+              onSpotlight={onSpotlight}
+            />
+          ))
+        : resolved &&
+          (quotas.length === 0 || limitsNotice(resolved.limits) === null) && (
+            <InstanceRows
+              limits={resolved.limits}
+              now={now}
+              spotlight={spotlight}
+              onSpotlight={onSpotlight}
+            />
+          )}
+      {quotas.map(({ key, accountLabel, window }) => (
+        <LimitRow
+          key={key}
+          window={window}
+          now={now}
+          accountLabel={accountLabel}
+          spotlight={spotlight}
+          onSpotlight={onSpotlight}
+        />
+      ))}
+    </>
+  );
+  if (spotlight) {
+    return (
+      <section className={SPOTLIGHT_CARD}>
+        <h3 className="text-xs font-medium text-muted-foreground stock-dark:text-(--silk-violet)">
+          {gt("Usage limits")}
+        </h3>
+        <div className="flex flex-col gap-3">
+          {resolved || quotas.length > 0 ? (
+            rows
+          ) : (
+            <p className="text-xs text-muted-foreground">{gt("No usage limits reported.")}</p>
+          )}
+        </div>
+      </section>
+    );
+  }
   return (
     <ThreadDetailsSection
       headingId="thread-details-usage-heading"
       title={gt("Usage limits")}
       showHeading={false}
     >
-      <div className="grid grid-cols-[auto_minmax(3rem,1fr)_auto] gap-x-3 text-xs">
-        {resolved?.kind === "pool"
-          ? resolved.windows.map((window) => <PoolRow key={window.id} window={window} now={now} />)
-          : resolved &&
-            (quotas.length === 0 || limitsNotice(resolved.limits) === null) && (
-              <InstanceRows limits={resolved.limits} now={now} />
-            )}
-        {quotas.map(({ key, accountLabel, window }) => (
-          <LimitRow key={key} window={window} now={now} accountLabel={accountLabel} />
-        ))}
-      </div>
+      <div className="grid grid-cols-[auto_minmax(3rem,1fr)_auto] gap-x-3 text-xs">{rows}</div>
     </ThreadDetailsSection>
   );
 }
@@ -93,14 +142,19 @@ export function ThreadDetailsUsage({
 function InstanceRows({
   limits,
   now,
+  spotlight,
+  onSpotlight,
 }: {
   readonly limits: ServerProviderUsageLimits;
   readonly now: number;
+  readonly spotlight: boolean;
+  readonly onSpotlight: SpotlightTrigger | undefined;
 }) {
   const gt = useGT();
   const m = useMessages();
   const notice = limitsNotice(limits, m);
   if (notice) {
+    if (spotlight) return <p className="text-xs text-muted-foreground">{notice}</p>;
     return (
       <UsageRow
         label={gt("Limits", { $context: "usage limits row label" })}
@@ -108,21 +162,37 @@ function InstanceRows({
         tone={null}
         value={gt("Unavailable")}
         tooltip={<span className="text-foreground">{notice}</span>}
-        opensUsage
+        onSpotlight={onSpotlight}
       />
     );
   }
-  return limits.windows.map((window) => <LimitRow key={window.id} window={window} now={now} />);
+  return limits.windows.map((window) => (
+    <LimitRow
+      key={window.id}
+      window={window}
+      now={now}
+      spotlight={spotlight}
+      onSpotlight={onSpotlight}
+    />
+  ));
 }
 
 /** The thread's context window. The bar fills as context is used; the tick marks auto-compaction. */
-export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowSnapshot }) {
-  const maxTokens = usage.maxTokens != null && usage.maxTokens > 0 ? usage.maxTokens : null;
+export function ThreadDetailsContext({
+  usage,
+  spotlight = false,
+  onSpotlight,
+}: {
+  readonly usage: ContextWindowSnapshot | null;
+  readonly spotlight?: boolean;
+  readonly onSpotlight?: SpotlightTrigger;
+}) {
+  const maxTokens = usage?.maxTokens != null && usage.maxTokens > 0 ? usage.maxTokens : null;
   const used =
-    maxTokens !== null && usage.usedPercentage !== null
+    maxTokens !== null && usage?.usedPercentage != null
       ? Math.round(Math.max(0, Math.min(100, usage.usedPercentage)))
       : null;
-  const threshold = usage.autoCompactThreshold ?? null;
+  const threshold = usage?.autoCompactThreshold ?? null;
   const tick =
     maxTokens !== null && threshold !== null && threshold > 0 && threshold < maxTokens
       ? (threshold / maxTokens) * 100
@@ -130,7 +200,58 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
   const gt = useGT();
   const m = useMessages();
   const locale = useLocale();
-  const usedTokens = formatContextWindowTokens(usage.usedTokens);
+  const usedTokens = usage ? formatContextWindowTokens(usage.usedTokens) : null;
+  const tokenCount =
+    maxTokens !== null ? `${usedTokens} / ${formatContextWindowTokens(maxTokens)}` : usedTokens;
+  const compactionMessage =
+    threshold !== null && threshold > 0 ? formatContextWindowCompactionMessage(threshold, m) : null;
+  if (spotlight) {
+    return (
+      <section className={SPOTLIGHT_CARD}>
+        <h3 className="text-xs font-medium text-muted-foreground stock-dark:text-(--silk-violet)">
+          {gt("Context window")}
+        </h3>
+        {tokenCount ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xl font-semibold tabular-nums">{tokenCount}</p>
+            {used !== null ? (
+              <Badge variant="silk" size="pill-sm">
+                {gt("{used}% used", { used })}
+              </Badge>
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">{gt("No context usage reported.")}</p>
+        )}
+        {used !== null ? (
+          <div
+            role="meter"
+            aria-label={gt("Context window")}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={used}
+            className="relative h-1.5 rounded-full bg-muted stock-dark:bg-(--silk-surface-well)"
+          >
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-primary stock-dark:bg-(image:--silk-accent)"
+              style={{ width: `${used}%` }}
+            />
+            {tick !== null ? (
+              <span
+                aria-hidden
+                className="absolute -inset-y-0.5 w-px -translate-x-1/2 bg-foreground ring-1 ring-background"
+                style={{ left: `${tick}%` }}
+              />
+            ) : null}
+          </div>
+        ) : null}
+        {compactionMessage ? (
+          <p className="text-xs text-muted-foreground">{compactionMessage}</p>
+        ) : null}
+      </section>
+    );
+  }
+  if (!usage || usedTokens === null || tokenCount === null) return null;
   return (
     <ThreadDetailsSection
       headingId="thread-details-context-heading"
@@ -144,11 +265,8 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
           tone={used === null ? null : used >= 90 ? "error" : used >= 80 ? "warning" : null}
           tick={tick}
           muted
-          value={
-            maxTokens !== null
-              ? `${usedTokens} / ${formatContextWindowTokens(maxTokens)}`
-              : usedTokens
-          }
+          value={tokenCount}
+          onSpotlight={onSpotlight}
           ariaValue={
             used !== null
               ? gt("{used}% used", { used })
@@ -169,10 +287,8 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
                   })}
                 </span>
               ) : null}
-              {threshold !== null && threshold > 0 ? (
-                <span className="text-muted-foreground">
-                  {formatContextWindowCompactionMessage(threshold, m)}
-                </span>
+              {compactionMessage ? (
+                <span className="text-muted-foreground">{compactionMessage}</span>
               ) : null}
             </>
           }
@@ -186,10 +302,14 @@ function LimitRow({
   window,
   now,
   accountLabel,
+  spotlight,
+  onSpotlight,
 }: {
   readonly window: ServerProviderUsageWindow;
   readonly now: number;
   readonly accountLabel?: string;
+  readonly spotlight: boolean;
+  readonly onSpotlight: SpotlightTrigger | undefined;
 }) {
   const gt = useGT();
   const m = useMessages();
@@ -198,6 +318,25 @@ function LimitRow({
   const pace = paceOf(window, now);
   const timeLeft = paceRemainingPercent(window, now);
   const resetsAt = window.resetsAt ? Date.parse(window.resetsAt) : Number.NaN;
+  const reset =
+    window.resetsAt && resetsAt > now
+      ? gt("Resets in {duration} · {time}", {
+          duration: formatDuration(resetsAt - now, m),
+          time: formatUpcomingTimestamp(window.resetsAt, timestampFormat, now, undefined, m),
+        })
+      : null;
+  if (spotlight) {
+    return (
+      <SpotlightQuota
+        label={window.label}
+        left={left}
+        pace={pace}
+        timeLeft={timeLeft}
+        reset={reset}
+        source={accountLabel}
+      />
+    );
+  }
   return (
     <UsageRow
       label={window.label}
@@ -206,7 +345,7 @@ function LimitRow({
       tick={timeLeft}
       value={`${left}%`}
       ariaValue={gt("{left}% left", { left })}
-      opensUsage
+      onSpotlight={onSpotlight}
       tooltip={
         <>
           <span className="text-foreground">
@@ -218,21 +357,24 @@ function LimitRow({
               {m(PACE_LABEL[pace])} · {gt("{timeLeft}% of the window left", { timeLeft })}
             </span>
           ) : null}
-          {window.resetsAt && resetsAt > now ? (
-            <span className="text-muted-foreground">
-              {gt("Resets in {duration} · {time}", {
-                duration: formatDuration(resetsAt - now, m),
-                time: formatUpcomingTimestamp(window.resetsAt, timestampFormat, now, undefined, m),
-              })}
-            </span>
-          ) : null}
+          {reset ? <span className="text-muted-foreground">{reset}</span> : null}
         </>
       }
     />
   );
 }
 
-function PoolRow({ window, now }: { readonly window: LimitPoolWindow; readonly now: number }) {
+function PoolRow({
+  window,
+  now,
+  spotlight,
+  onSpotlight,
+}: {
+  readonly window: LimitPoolWindow;
+  readonly now: number;
+  readonly spotlight: boolean;
+  readonly onSpotlight: SpotlightTrigger | undefined;
+}) {
   const gt = useGT();
   const m = useMessages();
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
@@ -249,6 +391,29 @@ function PoolRow({ window, now }: { readonly window: LimitPoolWindow; readonly n
           time: formatUpcomingTimestamp(resetsAt, timestampFormat, now, undefined, m),
         }
       : null;
+  const resetLabel =
+    next && reset
+      ? accounts > 1
+        ? gt("+{percent}% in {duration} · {time}", { percent: next.restoresPercent, ...reset })
+        : gt("Resets in {duration} · {time}", reset)
+      : null;
+  const source =
+    sourceLabels.length > 0
+      ? gt("From {sources}", { sources: sourceLabels.join(", ") })
+      : undefined;
+  if (spotlight) {
+    const member = accounts === 1 ? window.members[0] : undefined;
+    return (
+      <SpotlightQuota
+        label={window.label}
+        left={left}
+        pace={window.pace}
+        timeLeft={member ? paceRemainingPercent(member.window, now) : null}
+        reset={resetLabel}
+        source={source}
+      />
+    );
+  }
   return (
     <UsageRow
       label={window.label}
@@ -256,7 +421,7 @@ function PoolRow({ window, now }: { readonly window: LimitPoolWindow; readonly n
       tone={limitTone(left)}
       value={`${left}%`}
       ariaValue={gt("{left}% left", { left })}
-      opensUsage
+      onSpotlight={onSpotlight}
       tooltip={
         <>
           <span className="text-foreground">
@@ -271,28 +436,54 @@ function PoolRow({ window, now }: { readonly window: LimitPoolWindow; readonly n
           {window.pace ? (
             <span className="text-muted-foreground">{m(PACE_LABEL[window.pace])}</span>
           ) : null}
-          {next && reset ? (
-            <span className="text-muted-foreground">
-              {accounts > 1
-                ? gt("+{percent}% in {duration} · {time}", {
-                    percent: next.restoresPercent,
-                    ...reset,
-                  })
-                : gt("Resets in {duration} · {time}", reset)}
-            </span>
-          ) : null}
-          {sourceLabels.length > 0 ? (
-            <span className="text-muted-foreground">
-              {gt("From {sources}", { sources: sourceLabels.join(", ") })}
-            </span>
-          ) : null}
+          {resetLabel ? <span className="text-muted-foreground">{resetLabel}</span> : null}
+          {source ? <span className="text-muted-foreground">{source}</span> : null}
         </>
       }
     />
   );
 }
 
-/** One label, hairline, and value row; the whole row opens the details tooltip. With `opensUsage` it links to the usage page. */
+function SpotlightQuota({
+  label,
+  left,
+  pace,
+  timeLeft,
+  reset,
+  source,
+}: {
+  readonly label: string;
+  readonly left: number;
+  readonly pace: LimitPace | null;
+  readonly timeLeft: number | null;
+  readonly reset: string | null;
+  readonly source: string | undefined;
+}) {
+  const gt = useGT();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="min-w-0 wrap-anywhere">{label}</span>
+        <span className="flex shrink-0 items-center gap-1.5 font-medium tabular-nums">
+          {pace ? <PaceIcon pace={pace} /> : null}
+          {gt("{left}% left", { left })}
+        </span>
+      </div>
+      <LedQuotaMeter
+        size="md"
+        ariaLabel={label}
+        remainingPercent={left}
+        paceRemainingPercent={timeLeft}
+      />
+      {reset || source ? (
+        <div className="flex flex-wrap justify-between gap-x-2 text-2xs text-muted-foreground">
+          {source ? <span className="min-w-0 wrap-anywhere">{source}</span> : null}
+          {reset ? <span className="tabular-nums">{reset}</span> : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 function UsageRow({
   label,
   fill,
@@ -302,7 +493,7 @@ function UsageRow({
   ariaValue = value,
   tooltip,
   muted = false,
-  opensUsage = false,
+  onSpotlight,
 }: {
   readonly label: string;
   /** Bar fill from 0 to 100. Null hides the bar. */
@@ -314,15 +505,15 @@ function UsageRow({
   readonly ariaValue?: string;
   readonly tooltip: ReactNode;
   readonly muted?: boolean;
-  readonly opensUsage?: boolean;
+  readonly onSpotlight?: SpotlightTrigger | undefined;
 }) {
   const gt = useGT();
   const rowProps = {
     "aria-label": gt("{label}: {value}", { label, value: ariaValue }),
     className: cn(
       "col-span-3 grid h-6 grid-cols-subgrid items-center rounded-lg px-2.5 outline-none hover:bg-black/[0.035] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring data-popup-open:bg-black/[0.035] dark:hover:bg-white/[0.08] dark:data-popup-open:bg-white/[0.08]",
-      opensUsage
-        ? "group cursor-pointer active:bg-black/[0.06] dark:active:bg-white/[0.12]"
+      onSpotlight
+        ? "group cursor-pointer text-start active:bg-black/[0.06] dark:active:bg-white/[0.12] stock-dark:hover:bg-(--silk-soft-edge)"
         : "cursor-default",
     ),
   };
@@ -330,7 +521,11 @@ function UsageRow({
     <Tooltip>
       <TooltipTrigger
         render={
-          opensUsage ? <Link to="/usage" {...rowProps} /> : <div tabIndex={0} {...rowProps} />
+          onSpotlight ? (
+            <button type="button" onClick={onSpotlight} {...rowProps} />
+          ) : (
+            <div tabIndex={0} {...rowProps} />
+          )
         }
       >
         <span className="max-w-28 truncate text-muted-foreground group-hover:text-foreground">
@@ -383,7 +578,9 @@ function UsageRow({
       <TooltipPopup side="left" sideOffset={16}>
         <div className="flex flex-col gap-0.5">
           {tooltip}
-          {opensUsage ? <span className="text-muted-foreground">{gt("Open usage")}</span> : null}
+          {onSpotlight ? (
+            <span className="text-muted-foreground">{gt("Open context & quotas")}</span>
+          ) : null}
         </div>
       </TooltipPopup>
     </Tooltip>

@@ -1044,8 +1044,8 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
         >
           <div
             className={cn(
-              "flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/40",
-              showSidebar && "border-l border-border/70",
+              "flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/40 stock-dark:bg-(--silk-surface-glass)",
+              showSidebar && "border-l border-border/70 stock-dark:border-(--silk-soft-edge)",
             )}
           >
             <ComboboxSearchInput

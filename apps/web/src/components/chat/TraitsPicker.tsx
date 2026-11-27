@@ -415,7 +415,7 @@ const TraitsMenuContent = memo(function TraitsMenuContentImpl(props: TraitsSelec
             <div key={descriptor.id}>
               {index > 0 ? <MenuDivider /> : null}
               <MenuGroup>
-                <div className="px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs">
+                <div className="px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs stock-dark:text-(--silk-violet)">
                   {descriptor.label}
                 </div>
                 <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">{value}</div>
@@ -474,7 +474,7 @@ const TraitsMenuContent = memo(function TraitsMenuContentImpl(props: TraitsSelec
         <div key={descriptor.id}>
           {index > 0 || selectDescriptors.length > 0 ? <MenuDivider /> : null}
           <MenuGroup>
-            <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">
+            <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs stock-dark:text-(--silk-violet)">
               {descriptor.label}
             </div>
             <MenuRadioGroup

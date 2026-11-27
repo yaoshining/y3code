@@ -185,8 +185,9 @@ export function describeComposerEffort(
 }
 
 const COLUMN_ROW =
-  "flex h-8 w-full shrink-0 cursor-pointer items-center gap-2 rounded-sm px-2 text-left text-sm text-foreground outline-none hover:bg-foreground/[0.09] focus-visible:bg-foreground/[0.09] disabled:cursor-not-allowed disabled:opacity-64";
-const COLUMN_LABEL = "px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs";
+  "flex h-8 w-full shrink-0 cursor-pointer items-center gap-2 rounded-sm px-2 text-left text-sm text-foreground outline-none hover:bg-foreground/[0.09] focus-visible:bg-foreground/[0.09] disabled:cursor-not-allowed disabled:opacity-64 stock-dark:rounded-md stock-dark:bg-white/[0.025] stock-dark:hover:bg-(--silk-surface-well) stock-dark:focus-visible:ring-1 stock-dark:focus-visible:ring-inset stock-dark:focus-visible:ring-(--silk-violet) stock-dark:aria-checked:bg-(--silk-surface-selected) stock-dark:aria-checked:text-(--silk-violet) stock-dark:aria-checked:inset-shadow-(--silk-selection-mark)";
+const COLUMN_LABEL =
+  "px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs stock-dark:text-(--silk-violet)";
 
 function ColumnRow(props: {
   label: string;
@@ -302,7 +303,10 @@ function EffortLevels(props: { traits: TraitsSelectionInput }) {
       {effort ? <EffortRows control={effort} traits={traits} locked={locked} /> : null}
       {others.length > 0 ? (
         <div
-          className={cn("flex flex-col gap-0.5", effort && "mt-1 border-t border-border/70 pt-1")}
+          className={cn(
+            "flex flex-col gap-0.5",
+            effort && "mt-1 border-t border-border/70 pt-1 stock-dark:border-(--silk-soft-edge)",
+          )}
         >
           {others.map((control, index) =>
             control.kind === "boolean" ? (
@@ -552,7 +556,7 @@ export function ComposerEffortColumn(props: { traits: TraitsSelectionInput | nul
     <>
       {/* Matches the search row's box, so one rule runs across the top of the popup. */}
       <div className="shrink-0 px-3 pt-2.5">
-        <div className="flex h-8.25 -translate-y-px items-center gap-2 border-b border-border/70 pb-1.5 text-sm">
+        <div className="flex h-8.25 -translate-y-px items-center gap-2 border-b border-border/70 pb-1.5 text-sm stock-dark:border-(--silk-soft-edge)">
           <span className="text-muted-foreground">
             {controls?.effort?.descriptor.label ??
               (controls?.others.length
@@ -727,7 +731,7 @@ export function ComposerPickerFooter(props: {
   onRuntimeModeChange: (mode: RuntimeMode) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t border-border/70 bg-muted/40 px-3 py-2">
+    <div className="flex flex-wrap items-center gap-2 border-t border-border/70 bg-muted/40 px-3 py-2 stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-recessed)">
       {props.traits ? <SpeedControl traits={props.traits} /> : null}
       {props.traits ? <UltracodeControl traits={props.traits} /> : null}
       <PermissionsMenu

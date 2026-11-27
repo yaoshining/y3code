@@ -1,13 +1,17 @@
 import {
   EnvironmentId,
   ProjectId,
+  ProviderDriverKind,
+  ProviderInstanceId,
   ThreadId,
+  UsageLimitSourceId,
   type ScopedThreadRef,
   type ThreadPullRequestLink,
 } from "@t3tools/contracts";
+import { deriveLatestContextWindowSnapshot } from "@t3tools/client-runtime/state/context-window";
 import { AsyncResult, Atom } from "effect/reactivity";
 import { expect, it, vi } from "vite-plus/test";
-import { page } from "vite-plus/test/browser";
+import { page, userEvent } from "vite-plus/test/browser";
 
 const SCRATCH_ROOT = "/home/user/.t3/scratch";
 
@@ -123,11 +127,13 @@ vi.mock(import("~/state/vcs"), async (importOriginal) => {
 });
 
 import { render } from "../../../test/render";
+import { getClientSettings, updateClientSettings } from "../../hooks/useSettings";
 import { useRightPanelStore } from "../../rightPanelStore";
 import { PopoverCreateHandle } from "../ui/popover";
 import { ChatCanvasContext } from "./ChatCanvasContext";
 import { resolveChatCanvasLayout } from "./chatCanvasLayout";
 import { ThreadDetailsPanel } from "./ThreadDetailsPanel";
+import type { ThreadDetailsUsageInput } from "./ThreadDetailsUsage";
 
 const threadRef: ScopedThreadRef = {
   environmentId: EnvironmentId.make("environment"),
@@ -179,12 +185,20 @@ function Panel({
   draftEnvMode,
   onMachines = false,
   withScripts = false,
+  usage = {
+    providerInstanceId: null,
+    model: null,
+    providers: [],
+    sources: [],
+    contextWindow: null,
+  },
 }: {
   fixture: ReturnType<typeof setup>;
   /** Renders an unsent draft in this mode instead of a started thread. */
   draftEnvMode?: "local" | "worktree";
   onMachines?: boolean;
   withScripts?: boolean;
+  usage?: ThreadDetailsUsageInput;
 }) {
   const noop = () => {};
   const scriptResult = async () => ({ ok: true }) as never;
@@ -234,11 +248,113 @@ function Panel({
         onAddProjectScript={scriptResult}
         onUpdateProjectScript={scriptResult}
         onDeleteProjectScript={scriptResult}
-        usage={{} as never}
+        usage={usage}
       />
     </ChatCanvasContext>
   );
 }
+
+it("drills into context and quota details without replacing the inspector's 12-item menu", async () => {
+  using fixture = setup({ workspaceRoot: "/project", folder: "/project" });
+  const original = getClientSettings();
+  using _settings = {
+    [Symbol.dispose]: () =>
+      updateClientSettings({
+        threadDetailsItems: original.threadDetailsItems,
+        threadDetailsUsageEnabled: original.threadDetailsUsageEnabled,
+      }),
+  };
+  const instanceId = ProviderInstanceId.make("spotlight-provider");
+  const providerWindow = {
+    id: "session",
+    kind: "session",
+    label: "Session quota",
+    usedPercent: 25,
+  } as const;
+  const updatedAt = "2026-10-30T11:59:00Z";
+  const usage: ThreadDetailsUsageInput = {
+    providerInstanceId: instanceId,
+    model: null,
+    contextWindow: deriveLatestContextWindowSnapshot([], {
+      updatedAt,
+      usedTokens: 165_000,
+      maxTokens: 1_000_000,
+      autoCompactThreshold: 800_000,
+    }),
+    providers: [
+      {
+        instanceId,
+        driver: ProviderDriverKind.make("codex"),
+        enabled: true,
+        installed: true,
+        version: null,
+        status: "ready",
+        auth: { status: "authenticated" },
+        checkedAt: updatedAt,
+        models: [],
+        slashCommands: [],
+        skills: [],
+        usageLimits: { checkedAt: updatedAt, windows: [providerWindow] },
+      },
+    ],
+    sources: [
+      {
+        id: UsageLimitSourceId.make("spotlight-http"),
+        kind: "http",
+        label: "HTTP quotas",
+        checkedAt: updatedAt,
+        accounts: [],
+        quotaAccounts: [
+          {
+            id: "account",
+            label: "API account",
+            providerInstanceId: instanceId,
+            windows: [{ id: "monthly", kind: "monthly", label: "HTTP quota", usedPercent: 85 }],
+          },
+        ],
+      },
+    ],
+  };
+  await using screen = await render(<Panel fixture={fixture} usage={usage} />);
+  const card = screen.getByRole("region", { name: "Thread details" });
+  await card.click({ button: "right" });
+  await expect.element(page.getByText("Show in thread details")).toBeVisible();
+  expect(page.getByRole("menuitemcheckbox").all()).toHaveLength(12);
+  await page.getByRole("menuitemcheckbox", { name: "Context window" }).click();
+  await page.getByRole("menuitemcheckbox", { name: "Usage limits" }).click();
+  await userEvent.keyboard("{Escape}");
+
+  const contextRow = screen.getByRole("button", { name: /^Context:/ });
+  const quotaRow = screen.getByRole("button", { name: /^Session quota:/ });
+  const back = screen.getByRole("button", { name: "Back", exact: true });
+  await contextRow.click();
+  await expect.element(screen.getByRole("heading", { name: "Context & Quotas" })).toBeVisible();
+  await expect.element(back).toHaveFocus();
+  await expect
+    .element(screen.getByRole("meter", { name: "Context window" }))
+    .toHaveAttribute("aria-valuenow", "17");
+  await expect
+    .element(screen.getByRole("meter", { name: "Session quota" }))
+    .toHaveAttribute("aria-valuenow", "75");
+  await expect
+    .element(screen.getByRole("meter", { name: "HTTP quota" }))
+    .toHaveAttribute("aria-valuenow", "15");
+  await expect
+    .element(screen.getByRole("link", { name: "Open usage" }))
+    .toHaveAttribute("href", "/usage");
+  await back.click();
+  await expect.element(contextRow).toHaveFocus();
+
+  await quotaRow.click();
+  await expect.element(back).toBeVisible();
+  await back.click();
+  await expect.element(quotaRow).toHaveFocus();
+  await card.click({ button: "right" });
+  expect(page.getByRole("menuitemcheckbox").all()).toHaveLength(12);
+  await page.getByRole("menuitem", { name: "Reset to default" }).click();
+  await expect.element(contextRow).not.toBeInTheDocument();
+  await expect.element(quotaRow).not.toBeInTheDocument();
+});
 
 it("offers no git controls in a No project thread, but shows its linked pull request", async () => {
   using fixture = setup({

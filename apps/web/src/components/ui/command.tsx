@@ -59,8 +59,10 @@ function CommandDialogPopup({
   className,
   children,
   onBackdropPointerDown,
+  variant = "default",
   ...props
 }: CommandDialogPrimitive.Popup.Props & {
+  variant?: "default" | "silk";
   onBackdropPointerDown?: React.PointerEventHandler<HTMLDivElement>;
 }) {
   const popupRef = useRef<HTMLDivElement>(null);
@@ -75,9 +77,11 @@ function CommandDialogPopup({
           className={cn(
             DIALOG_POPUP_CLASS,
             "pointer-events-auto max-h-105 max-w-xl text-foreground data-ending-style:pointer-events-none",
+            variant === "silk" && "silk-hairline-top",
             className,
           )}
           data-slot="command-dialog-popup"
+          data-silk-command={variant === "silk" || undefined}
           {...props}
         >
           {children}
@@ -148,12 +152,19 @@ function CommandListVirtualized({
   );
 }
 
+const COMMAND_HEADING_CLASS =
+  "stock-dark:in-data-silk-command:text-(--silk-violet) stock-dark:in-data-silk-command:tracking-wide";
+
 function CommandListHeading({
   className,
   ...props
 }: React.ComponentProps<typeof AutocompleteListHeading>) {
   return (
-    <AutocompleteListHeading className={className} data-slot="command-group-label" {...props} />
+    <AutocompleteListHeading
+      className={cn(COMMAND_HEADING_CLASS, className)}
+      data-slot="command-group-label"
+      {...props}
+    />
   );
 }
 
@@ -178,7 +189,11 @@ function CommandGroupLabel({
   ...props
 }: React.ComponentProps<typeof AutocompleteGroupLabel>) {
   return (
-    <AutocompleteGroupLabel className={className} data-slot="command-group-label" {...props} />
+    <AutocompleteGroupLabel
+      className={cn(COMMAND_HEADING_CLASS, className)}
+      data-slot="command-group-label"
+      {...props}
+    />
   );
 }
 
@@ -200,7 +215,8 @@ function CommandItem({
           "stock-dark:data-selected:bg-accent/70 stock-dark:data-highlighted:bg-accent stock-dark:data-highlighted:text-accent-foreground stock-dark:[&[data-highlighted][data-selected]]:bg-accent stock-dark:[&[data-highlighted][data-selected]]:text-accent-foreground",
         active !== undefined &&
           "cursor-pointer hover:bg-transparent hover:text-inherit data-highlighted:bg-transparent data-highlighted:text-inherit data-selected:bg-transparent data-selected:text-inherit [&[data-highlighted][data-selected]]:bg-transparent [&[data-highlighted][data-selected]]:text-inherit",
-        active && "bg-accent! text-accent-foreground!",
+        active &&
+          "bg-accent! text-accent-foreground! stock-dark:in-data-silk-command:bg-(--silk-surface-hover)! stock-dark:in-data-silk-command:inset-shadow-(--silk-selection-mark)",
         className,
       )}
       data-active={active || undefined}
