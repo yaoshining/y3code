@@ -2061,7 +2061,6 @@
   "42fd195574793f9e": "Code",
   "51b31345c7bed6f0": "Pairing code",
   "e1cb1c8599e84e26": "Create a pairing code on {environment}, in its Settings → Sharing & access or with `t3 auth pairing create`, and enter it here.",
-  "7d6f419f8ab7f779": "For machines on your local network or tailnet. The machine keeps its own provider credentials.",
   "36f32bd159bdc0d1": "Scan QR code",
   "11fd02455d938901": "Scan the code from {command} or desktop Connections settings",
   "68b43e17c7e5f4b3": "Sign in to {product}",
@@ -5715,5 +5714,6 @@
   "99451a5d2d40440f": "Withdrawn by {by}.",
   "3ee30a50b70fffab": "Withdrawn by {by}: {reason}",
   "201490988858b511": "withdrawn by {by}",
-  "46d614fa7b4bf1e5": "Workflow runs"
+  "46d614fa7b4bf1e5": "Workflow runs",
+  "3fe1ce4db810d638": "Connect over your local network, tailnet, or a Y3 Connect gateway. The machine keeps its own provider credentials."
 }

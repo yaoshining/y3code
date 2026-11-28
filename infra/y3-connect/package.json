@@ -1,0 +1,21 @@
+{
+  "name": "@t3tools/y3-connect",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.ts serve",
+    "test": "vp test run --config ../../vite.config.ts --dir .",
+    "typecheck": "effect-tsgo tsrs --noEmit"
+  },
+  "dependencies": {
+    "@effect/platform-node": "catalog:",
+    "@t3tools/contracts": "workspace:*",
+    "@t3tools/shared": "workspace:*",
+    "effect": "catalog:"
+  },
+  "devDependencies": {
+    "@effect/vitest": "catalog:",
+    "@types/node": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

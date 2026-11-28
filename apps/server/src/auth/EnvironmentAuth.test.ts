@@ -43,7 +43,7 @@ const layerEnvironmentAuth = (overrides?: Partial<ServerConfig.ServerConfig["Ser
     Layer.provide(ManagedPolicy.layerTest()),
     Layer.provideMerge(SqlitePersistence.layerMemory),
     Layer.provide(ServerSecretStore.layer),
-    Layer.provide(ServerEnvironment.layerIdentity),
+    Layer.provideMerge(ServerEnvironment.layerIdentity),
     Layer.provide(layerServerConfig(overrides)),
   );
 
@@ -422,6 +422,37 @@ it.layer(Layer.mergeAll(NodeServices.layer, NodePlatformCrypto.layer))(
             (yield* serverAuth.listPairingLinks()).some((link) => link.connectDeviceRequest),
           ).toBe(false);
         }).pipe(Effect.provide(layerEnvironmentAuth())),
+    );
+
+    it.effect("gives Y3 Connect routes paired by one key the same device identity", () =>
+      Effect.gen(function* () {
+        const auth = yield* EnvironmentAuth.EnvironmentAuth;
+        const sessions = yield* SessionStore.SessionStore;
+        const phone = makeDpopKey();
+        const tablet = makeDpopKey();
+        const pair = Effect.fnUntraced(function* (proofKeyThumbprint: string, y3: boolean) {
+          const pairing = yield* auth.issuePairingCredential({
+            scopes: ["orchestration:read"],
+            ...(y3 ? { purpose: "y3-connect" as const } : {}),
+          });
+          const token = yield* auth.exchangeBootstrapCredentialForAccessToken(
+            pairing.credential,
+            undefined,
+            requestMetadata,
+            { proofKeyThumbprint },
+          );
+          return yield* sessions.verify(token.access_token);
+        });
+        const gateway = yield* pair(phone.thumbprint, true);
+        const lan = yield* pair(phone.thumbprint, true);
+        const other = yield* pair(tablet.thumbprint, true);
+        const ordinary = yield* pair(phone.thumbprint, false);
+        expect(gateway.subject).toMatch(/^y3-connect:[0-9a-f]{64}$/);
+        expect(lan.subject).toBe(gateway.subject);
+        expect(lan.sessionId).not.toBe(gateway.sessionId);
+        expect(other.subject).not.toBe(gateway.subject);
+        expect(ordinary.subject).toBe("one-time-token");
+      }).pipe(Effect.provide(layerEnvironmentAuth())),
     );
 
     it.effect("renews a pairing-link DPoP session in place while its device keeps using it", () =>

@@ -4,11 +4,11 @@ Connect external agents (Claude Code or Codex in your terminal, ChatGPT, or any 
 
 ## Quick setup
 
-Open the command palette (`Cmd/Ctrl+K`) and run **Use T3 Code in another app (MCP)** (or open **Settings → Sharing & access**), pick your app, and follow the prompts.
+On the Y3 Code desktop host, enable [Y3 Connect](../../infra/y3-connect/README.md) with your self-hosted HTTPS gateway. Then run **Use Y3 Code in another app (MCP)** from the command palette (`Cmd/Ctrl+K`) or **Settings → Sharing & access**. Pick your app and the access it needs, then follow the prompts.
 
-- Cloud assistants (like ChatGPT or Claude) require **T3 Connect** enabled on the environment.
+- Cloud assistants (like ChatGPT or Claude) need a public HTTPS address. The wizard uses the verified Y3 Connect address.
 - To also reach other machines through the same connection, enable **Settings → Labs → Linked environments** and [link them](./remote-access.md#link-another-environment).
-- To copy the raw MCP endpoint (`https://<environment-address>/mcp`), open an environment's menu in **Settings → Environments → Copy MCP URL**. OAuth requires `https://` or `localhost` (plain `http://` LAN/Tailscale addresses cannot complete OAuth).
+- Copy the raw MCP endpoint (`https://<environment-address>/mcp`) from the wizard. If setting up a client manually, OAuth requires `https://` or `localhost` (plain `http://` LAN/Tailscale addresses cannot complete OAuth).
 
 ### CLI clients and ChatGPT
 
@@ -26,7 +26,7 @@ Open the command palette (`Cmd/Ctrl+K`) and run **Use T3 Code in another app (MC
 
 ## Approve access and permissions
 
-The first time an outside agent connects, approve its sign-in page (via your T3 Connect account, an already-authorized browser, or a one-time pairing code from **Settings → Sharing & access** / `t3 auth pairing create`).
+The first time an outside agent connects through Y3 Connect, approve it on the environment's sign-in page. Use an already-authorized browser or the one-time approval code from the wizard. The gateway's host binding code does not grant app access.
 
 - **Read only**: Inspect projects, threads, providers, and models.
 - **Supervised → Full access**: Also launch, message, and stop threads up to the granted permission mode. Managing [workflow runs](./workflows.md) or using approval-skipping agent modes requires **Full access** (or your policy's maximum mode).

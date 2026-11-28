@@ -2061,7 +2061,6 @@
   "42fd195574793f9e": "Código",
   "51b31345c7bed6f0": "Código de pareamento",
   "e1cb1c8599e84e26": "Crie um código de pareamento em {environment}, em Configurações → Compartilhamento e acesso ou com `t3 auth pairing create`, e insira-o aqui.",
-  "7d6f419f8ab7f779": "Para máquinas na sua rede local ou tailnet. A máquina mantém as próprias credenciais dos provedores.",
   "36f32bd159bdc0d1": "Escanear QR code",
   "11fd02455d938901": "Escaneie o código de {command} ou das configurações de Conexões do desktop",
   "68b43e17c7e5f4b3": "Entrar no {product}",
@@ -5707,5 +5706,6 @@
   "99451a5d2d40440f": "Retirada por {by}.",
   "3ee30a50b70fffab": "Retirada por {by}: {reason}",
   "201490988858b511": "retirada por {by}",
-  "46d614fa7b4bf1e5": "Execuções de workflow"
+  "46d614fa7b4bf1e5": "Execuções de workflow",
+  "3fe1ce4db810d638": "Conecte-se pela rede local, pela tailnet ou por um gateway Y3 Connect. As credenciais dos provedores permanecem na máquina."
 }

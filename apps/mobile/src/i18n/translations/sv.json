@@ -2061,7 +2061,6 @@
   "42fd195574793f9e": "Kod",
   "51b31345c7bed6f0": "Parkopplingskod",
   "e1cb1c8599e84e26": "Skapa en parkopplingskod på {environment}, i dess Inställningar → Delning och åtkomst eller med `t3 auth pairing create`, och ange den här.",
-  "7d6f419f8ab7f779": "För datorer i ditt lokala nätverk eller tailnet. Datorn behåller sina egna leverantörsuppgifter.",
   "36f32bd159bdc0d1": "Skanna QR-kod",
   "11fd02455d938901": "Skanna koden från {command} eller inställningen Anslutningar på skrivbordet",
   "68b43e17c7e5f4b3": "Logga in på {product}",
@@ -5713,5 +5712,6 @@
   "99451a5d2d40440f": "Återkallad av {by}.",
   "3ee30a50b70fffab": "Återkallad av {by}: {reason}",
   "201490988858b511": "återkallad av {by}",
-  "46d614fa7b4bf1e5": "Arbetsflödeskörningar"
+  "46d614fa7b4bf1e5": "Arbetsflödeskörningar",
+  "3fe1ce4db810d638": "Anslut via det lokala nätverket, ditt tailnet eller en Y3 Connect-gateway. Leverantörernas inloggningsuppgifter stannar på värddatorn."
 }

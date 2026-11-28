@@ -2877,6 +2877,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
   if (platform === "mac") {
     const path = yield* Path.Path;
     const repoRoot = yield* RepoRoot;
+    buildConfig.afterPack = path.join(repoRoot, "scripts/mac-after-pack.ts");
     buildConfig.mac = {
       target: target === "dmg" ? [target, "zip"] : [target],
       icon: "icon.icns",
@@ -2885,7 +2886,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
         // macOS 26 offers Messages/Mail codes in every text field unless opted out.
         NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac: true,
         NSLocalNetworkUsageDescription:
-          "T3 Code connects to devices on your local network for remote environments and commands run by terminals and coding agents.",
+          "Y3 Code connects to devices on your local network for remote environments and commands run by terminals and coding agents.",
         NSCalendarsUsageDescription:
           "Commands you run in T3 Code may need access to your calendars.",
         NSCalendarsFullAccessUsageDescription:

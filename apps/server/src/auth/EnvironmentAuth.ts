@@ -28,6 +28,10 @@ import {
 import { isLocalLoopbackHost } from "@t3tools/shared/hostClassification";
 import { encodeOAuthScope } from "@t3tools/shared/oauthScope";
 import * as Context from "effect/Context";
+import {
+  Y3_CONNECT_DEVICE_SUBJECT_PREFIX,
+  Y3_CONNECT_PAIRING_SUBJECT,
+} from "@t3tools/contracts/y3Connect";
 import * as Digest from "effect/crypto/Digest";
 import * as DateTime from "effect/DateTime";
 import * as Duration from "effect/Duration";
@@ -825,6 +829,7 @@ export const make = Effect.gen(function* () {
   const sessions = yield* SessionStore.SessionStore;
   const secretStore = yield* ServerSecretStore.ServerSecretStore;
   const digest = yield* Digest.Digest;
+  const environmentIdentity = yield* ServerEnvironment.ServerEnvironmentIdentity;
   const descriptor = yield* policy.getDescriptor();
   const config = yield* ServerConfig.ServerConfig;
   const managedPolicy = yield* ManagedPolicy.ManagedPolicy;
@@ -1166,16 +1171,27 @@ export const make = Effect.gen(function* () {
               if (grantedScopes.length === 0) {
                 return yield* new ServerAuthScopeNotGrantedError({});
               }
-              // Only plain pairing links renew. T3 Connect, CLI, desktop and peer sessions keep
-              // their own lifetimes, so unlinking Connect or rotating a credential still cuts off.
+              const isY3Pairing = grant.subject === Y3_CONNECT_PAIRING_SUBJECT;
+              const proofKey = input?.proofKeyThumbprint;
               const renewable =
-                input?.proofKeyThumbprint !== undefined &&
+                proofKey !== undefined &&
                 grant.method === "one-time-token" &&
-                grant.subject === PAIRING_LINK_SUBJECT;
+                (grant.subject === PAIRING_LINK_SUBJECT || isY3Pairing);
+              // Route-specific sessions from the same device share a host-scoped identity.
+              const subject =
+                isY3Pairing && proofKey
+                  ? Y3_CONNECT_DEVICE_SUBJECT_PREFIX +
+                    (yield* digest.digestHex(
+                      Digest.sha256,
+                      new TextEncoder().encode(
+                        `${yield* environmentIdentity.getEnvironmentId}:${proofKey}`,
+                      ),
+                    ))
+                  : grant.subject;
               const issue = sessions
                 .issue({
                   method: input?.proofKeyThumbprint ? "dpop-access-token" : "bearer-access-token",
-                  subject: grant.subject,
+                  subject,
                   scopes: grantedScopes,
                   ...(input?.proofKeyThumbprint
                     ? {
@@ -1434,7 +1450,9 @@ export const make = Effect.gen(function* () {
       subject:
         input?.purpose === "peer-link" && input.access
           ? `${PEER_LINK_PAIRING_SUBJECT_PREFIX}${input.access}`
-          : "one-time-token",
+          : input?.purpose === "y3-connect"
+            ? Y3_CONNECT_PAIRING_SUBJECT
+            : PAIRING_LINK_SUBJECT,
       ...(input?.label ? { label: input.label } : {}),
       ...(input?.access && input.purpose !== "peer-link" ? { mcpApproval: input.access } : {}),
     }).pipe(
@@ -1832,12 +1850,16 @@ const revokePairedClientsThePolicyDisallows = Effect.fn(
 ) {
   const remoteAllowed = ManagedLimits.allowsRemoteClients(policy);
   const disallowed = new Set<string>();
-  if (!remoteAllowed) disallowed.add(LINK_PAIRED_SUBJECTS.link);
+  if (!remoteAllowed) {
+    disallowed.add(LINK_PAIRED_SUBJECTS.link);
+    disallowed.add(Y3_CONNECT_PAIRING_SUBJECT);
+  }
   if (!ManagedLimits.allowsConnect(policy)) disallowed.add(LINK_PAIRED_SUBJECTS.connect);
   if (disallowed.size === 0) return;
   const sessions = (yield* stores.sessions.listActive()).filter(
     (session) =>
       disallowed.has(session.subject) ||
+      (!remoteAllowed && session.subject.startsWith(Y3_CONNECT_DEVICE_SUBJECT_PREFIX)) ||
       // The startup link also pairs browsers on this machine; only a device elsewhere goes.
       (!remoteAllowed &&
         session.subject === INTERNAL_ADMINISTRATIVE_BOOTSTRAP_SUBJECT &&

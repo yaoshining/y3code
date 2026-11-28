@@ -45,6 +45,7 @@ import * as DesktopAssets from "./app/DesktopAssets.ts";
 import * as DesktopPrimaryPaste from "./app/DesktopPrimaryPaste.ts";
 import * as DesktopBackendConfiguration from "./backend/DesktopBackendConfiguration.ts";
 import * as DesktopBackendPool from "./backend/DesktopBackendPool.ts";
+import * as DesktopY3Connect from "./backend/DesktopY3Connect.ts";
 import * as DesktopLocalEnvironmentAuth from "./backend/DesktopLocalEnvironmentAuth.ts";
 import * as DesktopNetworkInterfaces from "./backend/DesktopNetworkInterfaces.ts";
 import * as DesktopEnvironment from "./app/DesktopEnvironment.ts";
@@ -229,6 +230,7 @@ const layerDesktopApplication = Layer.mergeAll(
   // Updates closes the same tunnels the SSH IPC opens before quitAndInstall.
   Layer.provideMerge(layerDesktopSsh),
   Layer.provideMerge(layerDesktopWslBackend),
+  Layer.provideMerge(DesktopY3Connect.layer.pipe(Layer.provide(layerDesktopBackend))),
   Layer.provideMerge(layerDesktopLocalEnvironmentAuth),
 );
 

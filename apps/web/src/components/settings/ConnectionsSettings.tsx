@@ -96,6 +96,7 @@ import {
   supportsDesktopAppUpdate,
 } from "~/versionSkew";
 import { hasCloudPublicConfig } from "~/cloud/publicConfig";
+import { Y3ConnectRow } from "./Y3ConnectRow";
 import { RemoveT3ConnectEnvironmentDialog } from "../clerk/RemoveT3ConnectEnvironmentDialog";
 import { authEnvironment } from "~/state/auth";
 import { environmentCatalog } from "~/connection/catalog";
@@ -434,8 +435,8 @@ function ConnectionsSettingsContent({
   const canReadAccess = useEnvironmentScope(accessEnvironmentId, AuthAccessReadScope);
   const canWriteAccess = useEnvironmentScope(accessEnvironmentId, AuthAccessWriteScope);
   const canReadRelay = useEnvironmentScope(accessEnvironmentId, AuthRelayReadScope);
-  const canMaintain = useEnvironmentScope(accessEnvironmentId, AuthEnvironmentMaintainScope);
   const canManageRelay = useEnvironmentScope(accessEnvironmentId, AuthRelayWriteScope);
+  const canMaintain = useEnvironmentScope(accessEnvironmentId, AuthEnvironmentMaintainScope);
   const canManageLocalBackend = isPrimaryAccess && !isLocalEnvironmentDisabled() && canMaintain;
   const showsAccess = view === "access";
   const authAccessChanges = useEnvironmentQuery(
@@ -1397,10 +1398,28 @@ function ConnectionsSettingsContent({
             ) : canManageLocalBackend ? (
               renderDisabledNetworkAccessRow()
             ) : null}
-            {canReadRelay || canManageRelay ? (
+            {canManageLocalBackend && accessEnvironmentId && desktopBridge?.setY3Connect ? (
+              <Y3ConnectRow
+                key={accessEnvironmentId}
+                environmentId={accessEnvironmentId}
+                canPair={canWriteAccess}
+                scopes={currentSessionScopes ?? []}
+                sessions={
+                  authAccessChanges.data?.type === "snapshot" ? desktopClientSessions : null
+                }
+                lanAddress={
+                  visibleDesktopNetworkAdvertisedEndpoints.find(
+                    (endpoint) =>
+                      endpoint.reachability === "lan" && endpoint.status === "available",
+                  )?.httpBaseUrl ?? null
+                }
+                managed={remoteClientsDenial}
+              />
+            ) : null}
+            {canReadRelay ? (
               <CloudLinkRow
                 environmentId={accessEnvironmentId}
-                canReadRelay={canReadRelay}
+                canReadRelay
                 canManageRelay={canManageRelay}
                 connectDeviceApproval={
                   accessServerConfig?.settings.requireConnectDeviceApproval === undefined
