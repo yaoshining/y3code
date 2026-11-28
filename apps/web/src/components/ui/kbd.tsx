@@ -15,8 +15,8 @@ function Kbd({
       className={cn(
         "pointer-events-none inline-flex h-5 min-w-5 select-none items-center justify-center gap-1 rounded px-1 font-medium font-sans text-muted-foreground text-xs [&_svg:not([class*='size-'])]:size-3",
         variant === "outline"
-          ? "border border-b-2 border-foreground/15 px-1.5"
-          : "bg-foreground/[0.07]",
+          ? "border border-b-2 border-foreground/15 px-1.5 stock-dark:border-[var(--silk-glass-border)] stock-dark:bg-popover/75"
+          : "bg-foreground/[0.07] stock-dark:bg-popover/75 stock-dark:inset-shadow-[0_0_0_1px_var(--silk-soft-edge)]",
         className,
       )}
       data-slot="kbd"

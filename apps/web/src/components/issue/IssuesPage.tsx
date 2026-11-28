@@ -568,7 +568,10 @@ export function IssuesPage() {
         const presentation = issueTrackerPresentation(group.tracker.tracker);
         const showScope = new Set(group.rows.map((row) => row.scope.toLowerCase())).size > 1;
         return (
-          <section key={issueTrackerKey(group.tracker)} className="flex flex-col gap-1">
+          <section
+            key={issueTrackerKey(group.tracker)}
+            className="flex flex-col gap-1 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-2"
+          >
             <h2 className="flex items-center gap-1.5 px-3 text-xs font-medium text-muted-foreground">
               <presentation.Icon aria-hidden className="size-3.5" />
               {presentation.providerName}
@@ -662,13 +665,13 @@ export function IssuesPage() {
   );
 
   return (
-    <SidebarInset className="h-dvh min-h-0 overflow-hidden overscroll-y-none">
+    <SidebarInset surface="secondary" className="h-dvh min-h-0 overflow-hidden overscroll-y-none">
       <div className="relative flex min-h-0 flex-1">
-        <div className="@container/issue-list flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-background">
+        <div className="@container/issue-list flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-background stock-dark:bg-transparent">
           <WorkspacePageHeader
             electron={isElectron}
             reserveNativeControls={!rightPanelState.isOpen}
-            className="relative bg-background"
+            className="relative bg-background stock-dark:bg-transparent"
           >
             <WorkspaceBreadcrumb ariaLabel={gt("Issues breadcrumb")}>
               <WorkspaceBreadcrumbItem current>
@@ -704,7 +707,7 @@ export function IssuesPage() {
 
           <div className="topbar-scroll-fade scrollbar-gutter-both min-h-0 flex-1 overflow-y-auto">
             <WorkspacePageContainer width="expanded" className="min-h-full gap-4">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-2">
                 <div className="min-w-0 basis-full @lg/issue-list:min-w-48 @lg/issue-list:basis-0 @lg/issue-list:flex-1">
                   <PullRequestSearchInput
                     value={search.q ?? ""}

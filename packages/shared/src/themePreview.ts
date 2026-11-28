@@ -1,4 +1,8 @@
-import type { ThemeAppearance } from "./themePalettes.js";
+import {
+  T3_CODE_DARK_THEME_COLORS,
+  type ThemeAppearance,
+  type ThemeColors,
+} from "./themePalettes.ts";
 
 export type ThemePreviewColors = Readonly<{
   canvas: string;
@@ -6,19 +10,23 @@ export type ThemePreviewColors = Readonly<{
   messageAction: string;
 }>;
 
-export const STANDARD_THEME_PREVIEW_COLORS: Readonly<Record<ThemeAppearance, ThemePreviewColors>> =
-  {
-    light: {
-      canvas: "#fcfcfc",
-      accent: "#f4f4f5",
-      messageAction: "#4f46e5",
-    },
-    dark: {
-      canvas: "#0a0a0a",
-      accent: "#1c1c1f",
-      messageAction: "#8b9cff",
-    },
-  };
+export const STANDARD_THEME_PREVIEW_COLORS = {
+  light: {
+    canvas: "#fcfcfc",
+    accent: "#f4f4f5",
+    messageAction: "#4f46e5",
+  },
+  dark: {
+    sidebar: T3_CODE_DARK_THEME_COLORS.sidebar,
+    canvas: T3_CODE_DARK_THEME_COLORS.canvas,
+    surface: T3_CODE_DARK_THEME_COLORS.surface,
+    text: T3_CODE_DARK_THEME_COLORS.text,
+    accentSurface: T3_CODE_DARK_THEME_COLORS.accentSurface,
+    accent: T3_CODE_DARK_THEME_COLORS.update,
+    messageSurface: T3_CODE_DARK_THEME_COLORS.messageSurface,
+    messageAction: T3_CODE_DARK_THEME_COLORS.messageAction,
+  },
+} as const satisfies Readonly<Record<ThemeAppearance, ThemePreviewColors & Partial<ThemeColors>>>;
 
 export type ThemePreviewRenderSpec = Readonly<{
   baseTarget: string;

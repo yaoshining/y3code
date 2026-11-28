@@ -960,8 +960,10 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
       <div
         ref={pickerContentRef}
         className={cn(
-          "relative flex w-screen max-w-90 flex-row overflow-hidden",
-          props.docked ? "max-sm:h-56 max-sm:w-full max-sm:max-w-none" : "max-h-86.5",
+          "relative flex min-w-0 flex-row overflow-hidden",
+          props.docked
+            ? "flex-1 max-sm:h-56 max-sm:w-full max-sm:flex-auto"
+            : "max-h-86.5 w-screen max-w-90",
         )}
         // Docked, the popup sets the height; a minimum here would overflow short windows.
         style={
@@ -982,6 +984,12 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
             onFocusSearch={focusSearchInput}
             instanceEntries={sidebarInstanceEntries}
             showFavorites
+            expanded={props.docked === true}
+            favoriteCount={
+              flatModels.filter((model) =>
+                favoritesSet.has(providerModelKey(model.instanceId, model.slug)),
+              ).length
+            }
             {...(selectableUnavailableInstanceIds ? { selectableUnavailableInstanceIds } : {})}
             {...(lockedDisabledInstanceIds
               ? {
@@ -1045,10 +1053,12 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
           <div
             className={cn(
               "flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/40",
-              showSidebar && "border-l border-border/70",
+              props.docked ? "stock-dark:bg-transparent" : "stock-dark:bg-(--silk-surface-glass)",
+              showSidebar && "border-l border-border/70 stock-dark:border-(--silk-soft-edge)",
             )}
           >
             <ComboboxSearchInput
+              variant={props.docked ? "well" : "default"}
               ref={searchInputRef}
               placeholder={gt("Search models...")}
               value={searchQuery}
@@ -1212,6 +1222,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
                 return (
                   <ModelListRow
                     key={modelKey}
+                    docked={props.docked === true}
                     index={index}
                     slug={model.slug}
                     name={model.name}

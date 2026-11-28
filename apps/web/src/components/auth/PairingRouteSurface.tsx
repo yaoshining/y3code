@@ -21,7 +21,7 @@ import { m, type MessageResolver } from "../../i18n/messages";
 export function PairingPendingSurface() {
   const gt = useGT();
   return (
-    <StandalonePage>
+    <StandalonePage variant="silk">
       <StandalonePageHeader
         title={gt("Pairing with this environment")}
         description={gt("Validating the pairing link and preparing your session.")}
@@ -89,7 +89,7 @@ export function PairingRouteSurface({
   }, [autoPairToken]);
 
   return (
-    <StandalonePage>
+    <StandalonePage variant="silk">
       <StandalonePageHeader
         title={gt("Pair with this environment")}
         description={describeAuthGate(auth.bootstrapMethods, messages)}
@@ -121,7 +121,7 @@ export function PairingRouteSurface({
         ) : null}
 
         <div className="flex flex-wrap gap-2">
-          <Button disabled={isSubmitting} size="sm" type="submit">
+          <Button variant="silk" disabled={isSubmitting} size="sm" type="submit">
             {isSubmitting ? gt("Pairing...") : gt("Continue")}
           </Button>
           <Button
@@ -223,7 +223,7 @@ export function HostedPairingRouteSurface() {
   };
 
   return (
-    <StandalonePage>
+    <StandalonePage variant="silk">
       <StandalonePageHeader
         title={
           status === "paired"
@@ -262,7 +262,7 @@ export function HostedPairingRouteSurface() {
       <div className="mt-6 flex flex-wrap gap-2">
         {status === "confirm" ? (
           <>
-            <Button size="sm" onClick={() => void submitHostedPairingRequest()}>
+            <Button size="sm" variant="silk" onClick={() => void submitHostedPairingRequest()}>
               <T>Add backend</T>
             </Button>
             <Button
@@ -277,11 +277,11 @@ export function HostedPairingRouteSurface() {
             </Button>
           </>
         ) : status === "pairing" ? (
-          <Button disabled size="sm">
+          <Button disabled size="sm" variant="silk">
             <T>Pairing...</T>
           </Button>
         ) : canRetry ? (
-          <Button size="sm" onClick={() => void submitHostedPairingRequest()}>
+          <Button size="sm" variant="silk" onClick={() => void submitHostedPairingRequest()}>
             <T>Try again</T>
           </Button>
         ) : null}

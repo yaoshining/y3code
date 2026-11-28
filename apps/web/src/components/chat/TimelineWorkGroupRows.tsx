@@ -111,7 +111,7 @@ export const WorkGroupSection = memo(function WorkGroupSection({
   }
 
   return (
-    <section aria-label={gt("Activity")}>
+    <section aria-label={gt("Activity")} className="stock-dark:space-y-1.5">
       {nonEmptyEntries.map((workEntry) => (
         <SimpleWorkEntryRow
           key={workEntry.id}

@@ -353,6 +353,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     targetId: "appearance",
   },
   {
+    id: "silk-window-frame",
+    title: msg("Nebula Silk frame"),
+    to: "/settings/appearance",
+    searchTerms: [msg("window border aura stock dark theme")],
+  },
+  {
     // Prefixed because the slider control already owns the `appearance-contrast` id.
     id: "setting-appearance-contrast",
     title: msg("Contrast"),

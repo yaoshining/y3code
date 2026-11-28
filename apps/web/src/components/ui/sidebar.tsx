@@ -316,7 +316,7 @@ function Sidebar({
       <SidebarInstanceContext value={instanceContextValue}>
         <div
           className={cn(
-            "flex h-full w-(--sidebar-width) flex-col bg-sidebar surface-grain text-sidebar-foreground",
+            "flex h-full w-(--sidebar-width) flex-col bg-sidebar surface-grain text-sidebar-foreground stock-dark:silk-sidebar-canvas",
             className,
           )}
           data-slot="sidebar"
@@ -365,7 +365,7 @@ function Sidebar({
             </SheetHeader>
             <div
               className={cn(
-                "flex h-full w-full flex-col pb-safe pt-safe",
+                "flex h-full w-full flex-col pb-safe pt-safe stock-dark:silk-sidebar-canvas",
                 SIDEBAR_TITLEBAR_CONTROL_SIZE,
                 side === "left" ? "pl-safe" : "pr-safe",
               )}
@@ -405,7 +405,7 @@ function Sidebar({
         />
         <div
           className={cn(
-            "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) md:flex",
+            "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) md:flex stock-dark:in-data-[app-shell-frame]:max-h-full",
             "[[data-panel-animations=true]_&]:transition-[left,right,width] [[data-panel-animations=true]_&]:[transition-duration:var(--panel-animation-duration)] [[data-panel-animations=true]_&]:ease-out",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
@@ -419,7 +419,7 @@ function Sidebar({
           {...props}
         >
           <div
-            className="flex h-full w-full flex-col bg-sidebar surface-grain group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm/5"
+            className="flex h-full w-full flex-col bg-sidebar surface-grain stock-dark:silk-sidebar-canvas group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm/5"
             data-sidebar="sidebar"
             data-slot="sidebar-inner"
           >
@@ -763,11 +763,18 @@ function SidebarInput({ className, ...props }: Omit<InputProps, "unstyled" | "va
   );
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+function SidebarInset({
+  className,
+  surface = "chat",
+  ...props
+}: React.ComponentProps<"main"> & { surface?: "chat" | "secondary" }) {
   return (
     <main
       className={cn(
-        "relative flex min-w-0 w-full flex-1 flex-col bg-background surface-grain",
+        "relative flex min-w-0 w-full flex-1 flex-col bg-background surface-grain stock-dark:md:in-data-[app-shell-frame]:max-h-full",
+        surface === "secondary"
+          ? "stock-dark:silk-modal-canvas stock-dark:silk-hairline-top"
+          : "stock-dark:silk-chat-canvas",
         "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ms-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ms-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm/5",
         className,
       )}
@@ -890,6 +897,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: "font-medium text-sidebar-muted-foreground/80",
         outline: "bg-sidebar-control-surface ring-1 ring-sidebar-border",
+        silk: "font-medium text-sidebar-muted-foreground/80 stock-dark:border stock-dark:border-transparent stock-dark:data-[active=true]:border-(--silk-selection-edge) stock-dark:data-[active=true]:bg-linear-to-r stock-dark:data-[active=true]:from-[#3b2848]/90 stock-dark:data-[active=true]:to-[#281e42]/80 stock-dark:data-[active=true]:shadow-[0_2px_12px_rgb(161_78_213/18%)] stock-dark:data-[active=true]:inset-shadow-(--silk-selection-mark) stock-dark:data-[active=true]:text-(--silk-violet) stock-dark:data-[active=true]:[&>svg]:text-(--silk-violet)",
       },
     },
   },

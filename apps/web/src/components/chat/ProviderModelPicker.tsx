@@ -7,6 +7,7 @@ import {
 } from "@t3tools/contracts";
 import { RegistryContext } from "@effect/atom-react";
 import { T, useGT } from "gt-react";
+import { SlidersHorizontalIcon, XIcon } from "lucide-react";
 import {
   createContext,
   memo,
@@ -18,7 +19,8 @@ import {
   useState,
 } from "react";
 import { Badge } from "../ui/badge";
-import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
+import { Popover, PopoverPopup, PopoverTitle, PopoverTrigger } from "../ui/popover";
 import { cn } from "~/lib/utils";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { ModelPickerContent, resolveModelPickerSelectedModel } from "./ModelPickerContent";
@@ -86,7 +88,11 @@ function lockBackgroundScroll(popup: HTMLElement | null) {
 }
 
 /** What a docked effort column needs from its picker: the model it serves. */
-export const DockedPickerContext = createContext<{ modelLabel: string }>({ modelLabel: "" });
+export const DockedPickerContext = createContext<{
+  modelLabel: string;
+  open: boolean;
+  docked: boolean;
+}>({ modelLabel: "", open: true, docked: false });
 
 export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   environmentId: EnvironmentId | null;
@@ -467,20 +473,44 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
         {...(docked
           ? { side: "top" as const, collisionAvoidance: { side: "shift", align: "shift" } as const }
           : {})}
-        className="before:hidden"
+        className={docked ? undefined : "before:hidden"}
+        variant={docked ? "model-picker" : "default"}
         padding="none"
         touchBackdrop
       >
         {props.effortColumn ? (
-          <DockedPickerContext value={{ modelLabel: triggerTitle }}>
-            <div className="flex max-h-(--available-height) flex-col">
-              {/* One fixed height, so a model with more options never resizes the popup. Short
-                  windows shrink it and keep the footer. */}
-              <div className="flex h-86.5 min-h-0 max-sm:h-auto max-sm:flex-col">
+          <DockedPickerContext value={{ modelLabel: triggerTitle, open: isMenuOpen, docked }}>
+            <div className="flex max-h-[calc(var(--available-height)-2px)] w-[min(45.5rem,calc(var(--available-width)-2px))] flex-col sm:h-112">
+              <div className="flex shrink-0 items-center gap-2 border-b border-border/70 px-3 py-2 stock-dark:border-(--silk-soft-edge)">
+                <span
+                  aria-hidden="true"
+                  className="grid size-8 shrink-0 place-items-center rounded-lg bg-muted text-primary stock-dark:bg-(image:--silk-emblem-bg) stock-dark:text-(--silk-violet) stock-dark:shadow-(--silk-emblem-shadow)"
+                >
+                  <SlidersHorizontalIcon className="size-4" />
+                </span>
+                <PopoverTitle>
+                  <T>Switch model</T>
+                </PopoverTitle>
+                <span className="hidden border-s border-border/70 ps-2 text-xs text-muted-foreground min-[360px]:inline stock-dark:border-(--silk-soft-edge)">
+                  <T>Reasoning &amp; execution</T>
+                </span>
+                <div className="ms-auto flex shrink-0">
+                  <Button
+                    type="button"
+                    size="icon-xs"
+                    variant="ghost-muted"
+                    aria-label={gt("Close")}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <XIcon />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex min-h-0 flex-1 max-sm:flex-col">
                 {picker}
                 <div
                   data-model-picker-effort
-                  className="flex min-h-0 w-48 flex-col sm:shrink-0 border-l border-border/70 bg-muted/40 max-sm:h-64 max-sm:w-full max-sm:border-t max-sm:border-l-0"
+                  className="flex min-h-0 w-80 flex-col border-l border-border/70 bg-muted/40 stock-dark:border-(--silk-soft-edge) stock-dark:bg-silk-chat-glass/20 sm:shrink-0 max-sm:h-68 max-sm:w-full max-sm:border-t max-sm:border-l-0"
                   onKeyDown={(event) => {
                     if (event.key !== "ArrowLeft" || event.altKey || event.ctrlKey || event.metaKey)
                       return;

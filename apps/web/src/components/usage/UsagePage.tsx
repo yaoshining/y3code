@@ -680,14 +680,17 @@ function UsageOverview({
   const rankedProviders = rankProvidersByMetric(activeProviders, merged.providers, metric);
 
   return (
-    <div aria-busy={loadingPartial} className="flex flex-col gap-6">
+    <div
+      aria-busy={loadingPartial}
+      className="flex flex-col gap-6 stock-dark:[--usage-codex:var(--silk-violet)] stock-dark:[--usage-claude:var(--silk-amber)] stock-dark:[--usage-grok:#adb3da] stock-dark:[--usage-cursor:var(--silk-rose)] stock-dark:[--usage-opencode:var(--silk-cyan)] stock-dark:[--usage-antigravity:#efb9ff] stock-dark:[--usage-pi:var(--silk-green)] stock-dark:[--usage-muse:#94b9ff]"
+    >
       {sourceMessages.map((message) => (
         <p key={message} className="mb-4 text-sm text-muted-foreground">
           {message}
         </p>
       ))}
       <section className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-5">
+        <div className="silk-hairline-top flex min-w-0 flex-col gap-5 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80 stock-dark:p-4 stock-dark:shadow-(--silk-card-shadow)">
           <div className="flex flex-col gap-1">
             <p
               className={cn(
@@ -808,7 +811,7 @@ function UsageOverview({
           })}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-3">
+        <div className="silk-hairline-top flex min-w-0 flex-col gap-3 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80 stock-dark:p-4 stock-dark:shadow-(--silk-card-shadow)">
           <h2 className="text-sm font-medium text-foreground">
             {shownHourly
               ? metric === "tokens"
@@ -834,7 +837,7 @@ function UsageOverview({
         </div>
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-2 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-4">
         <h2 className="text-sm font-medium text-foreground">
           <T>Totals</T>
         </h2>
@@ -862,6 +865,7 @@ function UsageOverview({
           <Metric
             loading={loadingPartial}
             label={gt("Cache savings")}
+            tone="savings"
             value={formatUsd(merged.costQuality.cacheSavingsUsd, locale)}
           />
         </dl>
@@ -869,7 +873,10 @@ function UsageOverview({
 
       {merged.totalTokens > 0 ? (
         <section
-          className={cn("grid gap-x-12 gap-y-8 lg:grid-cols-2", figureClass(loadingPartial))}
+          className={cn(
+            "grid gap-x-12 gap-y-8 lg:grid-cols-2 stock-dark:gap-x-4",
+            figureClass(loadingPartial),
+          )}
         >
           {metric === "tokens" ? (
             <UsageShareBar
@@ -897,7 +904,7 @@ function UsageOverview({
         </section>
       ) : null}
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-sm font-medium text-foreground">
             <T>Breakdown</T>
@@ -1120,16 +1127,22 @@ function Metric({
   label,
   value,
   loading,
+  tone,
 }: {
   readonly label: string;
   readonly value: string;
   readonly loading: boolean;
+  readonly tone?: "savings";
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd
-        className={cn("text-base font-medium text-foreground tabular-nums", figureClass(loading))}
+        className={cn(
+          "text-base font-medium text-foreground tabular-nums stock-dark:text-lg",
+          tone === "savings" && "stock-dark:text-(--silk-green)",
+          figureClass(loading),
+        )}
       >
         {value}
       </dd>

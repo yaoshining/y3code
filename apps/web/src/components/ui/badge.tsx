@@ -18,19 +18,26 @@ const badgeVariants = cva(
         default:
           "h-5.5 min-w-5.5 px-[calc(--spacing(1)-1px)] text-sm sm:h-4.5 sm:min-w-4.5 sm:text-xs",
         lg: "h-6.5 min-w-6.5 px-[calc(--spacing(1.5)-1px)] text-base sm:h-5.5 sm:min-w-5.5 sm:text-sm",
+        pill: "h-5.5 min-w-5.5 rounded-full px-2 text-sm sm:h-4.5 sm:min-w-4.5 sm:text-xs",
+        "pill-sm":
+          "h-5 min-w-5 rounded-full px-1.5 text-xs leading-none sm:h-4 sm:min-w-4 sm:text-[.625rem]",
         // Fractional leading rounds font metrics and raises fixed-height labels, especially under zoom.
         sm: "h-5 min-w-5 rounded-[.25rem] px-[calc(--spacing(1)-1px)] text-xs leading-none sm:h-4 sm:min-w-4 sm:text-[.625rem]",
       },
       variant: {
         default: "bg-primary text-primary-foreground [button&,a&]:hover:bg-primary/90",
         destructive: "bg-destructive text-white [button&,a&]:hover:bg-destructive/90",
-        error: "bg-destructive/8 text-destructive-foreground dark:bg-destructive/16",
-        info: "bg-info/8 text-info-foreground dark:bg-info/16",
+        error:
+          "bg-destructive/8 text-destructive-foreground dark:bg-destructive/16 stock-dark:border-destructive/24",
+        info: "bg-info/8 text-info-foreground dark:bg-info/16 stock-dark:border-[var(--silk-cyan)]/24 stock-dark:text-[color:var(--silk-cyan)]",
         outline:
           "border-input bg-background text-foreground dark:bg-input/32 [button&,a&]:hover:bg-accent/50 dark:[button&,a&]:hover:bg-input/48",
         secondary: "bg-secondary text-secondary-foreground [button&,a&]:hover:bg-secondary/90",
-        success: "bg-success/8 text-success-foreground dark:bg-success/16",
-        warning: "bg-warning/8 text-warning-foreground dark:bg-warning/16",
+        silk: "border-border bg-accent/80 text-accent-foreground stock-dark:border-[var(--silk-glass-border)] stock-dark:bg-popover/75 stock-dark:text-foreground",
+        success:
+          "bg-success/8 text-success-foreground dark:bg-success/16 stock-dark:border-[var(--silk-green)]/24 stock-dark:text-[color:var(--silk-green)]",
+        warning:
+          "bg-warning/8 text-warning-foreground dark:bg-warning/16 stock-dark:border-warning/24",
         label:
           "bg-[color-mix(in_srgb,var(--label)_8%,transparent)] text-[color-mix(in_srgb,var(--label)_30%,var(--color-foreground))] dark:bg-[color-mix(in_srgb,var(--label)_12%,transparent)] dark:text-[color-mix(in_srgb,var(--label)_45%,var(--color-foreground))]",
       },

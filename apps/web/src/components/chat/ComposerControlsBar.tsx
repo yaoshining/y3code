@@ -38,7 +38,8 @@ import { resolveComposerControlsOwnership } from "./composerControlsOwnership";
  * expanded footer or the resting controls host.
  */
 // Model and effort share one trigger; it stays filled while its popup is open.
-const MODEL_TRIGGER_STATES = "data-popup-open:bg-accent data-popup-open:text-foreground";
+const MODEL_TRIGGER_STATES =
+  "data-popup-open:bg-accent data-popup-open:text-foreground stock-dark:rounded-lg stock-dark:border-(--silk-glass-border) stock-dark:bg-(--silk-surface-well)/75 stock-dark:hover:bg-(--silk-surface-selected)";
 
 export function ComposerControlsBar(props: {
   environmentId: EnvironmentId;
@@ -281,7 +282,8 @@ export function ComposerControlsBar(props: {
               inert={hidden || undefined}
               className={cn(
                 "flex w-max min-w-max shrink-0 items-center gap-1",
-                hidden && "pointer-events-none invisible absolute",
+                "stock-dark:before:pointer-events-none stock-dark:before:absolute stock-dark:before:inset-y-1.5 stock-dark:before:-start-0.5 stock-dark:before:w-px stock-dark:before:bg-(--silk-soft-edge)",
+                hidden ? "pointer-events-none invisible absolute" : "stock-dark:relative",
                 index >= restingBlockDefs.length - iconOnlyBlockCount &&
                   "[&_[data-composer-control-label]]:pointer-events-none [&_[data-composer-control-label]]:invisible [&_[data-composer-control-label]]:absolute [&_[data-composer-control-label]]:w-max [&_[data-composer-control-label]]:max-w-none [&_[data-composer-control-compact-icon]]:[visibility:inherit] [&_[data-composer-control-compact-icon]]:relative",
               )}

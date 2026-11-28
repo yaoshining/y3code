@@ -41,6 +41,7 @@ import type { MobileThemeVariables } from "../../../lib/mobileTheme";
 import {
   createMobileThemePairPatch,
   createMobileThemeSelectionPatch,
+  isMobileStockDark,
   normalizeMobileThemeMode,
   resolveMobileThemeIds,
   type MobileThemeAppearance,
@@ -402,6 +403,11 @@ export function useAppearancePreferences(): AppearancePreferencesContextValue {
     throw new Error("useAppearancePreferences must be used within AppearancePreferencesProvider");
   }
   return context;
+}
+
+export function useMobileStockDark() {
+  const { themeId, themeAppearance } = useAppearancePreferences();
+  return isMobileStockDark(themeId, themeAppearance);
 }
 
 export function useAndroidFloatingTabs() {

@@ -2,6 +2,7 @@ import {
   memo,
   useEffect,
   useState,
+  type MouseEvent,
   type MouseEventHandler,
   type PointerEventHandler,
   type ReactNode,
@@ -98,6 +99,9 @@ const formatPendingPrimaryActionLabel = (
 const STOP_PENDING_MAX_MS = 10_000;
 // The action that takes Stop's place ignores clicks this long, so repeat Stop clicks can't resume.
 const STOP_LANDED_CLICK_GUARD_MS = 500;
+
+const silkActionClassName =
+  "stock-dark:[background-image:var(--silk-cta-bg)] stock-dark:text-(--silk-cta-foreground) stock-dark:shadow-(--silk-cta-shadow) stock-dark:hover:brightness-105 stock-dark:disabled:opacity-45 stock-dark:disabled:shadow-none";
 
 const messageActionPillClassName =
   "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-message-action font-medium text-base text-message-action-foreground shadow-xs shadow-message-action/24 outline-none hover:bg-message-action-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none sm:text-sm";
@@ -305,6 +309,21 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
   );
 
   if (pendingAction) {
+    const submitProps = {
+      type: "submit" as const,
+      ...pointerFocusProps,
+      onClick: (event: MouseEvent<HTMLButtonElement>) => {
+        if (stopPhase === "landed") event.preventDefault();
+      },
+      disabled:
+        !canOperateThread ||
+        isEnvironmentUnavailable ||
+        isSendDisabled ||
+        pendingAction.isResponding ||
+        (!voiceInputActive &&
+          (pendingAction.isLastQuestion ? !pendingAction.isComplete : !pendingAction.canAdvance)),
+      children: formatPendingPrimaryActionLabel({ compact, ...pendingAction }, m),
+    };
     return (
       <div className={cn("flex items-center justify-end", compact ? "gap-1.5" : "gap-2")}>
         {pendingAction.questionIndex > 0 ? (
@@ -333,33 +352,14 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
         ) : null}
         {children}
         <button
-          type="submit"
-          className={cn(messageActionPillClassName, "h-8 sm:h-7", compact ? "px-3" : "px-4")}
-          {...pointerFocusProps}
-          onClick={(event) => {
-            if (stopPhase === "landed") event.preventDefault();
-          }}
-          disabled={
-            !canOperateThread ||
-            isEnvironmentUnavailable ||
-            isSendDisabled ||
-            pendingAction.isResponding ||
-            (!voiceInputActive &&
-              (pendingAction.isLastQuestion
-                ? !pendingAction.isComplete
-                : !pendingAction.canAdvance))
-          }
-        >
-          {formatPendingPrimaryActionLabel(
-            {
-              compact,
-              isLastQuestion: pendingAction.isLastQuestion,
-              isResponding: pendingAction.isResponding,
-              questionIndex: pendingAction.questionIndex,
-            },
-            m,
+          className={cn(
+            messageActionPillClassName,
+            silkActionClassName,
+            "h-8 sm:h-7",
+            compact ? "px-3" : "px-4",
           )}
-        </button>
+          {...submitProps}
+        />
         {canInterrupt || stopPhase === "pending" || stopPhase === "timedOut"
           ? renderStopGenerationButton(true)
           : null}
@@ -436,35 +436,32 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
         : submitLabel);
 
   const isBusyOrHeld = isSendBusy || isSendHeld;
-  const sendButton = (
-    <button
-      type={showResume ? "button" : "submit"}
-      className={cn(
-        "relative isolate flex h-9 w-9 items-center justify-center overflow-hidden rounded-full shadow-xs transition-all duration-150 enabled:cursor-pointer enabled:inset-shadow-control-highlight hover:scale-105 active:inset-shadow-control-pressed active:shadow-none disabled:pointer-events-none disabled:shadow-none disabled:hover:scale-100 sm:h-8 sm:w-8 [&_svg]:pointer-events-none",
-        stageBackdropVariant
-          ? "bg-transparent text-white enabled:shadow-black/24 enabled:hover:brightness-110 disabled:opacity-64"
-          : "bg-message-action text-message-action-foreground enabled:shadow-message-action/24 hover:bg-message-action-hover disabled:bg-foreground/12 disabled:text-muted-foreground",
-      )}
-      {...pointerFocusProps}
-      onClick={(event) => {
-        if (stopPhase === "landed") {
-          event.preventDefault();
-          return;
-        }
-        if (showResume) onResume?.();
-        else onSubmitMessage?.(event);
-      }}
-      disabled={
-        isBusyOrHeld ||
-        isSendDisabled ||
-        isEnvironmentUnavailable ||
-        (!hasSendableContent && !showResume)
+  const sendButtonProps = {
+    ...pointerFocusProps,
+    type: showResume ? ("button" as const) : ("submit" as const),
+    onClick: (event: MouseEvent<HTMLButtonElement>) => {
+      if (stopPhase === "landed") {
+        event.preventDefault();
+        return;
       }
-      aria-label={submitStatus ?? submitLabel}
-      aria-busy={isBusyOrHeld || undefined}
-    >
+      if (showResume) onResume?.();
+      else onSubmitMessage?.(event);
+    },
+    disabled:
+      isBusyOrHeld ||
+      isSendDisabled ||
+      isEnvironmentUnavailable ||
+      (!hasSendableContent && !showResume),
+    "aria-label": submitStatus ?? submitLabel,
+    "aria-busy": isBusyOrHeld || undefined,
+  };
+  const sendButtonContent = (
+    <>
       {stageBackdropVariant ? (
-        <span className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <span
+          className="pointer-events-none absolute inset-0 -z-10 stock-dark:hidden"
+          aria-hidden="true"
+        >
           <StageBackdropButtonArt variant={stageBackdropVariant} />
         </span>
       ) : null}
@@ -489,7 +486,22 @@ export const ComposerPrimaryActions = memo(function ComposerPrimaryActions({
           />
         </svg>
       )}
+    </>
+  );
+  const sendButton = stageBackdropVariant ? (
+    <button
+      {...sendButtonProps}
+      className={cn(
+        "relative isolate flex size-9 items-center justify-center overflow-hidden rounded-full stock-dark:rounded-xl bg-transparent text-white shadow-xs transition-all duration-150 enabled:cursor-pointer not-stock-dark:enabled:shadow-black/24 enabled:inset-shadow-control-highlight not-stock-dark:enabled:hover:brightness-110 hover:scale-105 active:inset-shadow-control-pressed active:shadow-none disabled:pointer-events-none disabled:opacity-64 disabled:shadow-none disabled:hover:scale-100 sm:size-8 [&_svg]:pointer-events-none",
+        silkActionClassName,
+      )}
+    >
+      {sendButtonContent}
     </button>
+  ) : (
+    <Button variant="silk" size="icon-pill" {...sendButtonProps}>
+      {sendButtonContent}
+    </Button>
   );
 
   const submit = (

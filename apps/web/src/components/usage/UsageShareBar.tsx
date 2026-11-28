@@ -26,13 +26,13 @@ export function UsageShareBar({
   if (total <= 0) return null;
 
   return (
-    <div className="flex min-w-0 flex-col gap-2.5">
+    <div className="flex min-w-0 flex-col gap-2.5 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-4 stock-dark:[--usage-share-input:var(--silk-violet)] stock-dark:[--usage-share-cache-read:var(--silk-green)] stock-dark:[--usage-share-cache-write:var(--silk-cyan)] stock-dark:[--usage-share-output:var(--silk-amber)] stock-dark:[--usage-share-other:var(--silk-rose)]">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-sm font-medium text-foreground">{label}</h3>
         {aside}
       </div>
       {/* The legend below carries every figure; the bar's tooltips are pointer-only. */}
-      <div aria-hidden className="flex h-2 gap-0.5">
+      <div aria-hidden className="flex h-2 gap-0.5 stock-dark:h-2.5">
         {visible.map((segment) => (
           <SharedTooltipTrigger
             key={segment.label}

@@ -546,7 +546,7 @@ function SubagentTimelineLink(props: {
     </>
   );
   const className =
-    "group/subagent flex w-full min-w-0 items-center gap-2.5 rounded-md px-2 py-1.5 text-left";
+    "group/subagent flex w-full min-w-0 items-center gap-2.5 rounded-md px-2 py-1.5 text-left stock-dark:rounded-xl stock-dark:silk-delegate-card stock-dark:px-3 stock-dark:py-2";
   return (
     <Tooltip>
       <TooltipTrigger

@@ -40,11 +40,11 @@ const ink = (percent: number) =>
   `color-mix(in oklab, var(--foreground) ${percent}%, var(--background))`;
 
 const TYPE_COLORS = {
-  input: ink(60),
-  cacheRead: ink(30),
-  cacheWrite: ink(72),
-  output: ink(100),
-  other: ink(44),
+  input: `var(--usage-share-input, ${ink(60)})`,
+  cacheRead: `var(--usage-share-cache-read, ${ink(30)})`,
+  cacheWrite: `var(--usage-share-cache-write, ${ink(72)})`,
+  output: `var(--usage-share-output, ${ink(100)})`,
+  other: `var(--usage-share-other, ${ink(44)})`,
 };
 
 export function costTypeSegments(cost: CategoryCost): readonly ShareSegment[] {
@@ -74,8 +74,12 @@ export function tokenTypeSegments(
 
 export function speedCostSegments(cost: SpeedCost): readonly ShareSegment[] {
   return [
-    { label: msg("Standard"), value: cost.standard, color: ink(34) },
-    { label: msg("Fast"), value: cost.fast, color: ink(66) },
-    { label: msg("Ultrafast"), value: cost.ultrafast, color: ink(100) },
+    { label: msg("Standard"), value: cost.standard, color: `var(--usage-share-input, ${ink(34)})` },
+    { label: msg("Fast"), value: cost.fast, color: `var(--usage-share-cache-write, ${ink(66)})` },
+    {
+      label: msg("Ultrafast"),
+      value: cost.ultrafast,
+      color: `var(--usage-share-output, ${ink(100)})`,
+    },
   ];
 }

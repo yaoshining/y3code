@@ -291,7 +291,7 @@ export function WorkflowRunsView({
         {/* Below md there is room for one of the two: the list, or the run picked from it. */}
         <div
           className={cn(
-            "min-h-0 w-full shrink-0 flex-col md:w-72 md:border-e",
+            "min-h-0 w-full shrink-0 flex-col md:w-72 md:border-e stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-deep)",
             selectedRunId === null ? "flex" : "hidden",
             paneOpen ? "xl:flex" : "md:flex",
           )}
@@ -397,7 +397,7 @@ export function WorkflowRunsView({
                       : gt("No questions of this kind wait on you.")}
                 </p>
               ) : (
-                <ul className="space-y-0.5">
+                <ul className="space-y-0.5 stock-dark:space-y-1.5">
                   {listed.map((node) => (
                     <WorkflowRunListItem
                       key={node.run.runId}
@@ -479,7 +479,13 @@ function WorkflowRunListItem({
   const about = run.subject;
   const m = useMessages();
   return (
-    <li className={cn("rounded-lg", current ? "bg-accent" : undefined)}>
+    <li
+      className={cn(
+        "rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80",
+        current &&
+          "bg-accent stock-dark:bg-(--silk-surface-selected) stock-dark:inset-shadow-(--silk-selection-mark)",
+      )}
+    >
       <button
         type="button"
         aria-current={current ? "true" : undefined}

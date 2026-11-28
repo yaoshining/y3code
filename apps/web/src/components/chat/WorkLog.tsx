@@ -24,11 +24,13 @@ export function WorkLogBlock({
   return (
     <div
       className={
-        continues || layout === "group-header"
+        layout === "group-header"
           ? "pb-0"
-          : layout === "group-content"
-            ? "pb-1"
-            : "pb-2"
+          : continues
+            ? "pb-0 stock-dark:pb-1.5"
+            : layout === "group-content"
+              ? "pb-1"
+              : "pb-2"
       }
     >
       {children}
@@ -92,7 +94,9 @@ function useRowClassName(interactive: boolean, focusable = interactive) {
   const grouped = use(GroupedRows);
   return cn(
     "group/timeline-row relative w-full min-w-0 rounded-md px-0.5 text-left transition-colors",
-    grouped ? "py-0" : "py-0.5",
+    grouped
+      ? "py-0"
+      : "py-0.5 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-well)/75 stock-dark:px-2.5 stock-dark:py-1.5",
     interactive && "cursor-pointer",
     focusable && focusRingClassName,
   );

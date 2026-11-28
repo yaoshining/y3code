@@ -23,6 +23,7 @@ const buttonVariants = cva(
           "size-5 rounded-sm p-0 before:rounded-[calc(var(--radius-sm)-1px)] [&_svg:not([class*='size-'])]:size-3",
         "icon-tiny": "size-4 p-0 [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8 sm:size-7",
+        "icon-pill": "size-9 rounded-full before:rounded-full sm:size-8",
         "icon-sm-pill": "size-8 rounded-full before:rounded-full sm:size-7",
         "icon-xl":
           "size-11 sm:size-10 [&_svg:not([class*='size-'])]:size-5 sm:[&_svg:not([class*='size-'])]:size-4.5",
@@ -51,20 +52,23 @@ const buttonVariants = cva(
           "[--control-icon-color:var(--contrast-muted-foreground)] border-transparent text-foreground data-pressed:bg-accent [:hover,[data-pressed]]:bg-accent",
         "ghost-muted":
           "[--control-icon-color:currentColor] border-transparent text-muted-foreground data-pressed:bg-accent [:hover,[data-pressed]]:bg-accent [:hover,[data-pressed]]:text-foreground",
+        "glass-ghost":
+          "[--control-icon-color:currentColor] border-transparent text-muted-foreground data-pressed:bg-accent [:hover,[data-pressed]]:bg-accent [:hover,[data-pressed]]:text-foreground stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-well) stock-dark:text-(--silk-violet) stock-dark:[:hover,[data-pressed]]:bg-(--silk-surface-hover)",
         "ghost-destructive":
           "[--control-icon-color:currentColor] border-transparent text-muted-foreground data-pressed:bg-accent [:hover,[data-pressed]]:bg-accent [:hover,[data-pressed]]:text-destructive",
         glass:
-          "surface-glass [--control-icon-color:var(--contrast-muted-foreground)] rounded-full border-border/60 text-foreground shadow-sm before:rounded-full [:hover,[data-pressed]]:border-border",
+          "surface-glass [--control-icon-color:var(--contrast-muted-foreground)] rounded-full border-border/60 text-foreground shadow-sm before:rounded-full not-stock-dark:[:hover,[data-pressed]]:border-border stock-dark:border-[var(--silk-glass-border)] stock-dark:bg-popover/75 stock-dark:[:hover,[data-pressed]]:bg-popover/95 stock-dark:[:hover,[data-pressed]]:shadow-[0_2px_12px_rgb(151_88_230/14%)]",
         link: "border-transparent underline-offset-4 [:hover,[data-pressed]]:underline",
         "media-close":
           "[--control-icon-color:currentColor] border-transparent bg-black/65 text-white shadow-sm ring-1 ring-white/20 [:hover,[data-pressed]]:bg-black/80 focus-visible:ring-white",
         "media-navigation":
           "[--control-icon-color:currentColor] absolute top-1/2 z-20 -translate-y-1/2 border-transparent text-white/90 [:hover,[data-pressed]]:bg-white/10 [:hover,[data-pressed]]:text-white focus-visible:ring-white focus-visible:ring-offset-transparent",
         outline:
-          "[--control-icon-color:var(--contrast-muted-foreground)] border-input bg-popover not-dark:bg-clip-padding text-foreground shadow-xs/5 not-disabled:not-active:not-data-pressed:before:shadow-[0_1px_--theme(--color-black/4%)] dark:bg-input/32 dark:not-disabled:before:shadow-[0_-1px_--theme(--color-white/2%)] dark:not-disabled:not-active:not-data-pressed:before:shadow-[0_-1px_--theme(--color-white/6%)] [:disabled,:active,[data-pressed]]:shadow-none [:hover,[data-pressed]]:bg-accent/50 dark:[:hover,[data-pressed]]:bg-input/64",
+          "[--control-icon-color:var(--contrast-muted-foreground)] border-input bg-popover not-dark:bg-clip-padding text-foreground shadow-xs/5 not-disabled:not-active:not-data-pressed:before:shadow-[0_1px_--theme(--color-black/4%)] dark:not-stock-dark:bg-input/32 dark:not-disabled:before:shadow-[0_-1px_--theme(--color-white/2%)] dark:not-disabled:not-active:not-data-pressed:before:shadow-[0_-1px_--theme(--color-white/6%)] [:disabled,:active,[data-pressed]]:shadow-none not-stock-dark:[:hover,[data-pressed]]:bg-accent/50 dark:not-stock-dark:[:hover,[data-pressed]]:bg-input/64 stock-dark:border-[var(--silk-glass-border)] stock-dark:bg-card stock-dark:[:hover,[data-pressed]]:bg-popover/90 stock-dark:hover:not-active:not-data-pressed:not-disabled:shadow-[0_2px_12px_rgb(151_88_230/12%)]",
         overlay: "border-transparent bg-black/70 text-white/65 [:hover,[data-pressed]]:bg-black/90",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground [:active,[data-pressed]]:bg-secondary/80 [:hover,[data-pressed]]:bg-secondary/90",
+        silk: "stock-dark:rounded-xl stock-dark:border-transparent not-stock-dark:border-primary not-stock-dark:bg-primary not-stock-dark:text-primary-foreground not-stock-dark:shadow-xs not-stock-dark:shadow-primary/24 not-stock-dark:not-disabled:inset-shadow-[0_1px_--theme(--color-white/16%)] not-stock-dark:[:active,[data-pressed]]:inset-shadow-[0_1px_--theme(--color-black/8%)] not-stock-dark:[:disabled,:active,[data-pressed]]:shadow-none not-stock-dark:[:hover,[data-pressed]]:bg-primary/90 stock-dark:[background-image:var(--silk-cta-bg)] stock-dark:text-(--silk-cta-foreground) stock-dark:font-semibold stock-dark:shadow-(--silk-cta-shadow) stock-dark:disabled:opacity-45 stock-dark:[:hover,[data-pressed]]:brightness-105 stock-dark:[:disabled,:active,[data-pressed]]:shadow-none",
         "warning-outline":
           "border-warning/32 bg-warning-surface text-warning-foreground shadow-xs/5 [:disabled,:active,[data-pressed]]:shadow-none [:hover,[data-pressed]]:border-warning/40 [:hover,[data-pressed]]:bg-warning/16 dark:[:hover,[data-pressed]]:bg-warning/24",
       },
@@ -113,7 +117,7 @@ const inlineButtonVariants = cva(
         muted: "text-muted-foreground hover:text-foreground",
         destructive: "text-destructive/80 hover:text-destructive",
         picker:
-          "gap-1 text-foreground decoration-from-font underline-offset-4 data-popup-open:underline",
+          "gap-1 text-foreground decoration-from-font underline-offset-4 data-popup-open:underline stock-dark:text-(--silk-violet)",
       },
     },
   },

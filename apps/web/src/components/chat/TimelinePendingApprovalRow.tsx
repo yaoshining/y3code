@@ -57,86 +57,90 @@ export const TimelinePendingApprovalRow = memo(function TimelinePendingApprovalR
   const label = pushHooks ? PUSH_HOOKS_APPROVAL_LABEL : presentation.label;
   const canRespond = approval.responseCapability === "live";
   return (
-    <WorkLogRow
-      role="group"
-      aria-label={m(label)}
-      data-v2-item-type="approval_request"
-      wrapLabel
-      icon={
-        <ToolActivityIconView
-          icon={undefined}
-          fallbackName={pushHooks ? "terminal" : presentation.icon}
-          className="block size-4 shrink-0 stroke-2 text-icon-muted"
-          muted
-        />
-      }
-      label={
-        pushHooks ? (
-          <span className="block min-w-0 text-foreground select-text! wrap-anywhere">
-            {m(PUSH_HOOKS_APPROVAL_QUESTION)}
-          </span>
-        ) : (
-          <ApprovalText
-            text={approval.detail || m(presentation.label)}
-            label={m(presentation.detailLabel)}
+    <div className="stock-dark:rounded-xl stock-dark:silk-approval-card stock-dark:[&_[data-v2-item-type=approval_request]]:border-0 stock-dark:[&_[data-v2-item-type=approval_request]]:bg-transparent">
+      <WorkLogRow
+        role="group"
+        aria-label={m(label)}
+        data-v2-item-type="approval_request"
+        wrapLabel
+        icon={
+          <ToolActivityIconView
+            icon={undefined}
+            fallbackName={pushHooks ? "terminal" : presentation.icon}
+            className="block size-4 shrink-0 stroke-2 text-icon-muted stock-dark:text-warning"
+            muted
           />
-        )
-      }
-    >
-      <div className="ms-7.5 flex min-w-0 flex-col gap-1 pb-1 text-xs">
-        {pushHooks ? <PushHooksApprovalDetails pushHooks={pushHooks} /> : null}
-        {approval.appName ? (
-          <span className="text-muted-foreground wrap-anywhere">{approval.appName}</span>
-        ) : null}
-        {approval.reason ? (
-          <span className="text-muted-foreground select-text wrap-anywhere">{approval.reason}</span>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {canRespond ? (
-            <>
-              <span className="inline-flex items-center gap-1 text-warning">
-                <ShieldIcon aria-hidden className="size-3 shrink-0" />
-                <T>Waiting for approval</T>
-              </span>
-              {onRespondToApproval ? (
-                <>
-                  <span aria-hidden className="text-muted-foreground">
-                    ·
-                  </span>
-                  <ComposerPendingApprovalActions
-                    presentation="inline"
-                    requestId={approval.requestId}
-                    disabled={!canOperateThread}
-                    isResponding={respondingRequestIds.includes(approval.requestId)}
-                    canRespond={canRespond}
-                    options={approval.options}
-                    onRespondToApproval={onRespondToApproval}
-                  />
-                </>
-              ) : null}
-            </>
-          ) : (
-            <span className="text-warning">
-              <T>Provider process is gone. Interrupt or restart the run to respond.</T>
+        }
+        label={
+          pushHooks ? (
+            <span className="block min-w-0 text-foreground select-text! wrap-anywhere">
+              {m(PUSH_HOOKS_APPROVAL_QUESTION)}
             </span>
-          )}
-          {approval.fullAccessOverride ? (
-            <Popover>
-              <PopoverTrigger openOnHover render={<InlineButton tone="muted" />}>
-                {m(FULL_ACCESS_OVERRIDE_QUESTION)}
-              </PopoverTrigger>
-              <PopoverPopup
-                aria-label={m(FULL_ACCESS_OVERRIDE_QUESTION)}
-                tooltipStyle
-                side="top"
-                className="max-w-[min(22rem,calc(100vw-2rem))] whitespace-normal"
-              >
-                {fullAccessOverrideExplanation(approval.fullAccessOverride, m)}
-              </PopoverPopup>
-            </Popover>
+          ) : (
+            <ApprovalText
+              text={approval.detail || m(presentation.label)}
+              label={m(presentation.detailLabel)}
+            />
+          )
+        }
+      >
+        <div className="ms-7.5 flex min-w-0 flex-col gap-1 pb-1 text-xs">
+          {pushHooks ? <PushHooksApprovalDetails pushHooks={pushHooks} /> : null}
+          {approval.appName ? (
+            <span className="text-muted-foreground wrap-anywhere">{approval.appName}</span>
           ) : null}
+          {approval.reason ? (
+            <span className="text-muted-foreground select-text wrap-anywhere">
+              {approval.reason}
+            </span>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {canRespond ? (
+              <>
+                <span className="inline-flex items-center gap-1 text-warning">
+                  <ShieldIcon aria-hidden className="size-3 shrink-0" />
+                  <T>Waiting for approval</T>
+                </span>
+                {onRespondToApproval ? (
+                  <>
+                    <span aria-hidden className="text-muted-foreground">
+                      ·
+                    </span>
+                    <ComposerPendingApprovalActions
+                      presentation="inline"
+                      requestId={approval.requestId}
+                      disabled={!canOperateThread}
+                      isResponding={respondingRequestIds.includes(approval.requestId)}
+                      canRespond={canRespond}
+                      options={approval.options}
+                      onRespondToApproval={onRespondToApproval}
+                    />
+                  </>
+                ) : null}
+              </>
+            ) : (
+              <span className="text-warning">
+                <T>Provider process is gone. Interrupt or restart the run to respond.</T>
+              </span>
+            )}
+            {approval.fullAccessOverride ? (
+              <Popover>
+                <PopoverTrigger openOnHover render={<InlineButton tone="muted" />}>
+                  {m(FULL_ACCESS_OVERRIDE_QUESTION)}
+                </PopoverTrigger>
+                <PopoverPopup
+                  aria-label={m(FULL_ACCESS_OVERRIDE_QUESTION)}
+                  tooltipStyle
+                  side="top"
+                  className="max-w-[min(22rem,calc(100vw-2rem))] whitespace-normal"
+                >
+                  {fullAccessOverrideExplanation(approval.fullAccessOverride, m)}
+                </PopoverPopup>
+              </Popover>
+            ) : null}
+          </div>
         </div>
-      </div>
-    </WorkLogRow>
+      </WorkLogRow>
+    </div>
   );
 });

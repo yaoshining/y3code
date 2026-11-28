@@ -160,8 +160,8 @@ function SettingsContentLayout() {
     <AppRouteModal label={gt("Settings")}>
       <div className="relative flex min-h-0 flex-1">
         <SettingsSidebarNav pathname={navPathname} />
-        <div {...contentArea} className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <header className="flex h-12 shrink-0 items-center gap-3 border-b ps-5 pe-2">
+        <div {...contentArea} className="silk-hairline-top flex min-h-0 min-w-0 flex-1 flex-col">
+          <header className="flex h-12 shrink-0 items-center gap-3 border-b ps-5 pe-2 stock-dark:border-(--silk-glass-border) stock-dark:bg-card/80">
             <SettingsBreadcrumb pathname={pathname} />
             <div className="ms-auto flex shrink-0 items-center gap-1">
               {pathname === "/settings/general" ? (

@@ -17,6 +17,7 @@ import {
   type DesktopSnapShotEvent,
   DEFAULT_CLIENT_SETTINGS,
 } from "@t3tools/contracts";
+import { T3_CODE_DARK_THEME_COLORS } from "@t3tools/shared/themePalettes";
 
 import * as DesktopAssets from "../app/DesktopAssets.ts";
 import * as DesktopClerk from "../app/DesktopClerk.ts";
@@ -171,7 +172,7 @@ function getIconOption(
 }
 
 function getInitialWindowBackgroundColor(shouldUseDarkColors: boolean): string {
-  return shouldUseDarkColors ? "#000000" : "#ffffff";
+  return shouldUseDarkColors ? T3_CODE_DARK_THEME_COLORS.chrome : "#ffffff";
 }
 
 type DisplayBounds = Pick<Electron.Rectangle, "x" | "y" | "width" | "height">;

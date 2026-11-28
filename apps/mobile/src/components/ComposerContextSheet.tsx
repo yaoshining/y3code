@@ -31,6 +31,8 @@ import { ComposerContextAttachment } from "./ComposerContextAttachment";
 import { AppText as Text } from "./ui/AppText";
 import { Sheet } from "./ui/Sheet";
 import { useAppearancePreferences } from "../features/settings/appearance/AppearancePreferencesProvider";
+import { cn } from "../lib/cn";
+import { isMobileStockDark } from "../lib/mobileTheme";
 import { getMobileTerminalTheme } from "../features/terminal/terminalTheme";
 
 function ContextField(props: {
@@ -236,7 +238,10 @@ export function ComposerContextSheet(props: {
           <>
             {record.kind === "terminal" ? (
               <View
-                className="overflow-hidden rounded-xl"
+                className={cn(
+                  "overflow-hidden rounded-xl",
+                  isMobileStockDark(themeId, themeAppearance) && "border border-focus/30",
+                )}
                 style={{ backgroundColor: terminalTheme.background }}
               >
                 <ScrollView

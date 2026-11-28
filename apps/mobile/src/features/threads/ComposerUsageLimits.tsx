@@ -5,6 +5,8 @@ import { Pressable, ScrollView, View } from "react-native";
 
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { AppText as Text } from "../../components/ui/AppText";
+import { cn } from "../../lib/cn";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
 import { AccountLimits, ResetCredits } from "../usage/UsageLimitsSection";
 
 export function ComposerUsageLimits({
@@ -20,6 +22,7 @@ export function ComposerUsageLimits({
 }) {
   const gt = useGT();
   const now = Date.parse(report.createdAt);
+  const stockDark = useMobileStockDark();
   const close = (
     <Pressable
       accessibilityLabel={gt("Dismiss usage limits")}
@@ -32,7 +35,12 @@ export function ComposerUsageLimits({
     </Pressable>
   );
   return (
-    <View className="overflow-hidden rounded-[20px] border-continuous bg-card">
+    <View
+      className={cn(
+        "overflow-hidden rounded-[20px] border-continuous",
+        stockDark ? "border border-focus/30 bg-[#261d37]" : "bg-card",
+      )}
+    >
       <ScrollView bounces={false} showsVerticalScrollIndicator={false} style={{ maxHeight }}>
         {report.accounts.map((account, index) => {
           const resetCreditInput =

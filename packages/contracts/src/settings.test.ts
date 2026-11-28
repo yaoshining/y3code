@@ -129,6 +129,13 @@ describe("storage cleanup settings", () => {
   });
 });
 
+it("defaults legacy settings to the Silk frame and preserves a stored opt-out", () => {
+  expect(decodeClientSettings({}).silkWindowFrame).toBe(true);
+  const patch = decodeClientSettingsPatch({ silkWindowFrame: false });
+  const settings = decodeClientSettings(patch);
+  expect(decodeClientSettings(encodeClientSettings(settings)).silkWindowFrame).toBe(false);
+});
+
 describe("ClientSettings terminal close confirmation", () => {
   it("keeps confirmation enabled for settings without a saved preference", () => {
     expect(decodeClientSettings({}).confirmTerminalClose).toBe(true);

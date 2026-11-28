@@ -1,12 +1,31 @@
 import type { ReactNode } from "react";
 
+import { cn } from "../../lib/utils";
 import { T3Wordmark } from "../T3Wordmark";
 
-export function StandalonePage({ children }: { readonly children: ReactNode }) {
+export function StandalonePage({
+  children,
+  variant = "default",
+}: {
+  readonly children: ReactNode;
+  readonly variant?: "default" | "silk";
+}) {
   return (
     // The page owns scrolling because root cannot scroll; safe centering keeps oversized cards top-aligned.
-    <div className="flex h-full items-center-safe justify-center overflow-y-auto scrollbar-gutter-both bg-background px-4 py-10 text-foreground sm:px-6">
-      <section className="dialog-glass w-full max-w-xl rounded-2xl border p-6">{children}</section>
+    <div
+      className={cn(
+        "flex h-full items-center-safe justify-center overflow-y-auto scrollbar-gutter-both bg-background px-4 py-10 text-foreground sm:px-6",
+        variant === "silk" && "stock-dark:[background-image:var(--silk-ambient-bg)]",
+      )}
+    >
+      <section
+        className={cn(
+          "dialog-glass w-full max-w-xl rounded-2xl border p-6",
+          variant === "silk" && "silk-hairline-top",
+        )}
+      >
+        {children}
+      </section>
     </div>
   );
 }

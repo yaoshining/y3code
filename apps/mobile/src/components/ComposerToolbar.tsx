@@ -15,6 +15,7 @@ import {
 
 import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
 
+import { useMobileStockDark } from "../features/settings/appearance/AppearancePreferencesProvider";
 import { cn } from "../lib/cn";
 import { AppText as Text } from "./ui/AppText";
 import { SymbolView } from "./ui/AppSymbol";
@@ -297,6 +298,7 @@ export function ComposerActionButton(props: {
   const { scale, smallIconSize } = useAndroidControlSizing();
   const circleSize = Math.round((props.size === "large" ? 44 : 30) * scale);
   const fadeIcon = props.disabled === true && props.variant !== "danger";
+  const silk = useMobileStockDark() && props.variant === "primary" && !props.disabled;
   return (
     <Pressable
       accessibilityLabel={props.accessibilityLabel}
@@ -310,14 +312,26 @@ export function ComposerActionButton(props: {
       onTouchStart={props.onTouchStart}
     >
       <View
-        style={{ width: circleSize, height: circleSize }}
+        style={{
+          width: circleSize,
+          height: circleSize,
+          ...(silk
+            ? {
+                experimental_backgroundImage:
+                  "linear-gradient(115deg, #ffb3dd, #c8afff 60%, #9be5ef)",
+                boxShadow: "0 0 12px rgba(194, 173, 255, 0.36)",
+              }
+            : {}),
+        }}
         className={cn(
           "items-center justify-center rounded-full",
           props.variant === "danger"
             ? "bg-danger"
             : props.disabled
               ? "bg-foreground/12"
-              : "bg-primary",
+              : silk
+                ? "bg-[#c8afff]"
+                : "bg-primary",
         )}
       >
         {/* Fade the icon as one layer: a translucent tint, or opacity on a Tabler icon (which
@@ -335,7 +349,9 @@ export function ComposerActionButton(props: {
                 ? "accent-danger-foreground"
                 : props.disabled
                   ? "accent-foreground"
-                  : "accent-primary-foreground"
+                  : silk
+                    ? "accent-[#161022]"
+                    : "accent-primary-foreground"
             }
             type="monochrome"
           />

@@ -1,5 +1,6 @@
 import type { ProviderOptionDescriptor } from "@t3tools/contracts";
 import { ZapIcon } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 import type { ComposerControlSize } from "./ComposerControl";
 
@@ -54,7 +55,12 @@ export function effortBarHeights(count: number, maxBar: number): number[] {
  * Rising bars on whole pixels so they stay sharp on 1x displays. Color follows the text.
  * The box is centered like the icons beside it; the bars sit on the text baseline inside it.
  */
-export function EffortGlyph(props: { count: number; filled: number; size?: ComposerControlSize }) {
+export function EffortGlyph(props: {
+  count: number;
+  filled: number;
+  size?: ComposerControlSize;
+  tone?: "nebula" | "overload";
+}) {
   const height = props.size === "xs" ? GLYPH_HEIGHT_XS : GLYPH_HEIGHT_SM;
   const step = 4;
   const width = step * props.count - 2;
@@ -67,7 +73,13 @@ export function EffortGlyph(props: { count: number; filled: number; size?: Compo
       viewBox={`0 0 ${width} ${height}`}
       // Inline size: the composer control CSS forces unsized SVGs to 16px.
       style={{ width, height }}
-      className="shrink-0 text-current"
+      className={cn(
+        "shrink-0 text-current",
+        props.tone === "nebula" &&
+          "stock-dark:text-(--silk-violet) stock-dark:drop-shadow-(--silk-violet-glyph-glow)",
+        props.tone === "overload" &&
+          "stock-dark:text-(--silk-cyan) stock-dark:drop-shadow-(--silk-cyan-glyph-glow)",
+      )}
       data-composer-effort-glyph
       // Opts out of the control's negative icon margins, so the row's gaps stay true.
       data-composer-control-icon

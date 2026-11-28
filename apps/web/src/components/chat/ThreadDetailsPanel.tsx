@@ -20,7 +20,9 @@ import ProjectScriptsControl, {
   type ProjectScriptActionResult,
 } from "../ProjectScriptsControl";
 import { T, useGT } from "gt-react";
-import { useState, type ComponentProps } from "react";
+import { useLayoutEffect, useRef, useState, type ComponentProps, type MouseEvent } from "react";
+import { Link } from "@tanstack/react-router";
+import { Button } from "../ui/button";
 import { ThreadDetailsCard } from "./ThreadDetailsCard";
 import { OpenInPicker } from "./OpenInPicker";
 import { ThreadDetailsSection } from "./ThreadDetailsSection";
@@ -41,7 +43,7 @@ import { filesystemEnvironment } from "../../state/filesystem";
 import { useEnvironmentQuery } from "../../state/query";
 import { ThreadDetailsThreadPrRows } from "./ThreadDetailsPrRows";
 import { cn } from "../../lib/utils";
-import { SlidersHorizontalIcon } from "lucide-react";
+import { ArrowLeftIcon, SlidersHorizontalIcon } from "lucide-react";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
 import {
   THREAD_DETAILS_PANEL_ICON_CLASS,
@@ -95,12 +97,33 @@ interface ThreadDetailsPanelProps extends Pick<
   ) => Promise<ProjectScriptActionResult>;
   onDeleteProjectScript: (scriptId: string) => Promise<ProjectScriptActionResult>;
   usage: ThreadDetailsUsageInput;
+  spotlight?: boolean;
+  onSpotlightChange?: (open: boolean) => void;
 }
 
 export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
   const visible = useClientSettings(resolveThreadDetailsVisibility);
   const gt = useGT();
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [internalSpotlight, setInternalSpotlight] = useState(false);
+  const spotlight = props.spotlight ?? internalSpotlight;
+  const setSpotlight = (open: boolean) => {
+    setInternalSpotlight(open);
+    props.onSpotlightChange?.(open);
+  };
+  const spotlightTrigger = useRef<HTMLButtonElement>(null);
+  const backButton = useRef<HTMLButtonElement>(null);
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- moves focus to the visible view after switching card content
+  useLayoutEffect(() => {
+    if (spotlight) backButton.current?.focus();
+    else spotlightTrigger.current?.focus();
+  }, [spotlight]);
+
+  function openSpotlight(event: MouseEvent<HTMLButtonElement>) {
+    spotlightTrigger.current = event.currentTarget;
+    setMenuPosition(null);
+    setSpotlight(true);
+  }
   const t3File = useT3ProjectFileState(
     props.environmentId,
     props.activeProjectScripts && visible.scripts ? props.gitCwd : null,
@@ -160,15 +183,21 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
       threadRef={{ environmentId: props.environmentId, threadId: props.threadId }}
       anchor={props.anchor}
       handle={props.handle}
-      contentKey={THREAD_DETAILS_ITEMS.filter((item) => visible[item.id])
-        .map((item) => item.id)
-        .join(",")}
+      onPopoverClose={() => setSpotlight(false)}
+      contentKey={
+        spotlight
+          ? "context-quotas"
+          : THREAD_DETAILS_ITEMS.filter((item) => visible[item.id])
+              .map((item) => item.id)
+              .join(",")
+      }
       onContextMenu={(event) => {
         // Popups the card opens bubble here through React; they, fields, links, and selected text
         // keep their own menus.
         const target = event.target;
         const selection = window.getSelection();
         if (
+          spotlight ||
           !(target instanceof Element) ||
           !event.currentTarget.contains(target) ||
           target.closest("input, textarea, [contenteditable], a[href]") ||
@@ -202,7 +231,30 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
         };
         return (
           <>
-            <div className="group/details-items">
+            {spotlight ? (
+              <div className="flex flex-col gap-2 p-2">
+                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                  <Button
+                    ref={backButton}
+                    size="micro"
+                    variant="ghost-muted"
+                    onClick={() => setSpotlight(false)}
+                  >
+                    <ArrowLeftIcon data-icon="inline-start" aria-hidden />
+                    <T>Back</T>
+                  </Button>
+                  <Button size="micro" variant="link" render={<Link to="/usage" />}>
+                    <T>Open usage</T>
+                  </Button>
+                </div>
+                <h2 className="px-1 text-sm font-semibold stock-dark:text-(--silk-violet)">
+                  <T>Context &amp; Quotas</T>
+                </h2>
+                <ThreadDetailsContext usage={props.usage.contextWindow} spotlight />
+                <ThreadDetailsUsage {...props.usage} spotlight />
+              </div>
+            ) : null}
+            <div className="group/details-items" hidden={spotlight}>
               {show.environment || show.openIn || show.scripts ? (
                 <ThreadDetailsSection
                   headingId="thread-details-workspace-heading"
@@ -327,10 +379,15 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
                 />
               ) : null}
 
-              {visible.usage ? <ThreadDetailsUsage {...props.usage} /> : null}
+              {visible.usage ? (
+                <ThreadDetailsUsage {...props.usage} onSpotlight={openSpotlight} />
+              ) : null}
 
               {visible.context && props.usage.contextWindow ? (
-                <ThreadDetailsContext usage={props.usage.contextWindow} />
+                <ThreadDetailsContext
+                  usage={props.usage.contextWindow}
+                  onSpotlight={openSpotlight}
+                />
               ) : null}
 
               {/* Shown only when no section above has content, so an emptied card can be refilled. */}

@@ -42,6 +42,7 @@ import { useEnvironment } from "../../state/environments";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { isImageAttachment, type ChatImageAttachment, type ChatMessage } from "../../types";
 import { cn } from "~/lib/utils";
+import { Badge } from "../ui/badge";
 import { Button, InlineButton } from "../ui/button";
 import { toastManager } from "../ui/toast";
 import { m } from "../../i18n/messages";
@@ -269,6 +270,14 @@ export function QueuedRunsControl({
           count: items.length,
         })}
       </span>
+      <div className="hidden self-end stock-dark:flex">
+        <Badge variant="silk" size="pill-sm" aria-hidden>
+          <Clock3Icon />
+          {gt("{count, plural, one {{count} queued} other {{count} queued}}", {
+            count: items.length,
+          })}
+        </Badge>
+      </div>
       <ol className="flex flex-col items-end gap-3" id={queueListId}>
         {visibleItems.map((item, position) => {
           const previewText = isAttachmentOnlyBootstrapPrompt(item.text)
@@ -528,12 +537,12 @@ function QueuedMessage(props: {
       {/* Dashed and unfilled: a turn that has not been sent yet. */}
       <div
         className={cn(
-          "flex min-w-0 max-w-[80%] flex-col rounded-2xl border border-dashed text-sm",
+          "flex min-w-0 max-w-[80%] flex-col rounded-2xl border border-dashed text-sm silk-hairline-top stock-dark:bg-card/90",
           props.isEditing
             ? "border-primary/60 text-foreground"
             : attribution === "guest"
               ? "border-guest/50 text-muted-foreground"
-              : "border-muted-foreground/40 text-muted-foreground",
+              : "border-muted-foreground/40 text-muted-foreground stock-dark:border-(--silk-glass-border)",
           fold === null && "px-3 py-2",
           fold !== null && expanded && "w-full",
         )}

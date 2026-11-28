@@ -319,6 +319,8 @@ import type { AssistantCitationRequest } from "./chat/AssistantCitationSource";
 import { useCitedHistory } from "./chat/citationProcedure";
 import type { MessagesTimelineHistoryControls } from "./chat/MessagesTimeline";
 import { ThreadTimeline } from "./chat/ThreadTimeline";
+import { ActiveStepsBar } from "./chat/ActiveStepsBar";
+import { deriveActiveSteps } from "./chat/ActiveStepsBar.logic";
 import { NativeChildWorkDialog } from "./chat/NativeChildWorkDialog";
 import { ProviderSubagentBar } from "./chat/ProviderSubagentBar";
 import { getTriggerDisplayModelName } from "./chat/providerIconUtils";
@@ -339,6 +341,7 @@ import {
 } from "./chat/PanelLayoutControls";
 import type { ExpandedImagePreview } from "./chat/ExpandedImagePreview";
 import { ThreadDetailsPanel } from "./chat/ThreadDetailsPanel";
+import { ComposerTelemetryStrip } from "./chat/ThreadDetailsUsage";
 import { NoActiveThreadState } from "./NoActiveThreadState";
 import {
   offersWorkspaceModes,
@@ -2165,6 +2168,17 @@ export default function ChatView(props: ChatViewProps) {
       )
     : linkedThreadPullRequestKey;
   const activeRunningTurnId = activeRuntime?.activeRunId ?? null;
+  const activeSteps = isDraftHeroState
+    ? null
+    : deriveActiveSteps(
+        serverVisibleTurnItems,
+        isWorking
+          ? (activeRunningTurnId ??
+              (activeActivityRun && ACTIVE_RUN_STATUSES.has(activeActivityRun.status)
+                ? activeActivityRun.runId
+                : null))
+          : null,
+      );
   useProactivePanels({
     threadRef: isServerThread && !embedded ? activeThreadRef : null,
     enabled: settings.proactivePanelsEnabled && !shouldUsePlanSidebarSheet && !embedded,
@@ -2585,6 +2599,40 @@ export default function ChatView(props: ChatViewProps) {
     closeRightPanelSurface,
   });
   const pullRequestSurfaceAvailable = supportsPullRequests && pullRequestPanelTarget !== null;
+  const [threadDetailsSpotlight, setThreadDetailsSpotlight] = useState<{
+    readonly threadKey: string;
+    readonly open: boolean;
+  } | null>(null);
+  const threadDetailsSpotlightOpen =
+    activeThreadKey !== null &&
+    threadDetailsSpotlight?.threadKey === activeThreadKey &&
+    threadDetailsSpotlight.open;
+  const handleThreadDetailsSpotlightChangeStable = useStableCallback((open: boolean) => {
+    setThreadDetailsSpotlight(
+      open && activeThreadKey !== null ? { threadKey: activeThreadKey, open: true } : null,
+    );
+  });
+  const handleToggleThreadPanelControlStable = useStableCallback(() => {
+    setThreadDetailsSpotlight(null);
+    toggleThreadPanelStable();
+  });
+  const openContextQuotasSpotlightStable = useStableCallback(() => {
+    if (!activeThreadRef || activeThreadKey === null) return;
+    const store = useRightPanelStore.getState();
+    const isPanelOpen = selectThreadPanelOpen(
+      store.threadPanelVisibilityByThreadKey,
+      activeThreadRef,
+      threadPanelPresentation,
+    );
+    if (!isPanelOpen) {
+      setThreadDetailsSpotlight({ threadKey: activeThreadKey, open: true });
+      toggleThreadPanelStable();
+      return;
+    }
+    setThreadDetailsSpotlight(
+      threadDetailsSpotlightOpen ? null : { threadKey: activeThreadKey, open: true },
+    );
+  });
   const {
     acknowledgeActiveThreadWoke,
     activeBranchMismatchKey,
@@ -3514,7 +3562,7 @@ export default function ChatView(props: ChatViewProps) {
     rightPanelOpen,
     rightPanelShortcutLabel: shortcutLabelForCommand(keybindings, "rightPanel.toggle"),
     onToggleTerminal: toggleTerminalVisibilityStable,
-    onToggleThreadPanel: toggleThreadPanelStable,
+    onToggleThreadPanel: handleToggleThreadPanelControlStable,
     onToggleRightPanel: toggleRightPanelStable,
   } satisfies PanelLayoutControlsProps;
   const panelToggleControls = (
@@ -3544,7 +3592,7 @@ export default function ChatView(props: ChatViewProps) {
   const content = (
     <div
       ref={setWorkspaceLayoutElement}
-      className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background"
+      className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background stock-dark:bg-transparent"
     >
       {embedded ? null : (
         <DeviceSetupDialogHost
@@ -3574,7 +3622,7 @@ export default function ChatView(props: ChatViewProps) {
             ref={threadPanelPopoverAnchorRef}
             data-chat-header
             className={cn(
-              "relative bg-background [[data-panel-animations=true]_&]:motion-safe:transition-[padding-left] [[data-panel-animations=true]_&]:motion-safe:duration-(--panel-animation-duration) [[data-panel-animations=true]_&]:motion-safe:ease-out",
+              "relative bg-background stock-dark:bg-transparent stock-dark:border-b stock-dark:border-(--silk-soft-edge) [[data-panel-animations=true]_&]:motion-safe:transition-[padding-left] [[data-panel-animations=true]_&]:motion-safe:duration-(--panel-animation-duration) [[data-panel-animations=true]_&]:motion-safe:ease-out",
               isElectron
                 ? cn(
                     "drag-region flex h-[var(--workspace-topbar-height)] min-h-[var(--workspace-topbar-height)] shrink-0 items-center px-3 sm:px-5",
@@ -3654,9 +3702,17 @@ export default function ChatView(props: ChatViewProps) {
             />
             <div
               {...conversationArea}
-              className="relative flex min-h-0 flex-1 flex-col bg-background"
+              className="relative flex min-h-0 flex-1 flex-col bg-background stock-dark:bg-transparent"
             >
               <WorkspaceMutationIdContext value={workspaceMutationId}>
+                {activeSteps ? (
+                  <ActiveStepsBar
+                    key={`${activeThreadKey}:${activeSteps.id}`}
+                    progress={activeSteps}
+                    activeWorkStartedAt={activeWorkStartedAt}
+                    environmentId={activeThread.environmentId}
+                  />
+                ) : null}
                 <ThreadTimeline
                   pendingApprovals={pendingApprovals}
                   heldApprovalRequestIds={heldApprovalRequestIds}
@@ -4094,6 +4150,19 @@ export default function ChatView(props: ChatViewProps) {
                                 />
                               </div>
                             )}
+                            {!embedded && isServerThread && !isDraftHeroState ? (
+                              <ComposerTelemetryStrip
+                                usage={{
+                                  providerInstanceId: activeProviderInstanceId,
+                                  model: activeUsageModel,
+                                  providers: providerStatuses,
+                                  sources:
+                                    serverConfig?.usageLimitSources ?? EMPTY_USAGE_LIMIT_SOURCES,
+                                  contextWindow: activeContextWindow,
+                                }}
+                                onOpenDetails={openContextQuotasSpotlightStable}
+                              />
+                            ) : null}
                           </div>
                         </div>
                       </ComposerSurface.Shell>
@@ -4135,6 +4204,7 @@ export default function ChatView(props: ChatViewProps) {
                 />
 
                 <ThreadDetailsPanel
+                  key={activeThreadKey}
                   anchor={threadPanelPopoverAnchorRef}
                   handle={threadPanelPopoverHandle}
                   forceNewWorktree={multipleModelSelections !== null}
@@ -4206,6 +4276,8 @@ export default function ChatView(props: ChatViewProps) {
                     sources: serverConfig?.usageLimitSources ?? EMPTY_USAGE_LIMIT_SOURCES,
                     contextWindow: activeContextWindow,
                   }}
+                  spotlight={threadDetailsSpotlightOpen}
+                  onSpotlightChange={handleThreadDetailsSpotlightChangeStable}
                 />
 
                 <PullRequestThreadDialogHost

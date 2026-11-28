@@ -1900,8 +1900,10 @@ export default function ThreadTerminalDrawer({
         data-thread-terminal-drawer
         data-terminal-owner={isPanel ? "right-panel" : "drawer"}
         className={cn(
-          "relative flex min-w-0 flex-col overflow-hidden bg-background",
-          isPanel ? "h-full flex-1" : "z-45 shrink-0 border-t border-border/80",
+          "relative flex min-w-0 flex-col overflow-hidden bg-background stock-dark:bg-(--terminal-background)",
+          isPanel
+            ? "h-full flex-1"
+            : "z-45 shrink-0 border-t border-border/80 stock-dark:border-(--silk-soft-edge)",
         )}
         style={isPanel ? undefined : { height: `var(${DRAG_HEIGHT_PROPERTY}, ${drawerHeight}px)` }}
       >
@@ -1930,8 +1932,10 @@ export default function ThreadTerminalDrawer({
       data-thread-terminal-drawer
       data-terminal-owner={isPanel ? "right-panel" : "drawer"}
       className={cn(
-        "relative flex min-w-0 flex-col overflow-hidden bg-background",
-        isPanel ? "h-full flex-1" : "z-45 shrink-0 border-t border-border/80",
+        "relative flex min-w-0 flex-col overflow-hidden bg-background stock-dark:bg-(--terminal-background)",
+        isPanel
+          ? "h-full flex-1"
+          : "z-45 shrink-0 border-t border-border/80 stock-dark:border-(--silk-soft-edge)",
       )}
       style={isPanel ? undefined : { height: `var(${DRAG_HEIGHT_PROPERTY}, ${drawerHeight}px)` }}
     >
@@ -1939,7 +1943,7 @@ export default function ThreadTerminalDrawer({
 
       {!hasTerminalSidebar && (
         <div className="pointer-events-none absolute right-2 top-2 z-20">
-          <div className="pointer-events-auto inline-flex items-center overflow-hidden rounded-md border border-border/80 bg-background shadow-xs">
+          <div className="pointer-events-auto inline-flex items-center overflow-hidden rounded-md border border-border/80 bg-background shadow-xs stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-glass)">
             <TerminalActionButton
               disabled={!canOperateTerminal}
               className={`p-1 text-foreground/90 transition-colors ${

@@ -39,6 +39,7 @@ import {
 import { useId, useRef, useState, type FormEvent } from "react";
 import { flushSync } from "react-dom";
 
+import { useRenderedStockDark } from "../../hooks/useTheme";
 import { serverEnvironment } from "../../state/server";
 import { useEnvironmentScope } from "../../state/session";
 import { useAtomCommand } from "../../state/use-atom-command";
@@ -96,6 +97,7 @@ function PendingSecretRequestForm(props: {
 }) {
   const { item } = props;
   const messages = useMessages();
+  const stockDark = useRenderedStockDark();
   const formId = useId();
   const errorId = useId();
   const privacyId = useId();
@@ -180,7 +182,11 @@ function PendingSecretRequestForm(props: {
     />
   );
   const saveButton = (
-    <Button type="submit" disabled={submitting || !canSave}>
+    <Button
+      type="submit"
+      variant={stockDark ? "silk" : "default"}
+      disabled={submitting || !canSave}
+    >
       <T>Save securely</T>
     </Button>
   );
@@ -188,7 +194,7 @@ function PendingSecretRequestForm(props: {
   return (
     <form
       data-v2-item-type={item.type}
-      className="flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-4"
+      className="silk-hairline-top flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 stock-dark:silk-interactive-card"
       onSubmit={onSubmit}
       autoComplete="off"
       // On click, not pointerdown: the mousedown that follows a pointerdown
@@ -284,7 +290,10 @@ function PendingSecretRequestForm(props: {
           id={privacyId}
           className="flex min-w-0 grow basis-52 items-center gap-1.5 text-xs text-muted-foreground"
         >
-          <ShieldCheckIcon className="size-3.5 shrink-0" aria-hidden />
+          <ShieldCheckIcon
+            className="size-3.5 shrink-0 stock-dark:text-(--silk-violet)"
+            aria-hidden
+          />
           {secretRequestPrivacyNote(item, messages)}
         </p>
         <div className="ms-auto flex shrink-0 items-center gap-2">

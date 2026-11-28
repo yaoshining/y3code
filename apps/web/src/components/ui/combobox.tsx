@@ -104,13 +104,26 @@ function ComboboxInput({
   );
 }
 
-function ComboboxSearchInput(props: React.ComponentProps<typeof ComboboxInput>) {
+function ComboboxSearchInput({
+  variant = "default",
+  ...props
+}: React.ComponentProps<typeof ComboboxInput> & { variant?: "default" | "well" }) {
   return (
     <label className="block min-w-0 shrink-0 cursor-text px-3 pt-2.5">
-      <div className="relative -translate-y-px border-b border-border/70 pb-1.5 transition-colors focus-within:border-ring">
+      <div
+        className={cn(
+          "relative -translate-y-px border-b border-border/70 pb-1.5 transition-colors focus-within:border-ring",
+          variant === "well" &&
+            "stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-silk-picker-search/80 stock-dark:px-2 stock-dark:py-1 stock-dark:focus-within:border-(--silk-cyan)/70",
+        )}
+      >
         <SearchIcon
           aria-hidden="true"
-          className="pointer-events-none absolute top-1.5 left-0 size-4 shrink-0 text-muted-foreground/55"
+          className={cn(
+            "pointer-events-none absolute top-1.5 left-0 size-4 shrink-0 text-muted-foreground/55",
+            variant === "well" &&
+              "stock-dark:top-1/2 stock-dark:left-2 stock-dark:-translate-y-1/2 stock-dark:text-(--silk-violet)",
+          )}
         />
         <ComboboxInput
           {...props}
@@ -190,17 +203,23 @@ function ComboboxItem({
   children,
   hideIndicator: _hideIndicator = false,
   selectedFill = true,
+  variant = "default",
   ...props
 }: ComboboxPrimitive.Item.Props & {
   hideIndicator?: boolean;
   /** Off for rows that mark selection themselves, so a fill only means hover or highlight. */
   selectedFill?: boolean;
+  variant?: "default" | "model" | "docked-model";
 }) {
   return (
     <ComboboxPrimitive.Item
       className={cn(
         "flex min-h-8 in-data-[side=none]:min-w-[calc(var(--anchor-width)+1.25rem)] cursor-pointer items-center rounded-sm px-2 py-1 text-base outline-none not-data-disabled:hover:bg-foreground/[0.09] data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-selected:text-foreground data-highlighted:bg-foreground/[0.09] data-highlighted:text-accent-foreground [&[data-highlighted][data-selected]]:bg-foreground/[0.09] [&[data-highlighted][data-selected]]:text-accent-foreground data-disabled:opacity-64 sm:min-h-7 sm:text-sm [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         selectedFill && "data-selected:bg-foreground/[0.06]",
+        variant === "model" &&
+          "stock-dark:data-selected:bg-(--silk-surface-selected) stock-dark:data-selected:inset-shadow-(--silk-selection-mark) stock-dark:data-highlighted:bg-(--silk-surface-hover) stock-dark:[&[data-highlighted][data-selected]]:bg-(--silk-surface-hover)",
+        variant === "docked-model" &&
+          "stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-silk-picker-model/70 stock-dark:data-selected:silk-model-picker-active stock-dark:data-highlighted:silk-model-picker-active stock-dark:[&[data-highlighted][data-selected]]:silk-model-picker-active",
         className,
       )}
       data-slot="combobox-item"

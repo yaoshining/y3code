@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test";
+import { T3_CODE_DARK_THEME_COLORS } from "@t3tools/shared/themePalettes";
 
 import indexHtml from "../index.html?raw";
 import {
@@ -256,6 +257,22 @@ describe("index.html boot script", () => {
     expect(boot.isDark).toBe(runtimeResolvedAppearance(storage, prefersDark) === "dark");
   });
 
+  it("paints the stock dark splash and chrome before the runtime mounts", () => {
+    const colors = T3_CODE_DARK_THEME_COLORS;
+    const boot = runBootScript({
+      storage: { [THEME_STORAGE_KEY]: "dark" },
+      prefersDark: false,
+    });
+
+    expect(boot.bootVariables).toEqual({
+      "--boot-background": colors.canvas,
+      "--boot-foreground": colors.text,
+      "--boot-accent": colors.accent,
+    });
+    expect(boot.backgroundColor).toBe(colors.chrome);
+    expect(boot.metaContent).toBe(colors.chrome);
+  });
+
   it("accepts exponent-form OKLCH before the runtime mounts", () => {
     const colors = {
       canvas: "oklch(9.5e-1 1e-2 2.8e2)",
@@ -404,5 +421,7 @@ describe("index.html boot script", () => {
 
     const dark = runBootScript({ storageThrows: true, prefersDark: true });
     expect(dark.isDark).toBe(true);
+    expect(dark.backgroundColor).toBe(T3_CODE_DARK_THEME_COLORS.chrome);
+    expect(dark.metaContent).toBe(T3_CODE_DARK_THEME_COLORS.chrome);
   });
 });

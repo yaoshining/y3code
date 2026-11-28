@@ -3369,7 +3369,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                   id="sidebar-thread-search-results"
                   role="listbox"
                   aria-label={gt("Thread search results")}
-                  className="flex flex-col gap-px"
+                  className="flex flex-col gap-px stock-dark:gap-0.5"
                 >
                   {threadSearchResults.map((thread, index) => {
                     const threadKey = scopedThreadKey(

@@ -922,27 +922,33 @@ it("bounds the parts of a megabyte of approval text and still shows what it ends
   }
 });
 
-it("splits a megabyte of approval text the same way as a short one", () => {
-  const size = 1 << 20;
-  const fill = (unit: string) => unit.repeat(size / unit.length);
-  const count = (text: string) => {
-    const { parts } = approvalTextParts(text, {
-      length: 2 * size,
-      namedRuns: size,
+const approvalStressSize = 1 << 20;
+const fill = (unit: string) => unit.repeat(approvalStressSize / unit.length);
+
+it.each([
+  ["marks before one joiner", () => `1${fill("\u094D")}\u200D`, 2, 1],
+  ["joined emoji ending with a joiner", () => fill("\u{1F469}\u200D"), 2, 1],
+  ["joined emoji with skin tones", () => fill("\u{1F469}\u{1F3FD}\u200D\u{1F4BB}"), 1, 0],
+  ["joiners", () => fill("\u200D"), 1, 1],
+  ["selectors", () => fill("\uFE0F"), 1, 1],
+  ["carriage returns", () => fill("\r"), 1, 1],
+  [
+    "alternating named and plain characters",
+    () => fill("a\r"),
+    approvalStressSize,
+    approvalStressSize / 2,
+  ],
+  ["plain characters", () => fill("a"), 1, 0],
+] as const)(
+  "splits long approval text containing %s",
+  (_description, text, partCount, namedCount) => {
+    const { parts } = approvalTextParts(text(), {
+      length: 2 * approvalStressSize,
+      namedRuns: approvalStressSize,
       tailLength: 0,
       tailNamedRuns: 0,
     });
-    return [parts.length, parts.filter((part) => part.named).length];
-  };
-  // A long run of marks before one joiner, and a long run of joined emoji with one left open.
-  expect(count(`1${fill("\u094D")}\u200D`)).toEqual([2, 1]);
-  expect(count(fill("\u{1F469}\u200D"))).toEqual([2, 1]);
-  expect(count(fill("\u{1F469}\u{1F3FD}\u200D\u{1F4BB}"))).toEqual([1, 0]);
-  // Nothing but joiners, selectors or carriage returns: one run.
-  expect(count(fill("\u200D"))).toEqual([1, 1]);
-  expect(count(fill("\uFE0F"))).toEqual([1, 1]);
-  expect(count(fill("\r"))).toEqual([1, 1]);
-  // Every other character named: one run each.
-  expect(count(fill("a\r"))).toEqual([size, size / 2]);
-  expect(count(fill("a"))).toEqual([1, 0]);
-});
+    expect(parts).toHaveLength(partCount);
+    expect(parts.filter((part) => part.named)).toHaveLength(namedCount);
+  },
+);

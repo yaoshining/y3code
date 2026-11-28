@@ -45,7 +45,7 @@ function IssueRowImpl({
     <div
       className={cn(
         "flex items-center rounded-md [content-visibility:auto] [contain-intrinsic-block-size:56.5px]",
-        selected ? "bg-accent" : "hover:bg-accent/60",
+        selected ? "bg-accent stock-dark:bg-(--silk-surface-selected)" : "hover:bg-accent/60",
       )}
     >
       <button

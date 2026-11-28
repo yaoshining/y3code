@@ -76,7 +76,7 @@ export function UsageModelDialog({
         if (!open) onClose();
       }}
     >
-      <DialogPopup className="max-w-3xl">
+      <DialogPopup variant="silk" className="max-w-3xl">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <ProviderInstanceIcon
@@ -95,11 +95,13 @@ export function UsageModelDialog({
         </DialogHeader>
         <DialogPanel>
           <div className="flex flex-col gap-8">
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 stock-dark:rounded-xl stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-card/80 stock-dark:p-4">
               {stats.map((stat) => (
                 <div key={stat.label} className="flex min-w-0 flex-col gap-0.5">
                   <dt className="text-xs text-muted-foreground">{stat.label}</dt>
-                  <dd className="text-2xl font-semibold text-foreground">{stat.value}</dd>
+                  <dd className="text-2xl font-semibold text-foreground stock-dark:tabular-nums">
+                    {stat.value}
+                  </dd>
                 </div>
               ))}
             </dl>

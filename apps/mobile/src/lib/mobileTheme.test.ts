@@ -20,6 +20,7 @@ import {
   DEFAULT_MOBILE_THEME_ID,
   flattenThemeColor,
   getMobileThemeVariables,
+  isMobileStockDark,
   resolveMobileThemeIds,
   themeColorWithAlpha,
   themeColorToNativeColor,
@@ -57,6 +58,14 @@ function compositeOver(overlay: string, background: string): string {
 }
 
 describe("mobile themes", () => {
+  it("scopes Silk accents to the stock dark selection on either platform", () => {
+    const themeIds = [...MOBILE_THEME_IDS, "material-you"] as const;
+    expect(themeIds.filter((id) => isMobileStockDark(id, "light"))).toEqual([]);
+    expect(themeIds.filter((id) => isMobileStockDark(id, "dark"))).toEqual([
+      DEFAULT_MOBILE_THEME_ID,
+    ]);
+  });
+
   it("declares every runtime theme variable in the static stylesheet", () => {
     const generatedVariables = createMobileThemeVariables(T3_CHAT_THEME.colors, "light");
     expect(Object.keys(readDefaultMobileThemeVariables("light")).sort()).toEqual(

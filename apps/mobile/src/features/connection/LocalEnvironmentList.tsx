@@ -5,6 +5,8 @@ import { View } from "react-native";
 
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { AppText as Text } from "../../components/ui/AppText";
+import { cn } from "../../lib/cn";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
 import { ConnectionEnvironmentRow } from "./ConnectionEnvironmentRow";
 
 type EnvironmentRowProps = ComponentProps<typeof ConnectionEnvironmentRow>;
@@ -22,11 +24,14 @@ export function LocalEnvironmentList({
   readonly expandedId: EnvironmentId | null;
   readonly onToggle: (environmentId: EnvironmentId) => void;
 }) {
+  const stockDark = useMobileStockDark();
+  const cardClassName = stockDark ? "border border-focus/20 bg-card" : "bg-grouped-card";
+
   if (environments.length === 0) {
     return (
       <View
         collapsable={false}
-        className="items-center gap-3 rounded-[24px] bg-grouped-card px-6 py-8"
+        className={cn("items-center gap-3 rounded-[24px] px-6 py-8", cardClassName)}
       >
         <View className="h-12 w-12 items-center justify-center rounded-[16px] bg-subtle">
           <SymbolView
@@ -48,7 +53,7 @@ export function LocalEnvironmentList({
   }
 
   return (
-    <View collapsable={false} className="overflow-hidden rounded-[24px] bg-grouped-card">
+    <View collapsable={false} className={cn("overflow-hidden rounded-[24px]", cardClassName)}>
       {environments.map((environment) => (
         <View key={environment.environmentId} collapsable={false}>
           <ConnectionEnvironmentRow

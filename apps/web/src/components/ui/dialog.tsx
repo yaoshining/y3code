@@ -118,7 +118,7 @@ function DialogPopup({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
   bottomStickOnMobile?: boolean;
-  variant?: "default" | "media";
+  variant?: "default" | "media" | "silk";
   mediaControlsPlacement?: "inside" | "outside";
 }) {
   const gt = useGT();
@@ -130,7 +130,8 @@ function DialogPopup({
         className={cn(
           variant === "media" ? DIALOG_MEDIA_POPUP_CLASS : DIALOG_POPUP_CLASS,
           "row-start-2 text-popover-foreground",
-          variant === "default" && "max-h-full max-w-lg",
+          variant !== "media" && "max-h-full max-w-lg",
+          variant === "silk" && "silk-hairline-top",
           bottomStickOnMobile && DIALOG_MOBILE_SHEET_CLASS,
           className,
         )}
@@ -157,7 +158,10 @@ function DialogPopup({
   return (
     <DialogPortal>
       {/* Media opens from inside other overlays (a composer chip, a popover), so it sits above them. */}
-      <DialogBackdrop className={variant === "media" ? "z-[60]" : undefined} variant={variant} />
+      <DialogBackdrop
+        className={variant === "media" ? "z-[60]" : undefined}
+        variant={variant === "media" ? "media" : "default"}
+      />
       <DialogViewport
         className={cn(
           bottomStickOnMobile && "max-sm:grid-rows-[1fr_auto] max-sm:p-0 max-sm:pt-12",

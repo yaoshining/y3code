@@ -33,6 +33,8 @@ import { serverEnvironment } from "../../state/server";
 import { readEnvironmentScope, useEnvironmentScope } from "../../state/session";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { useNowMinuteMs } from "../../lib/clock";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
+import { MobileLedQuotaMeter } from "./MobileLedQuotaMeter";
 import {
   environmentIdsKey,
   limitsAutoRefreshSetAtom,
@@ -66,6 +68,7 @@ function WindowRow(props: {
   const pace = paceOf(window, now);
   const m = useMessages();
   const resetsIn = resetLabels(window, now, m)?.full;
+  const stockDark = useMobileStockDark();
   const [barWidth, setBarWidth] = useState(0);
   const tickX =
     timeLeft === null || barWidth < 6
@@ -102,38 +105,47 @@ function WindowRow(props: {
           </T>
         </Text>
       </View>
-      <View
-        className="h-3 justify-center"
-        onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
-      >
-        {tickX === null ? (
-          bar
-        ) : (
-          <View className="h-1.5">
-            {/* Clip the same full-width bar so neither fill proportions nor corner radii change. */}
-            {(
-              [
-                [0, tickX - 3],
-                [tickX + 3, barWidth],
-              ] as const
-            ).map(([start, end]) => (
-              <View
-                key={start}
-                className="absolute top-0 bottom-0 overflow-hidden"
-                style={{ left: start, width: end - start }}
-              >
-                <View style={{ marginLeft: -start }}>{bar}</View>
-              </View>
-            ))}
-          </View>
-        )}
-        {tickX !== null ? (
-          <View
-            className="absolute top-px bottom-px w-0.5 rounded-full bg-foreground"
-            style={{ left: tickX - 1 }}
-          />
-        ) : null}
-      </View>
+      {stockDark ? (
+        <MobileLedQuotaMeter
+          label={window.label}
+          remainingPercent={remaining}
+          paceRemainingPercent={timeLeft}
+          stockDark={stockDark}
+        />
+      ) : (
+        <View
+          className="h-3 justify-center"
+          onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
+        >
+          {tickX === null ? (
+            bar
+          ) : (
+            <View className="h-1.5">
+              {/* Clip the same full-width bar so neither fill proportions nor corner radii change. */}
+              {(
+                [
+                  [0, tickX - 3],
+                  [tickX + 3, barWidth],
+                ] as const
+              ).map(([start, end]) => (
+                <View
+                  key={start}
+                  className="absolute top-0 bottom-0 overflow-hidden"
+                  style={{ left: start, width: end - start }}
+                >
+                  <View style={{ marginLeft: -start }}>{bar}</View>
+                </View>
+              ))}
+            </View>
+          )}
+          {tickX !== null ? (
+            <View
+              className="absolute top-px bottom-px w-0.5 rounded-full bg-foreground"
+              style={{ left: tickX - 1 }}
+            />
+          ) : null}
+        </View>
+      )}
       {pace || resetsIn ? (
         <View className="flex-row justify-between gap-3">
           <Text className="text-xs text-foreground-tertiary">

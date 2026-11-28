@@ -28,7 +28,7 @@ export function NoProjectsHero() {
         {/* The desktop window only moves where CSS opts in, so keep a titlebar strip. */}
         {isElectron ? <WorkspacePageHeader electron /> : null}
         <Empty size="hero" className="flex-1">
-          <div className="w-full max-w-lg px-8 py-12">
+          <div className="silk-launchpad-glow w-full max-w-lg px-8 py-12 stock-dark:rounded-2xl stock-dark:border stock-dark:border-(--silk-glass-border) stock-dark:bg-card/65 stock-dark:shadow-lg/20 stock-dark:[&_[data-slot=empty-title]]:tracking-tight">
             <EmptyHeader className="max-w-none">
               <EmptyTitle>
                 <T>What should we work on?</T>

@@ -34,6 +34,7 @@ import { mobilePreferencesAtom, saveMobilePreferences } from "../../state/prefer
 import { formatEnvironmentQueryError } from "../../state/query";
 import { serverEnvironment } from "../../state/server";
 import { useAtomCommand } from "../../state/use-atom-command";
+import { useMobileStockDark } from "../settings/appearance/AppearancePreferencesProvider";
 import { useWorkflowSubjectOpener, workflowSubjectLine } from "./WorkflowSubject";
 
 const TABS = [
@@ -78,6 +79,14 @@ export function WorkflowChip(props: { readonly name: string }) {
   );
 }
 
+const SILK_WORKFLOW_TONE_CLASS: Record<WorkflowRunTone, string> = {
+  input: "bg-warning text-warning-foreground",
+  failed: "bg-danger text-danger-foreground",
+  working: "bg-[#78e8fa18] text-[#78e8fa]",
+  quiet: "bg-subtle text-foreground-muted",
+  done: "bg-[#61e5b518] text-[#61e5b5]",
+};
+
 function RunRow(props: {
   readonly node: WorkflowRunNode;
   readonly onOpen: () => void;
@@ -87,11 +96,17 @@ function RunRow(props: {
   const { run } = props.node;
   const m = useMessages();
   const state = workflowRunState(props.node, m);
+  const stockDark = useMobileStockDark();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${run.title}, ${state.word}`}
-      className="gap-1 border-b border-border-subtle px-5 py-3 active:bg-subtle"
+      className={cn(
+        "gap-1 px-5 py-3 active:bg-subtle",
+        stockDark
+          ? "mx-3 my-1 rounded-2xl border border-focus/15 bg-card"
+          : "border-b border-border-subtle",
+      )}
       onPress={props.onOpen}
     >
       <View className="flex-row items-center gap-2">
@@ -99,7 +114,14 @@ function RunRow(props: {
         <Text className="min-w-0 flex-1 text-xs text-foreground-muted" numberOfLines={1}>
           {run.workflow}
         </Text>
-        <Text className={cn("font-t3-medium text-xs", WORKFLOW_TONE_CLASS[state.tone])}>
+        <Text
+          className={cn(
+            "font-t3-medium text-xs",
+            stockDark
+              ? cn("rounded-full px-2 py-0.5", SILK_WORKFLOW_TONE_CLASS[state.tone])
+              : WORKFLOW_TONE_CLASS[state.tone],
+          )}
+        >
           {state.word}
         </Text>
       </View>

@@ -6,10 +6,12 @@ import {
 } from "@t3tools/contracts";
 import { createModelCapabilities } from "@t3tools/shared/model";
 import { useState } from "react";
-import { expect, it } from "vite-plus/test";
+import { expect, it, vi } from "vite-plus/test";
 import { page, userEvent } from "vite-plus/test/browser";
 
-import { render } from "../../../test/render";
+import "~/index.css";
+
+import { act, fakeTimers, render } from "../../../test/render";
 import { ComposerEffortColumn, describeComposerEffort } from "./ComposerModelEffort";
 import type { TraitsSelectionInput } from "./TraitsPicker";
 
@@ -121,6 +123,56 @@ it("draws an agent's reasoning as bars and keeps its mode out of the levels", as
     .element(screen.getByRole("button", { name: "Session Mode: Plan" }))
     .toBeInTheDocument();
   await expect.element(page.getByRole("menuitemradio")).not.toBeInTheDocument();
+});
+
+it("renders the canvas and lets the track and horizontal keys choose the same levels", async () => {
+  await using screen = await render(<Column />, { router: false }); // no routes involved
+  const track = screen.container.querySelector<HTMLElement>("[data-nebula-track]")!;
+  const lens = track.querySelectorAll("canvas")[1]!;
+  await vi.waitFor(() => {
+    const pixels = lens.getContext("2d")!.getImageData(0, 0, lens.width, lens.height).data;
+    expect(pixels.some((channel, index) => index % 4 !== 3 && channel > 80)).toBe(true);
+  });
+
+  await userEvent.click(track, { position: { x: 5, y: 30 } });
+  const levels = screen.getByRole("radiogroup", { name: "Thinking" });
+  const low = levels.getByRole("radio", { name: "Low" });
+  const medium = levels.getByRole("radio", { name: "Medium" });
+  const high = levels.getByRole("radio", { name: "High" });
+  await expect.element(low).toHaveFocus();
+  await expect.element(low).toHaveAttribute("aria-checked", "true");
+  await userEvent.keyboard("{ArrowRight}");
+  await expect.element(medium).toHaveFocus();
+  await userEvent.keyboard("{End}");
+  await expect.element(high).toHaveFocus();
+  await userEvent.keyboard("{Home}");
+  await expect.element(low).toHaveFocus();
+  await userEvent.keyboard("{End}{Enter}");
+  await expect.element(high).toHaveAttribute("aria-checked", "true");
+});
+
+it("redraws the nebula when the level changes, then stops drawing", async () => {
+  using _timers = fakeTimers();
+  await using screen = await render(<Column />, { router: false }); // no routes involved
+  const lens = screen.container.querySelectorAll<HTMLCanvasElement>(
+    "[data-nebula-track] canvas",
+  )[1]!;
+  await vi.waitFor(() => {
+    expect(lens.width).toBe(Math.ceil(lens.clientWidth * Math.min(devicePixelRatio, 2)));
+  });
+  vi.advanceTimersByTime(1_000);
+
+  using draw = vi.spyOn(lens.getContext("2d")!, "drawImage");
+  vi.advanceTimersByTime(200);
+  expect(draw.mock.calls).toHaveLength(0);
+
+  const high = screen.getByRole("radio", { name: "High" }).element() as HTMLButtonElement;
+  await act(() => high.click());
+  vi.advanceTimersByTime(1_000);
+  const settledDraws = draw.mock.calls.length;
+  expect(settledDraws).toBeGreaterThan(0);
+  vi.advanceTimersByTime(200);
+  expect(draw.mock.calls).toHaveLength(settledDraws);
 });
 
 it("focuses a reasoning level by its first letter without selecting it", async () => {
