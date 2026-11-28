@@ -13,6 +13,7 @@ import type {
 import { AuthAccessTokenResult, AuthSessionState } from "./auth.ts";
 import { AdvertisedEndpoint } from "./remoteAccess.ts";
 import { ExecutionEnvironmentDescriptor } from "./environment.ts";
+import type { Y3ConnectChange, Y3ConnectChangeResult, Y3ConnectState } from "./y3Connect.ts";
 import { type ClientSettings, type QuitConfirmationMode, SnapShotShortcut } from "./settings.ts";
 import type { EditorId } from "./editor.ts";
 import { KeybindingShortcut, type PreviewForwardedShortcut } from "./keybindings.ts";
@@ -1182,6 +1183,8 @@ export interface DesktopBridge {
   /** Fires with a prompt's request id once it is answered, cancelled, expired or abandoned. */
   onSshPasswordPromptSettled: (listener: (requestId: string) => void) => () => void;
   resolveSshPasswordPrompt: (requestId: string, password: string | null) => Promise<void>;
+  getY3ConnectState?: () => Promise<Y3ConnectState>;
+  setY3Connect?: (input: Y3ConnectChange) => Promise<Y3ConnectChangeResult>;
   getServerExposureState: () => Promise<DesktopServerExposureState>;
   setServerExposureMode: (mode: DesktopServerExposureMode) => Promise<DesktopServerExposureState>;
   setTailscaleServeEnabled: (input: {

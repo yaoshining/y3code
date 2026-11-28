@@ -22,6 +22,7 @@ import {
   setServerExposureMode,
   setTailscaleServeEnabled,
 } from "./methods/serverExposure.ts";
+import { getY3ConnectState, setY3Connect } from "./methods/y3Connect.ts";
 import {
   bootstrapSshBearerSession,
   disconnectSshEnvironment,
@@ -147,6 +148,8 @@ export const installDesktopIpcHandlers = Effect.fn("desktop.ipc.installHandlers"
   yield* ipc.handle(resolveSshPasswordPrompt);
 
   yield* ipc.handle(getServerExposureState);
+  yield* ipc.handle(getY3ConnectState);
+  yield* ipc.handle(setY3Connect);
   yield* ipc.handle(setServerExposureMode);
   yield* ipc.handle(setTailscaleServeEnabled);
   yield* ipc.handle(getAdvertisedEndpoints);

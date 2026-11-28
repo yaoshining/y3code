@@ -2061,7 +2061,6 @@
   "42fd195574793f9e": "Code",
   "51b31345c7bed6f0": "Kopplungscode",
   "e1cb1c8599e84e26": "Erstelle auf {environment} einen Kopplungscode, in dessen Einstellungen → Freigabe & Zugriff oder mit `t3 auth pairing create`, und gib ihn hier ein.",
-  "7d6f419f8ab7f779": "Für Rechner in deinem lokalen Netzwerk oder Tailnet. Der Rechner behält seine eigenen Anbieter-Anmeldedaten.",
   "36f32bd159bdc0d1": "QR-Code scannen",
   "11fd02455d938901": "Scanne den Code von {command} oder aus den Verbindungseinstellungen am Desktop",
   "68b43e17c7e5f4b3": "Bei {product} anmelden",
@@ -5713,5 +5712,6 @@
   "99451a5d2d40440f": "Zurückgezogen von {by}.",
   "3ee30a50b70fffab": "Zurückgezogen von {by}: {reason}",
   "201490988858b511": "zurückgezogen von {by}",
-  "46d614fa7b4bf1e5": "Workflow-Ausführungen"
+  "46d614fa7b4bf1e5": "Workflow-Ausführungen",
+  "3fe1ce4db810d638": "Verbinde dich über dein lokales Netzwerk, dein Tailnet oder ein Y3 Connect-Gateway. Die Zugangsdaten der Anbieter bleiben auf dem Host."
 }

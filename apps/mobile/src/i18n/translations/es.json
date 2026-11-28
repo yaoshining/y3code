@@ -2061,7 +2061,6 @@
   "42fd195574793f9e": "Código",
   "51b31345c7bed6f0": "Código de emparejamiento",
   "e1cb1c8599e84e26": "Crea un código de emparejamiento en {environment}, en sus Ajustes → Compartir y acceso o con `t3 auth pairing create`, e introdúcelo aquí.",
-  "7d6f419f8ab7f779": "Para máquinas de tu red local o tailnet. La máquina conserva sus propias credenciales de proveedores.",
   "36f32bd159bdc0d1": "Escanear código QR",
   "11fd02455d938901": "Escanea el código de {command} o de los ajustes de Conexiones del escritorio",
   "68b43e17c7e5f4b3": "Iniciar sesión en {product}",
@@ -5707,5 +5706,6 @@
   "99451a5d2d40440f": "Retirada por {by}.",
   "3ee30a50b70fffab": "Retirada por {by}: {reason}",
   "201490988858b511": "retirada por {by}",
-  "46d614fa7b4bf1e5": "Ejecuciones de flujos de trabajo"
+  "46d614fa7b4bf1e5": "Ejecuciones de flujos de trabajo",
+  "3fe1ce4db810d638": "Conéctate a través de tu red local, tu tailnet o una puerta de enlace de Y3 Connect. Las credenciales de los proveedores se quedan en el equipo."
 }

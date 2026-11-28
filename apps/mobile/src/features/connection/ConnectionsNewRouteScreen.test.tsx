@@ -9,6 +9,9 @@ const { Children, harness } = vi.hoisted(() => ({
     // The app-wide error slot other features (composer sends, branch refreshes) write to.
     pendingConnectionError: null as string | null,
     connectPress: vi.fn(),
+    scan: null as ((event: { data: string }) => void) | null,
+    submit: null as (() => void) | null,
+    cameraAllowed: false,
   },
 }));
 
@@ -35,8 +38,11 @@ vi.mock("@react-navigation/native", () => ({
 vi.mock("@effect/atom-react", () => ({ useAtomValue: () => null }));
 vi.mock("@clerk/expo", () => ({ useAuth: () => ({ isLoaded: false, isSignedIn: false }) }));
 vi.mock("expo-camera", () => ({
-  CameraView: () => null,
-  useCameraPermissions: () => [null, vi.fn()],
+  CameraView: ({ onBarcodeScanned }: { onBarcodeScanned: (event: { data: string }) => void }) => {
+    harness.scan = onBarcodeScanned;
+    return null;
+  },
+  useCameraPermissions: () => [{ granted: harness.cameraAllowed }, vi.fn()],
 }));
 vi.mock("expo-haptics", () => ({
   notificationAsync: vi.fn(async () => {}),
@@ -69,7 +75,18 @@ vi.mock("../../lib/useUniwindTheme", () => ({ useUniwindTheme: () => ({}) }));
 vi.mock("../settings/appearance/AppearancePreferencesProvider", () => ({
   useAppearancePreferences: () => ({ themeAppearance: "dark" }),
 }));
-vi.mock("../settings/components/SettingsScreen", () => ({ SettingsScreen: Children }));
+vi.mock("../settings/components/SettingsScreen", () => ({
+  SettingsScreen: ({
+    actions,
+    children,
+  }: {
+    actions: readonly { onPress: () => void }[];
+    children: ReactNode;
+  }) => {
+    harness.submit = actions[0]?.onPress ?? null;
+    return <>{children}</>;
+  },
+}));
 vi.mock("../settings/settings-navigation", () => ({
   leaveSettingsPage: vi.fn(),
   openSettings: vi.fn(),
@@ -113,7 +130,9 @@ it("does not show another feature's error as a pairing failure", () => {
   act(() => root.render(<ConnectionsNewRouteScreen route={{ params: undefined }} />));
 
   expect(container.textContent).not.toContain("Could not send the message.");
-  expect(container.textContent).toContain("For machines on your local network or tailnet.");
+  expect(container.textContent).toContain(
+    "Connect over your local network, tailnet, or a Y3 Connect gateway.",
+  );
 
   act(() => root.unmount());
   // Leaving the form must not wipe an error that belongs to another screen.
@@ -154,5 +173,33 @@ it("splits a pasted pairing link and preserves the code during address edits", (
     }
   } finally {
     act(() => root.unmount());
+  }
+});
+
+it("fills the native form from a Y3 Connect QR and submits the public gateway for pairing", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.stubGlobal("__DEV__", false);
+  harness.cameraAllowed = true;
+  harness.connectPress.mockResolvedValueOnce({ ok: true, error: null });
+  const container = document.createElement("div");
+  const root = createRoot(container);
+  try {
+    act(() => root.render(<ConnectionsNewRouteScreen route={{ params: undefined }} />));
+    const address = "https://connect.example.com";
+    const code = "one-time-pairing-code";
+    const data = `${address}/pair#token=${code}`;
+    act(() => harness.scan?.({ data }));
+    expect(container.querySelector<HTMLInputElement>('input[aria-label="Address"]')?.value).toBe(
+      address,
+    );
+    expect(container.querySelector<HTMLInputElement>('input[aria-label="Code"]')?.value).toBe(code);
+    await act(async () => harness.submit?.());
+    expect(harness.connectPress).toHaveBeenLastCalledWith(`${address}/#token=${code}`, undefined);
+  } finally {
+    act(() => root.unmount());
+    harness.cameraAllowed = false;
+    harness.scan = null;
+    harness.submit = null;
+    vi.unstubAllGlobals();
   }
 });

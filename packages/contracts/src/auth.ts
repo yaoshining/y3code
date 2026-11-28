@@ -527,6 +527,11 @@ export const AuthCreatePairingCredentialInput = Schema.Union([
     access: AuthMcpClientAccess,
     purpose: Schema.Literal("peer-link"),
   }),
+  Schema.Struct({
+    ...pairingCredentialFields,
+    purpose: Schema.Literal("y3-connect"),
+    access: Schema.optionalKey(Schema.Undefined),
+  }),
 ]);
 export type AuthCreatePairingCredentialInput = typeof AuthCreatePairingCredentialInput.Type;
 

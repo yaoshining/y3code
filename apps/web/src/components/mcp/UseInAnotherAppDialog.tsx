@@ -1,5 +1,4 @@
 import { thrownErrorMessage } from "@t3tools/client-runtime/errors";
-import { useAuth } from "@clerk/react";
 import { useAtomValue } from "@effect/atom-react";
 import {
   managedCapabilityDenial,
@@ -9,29 +8,20 @@ import { offersLinkedEnvironments } from "@t3tools/client-runtime/link-request";
 import {
   AuthAccessWriteScope,
   AuthMcpClientAccess,
-  AuthRelayReadScope,
-  type EnvironmentConnectReachability,
   type EnvironmentId,
   mcpClientScopes,
   sessionGrantsScope,
 } from "@t3tools/contracts";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import * as Option from "effect/Option";
 import { Atom } from "effect/reactivity";
 import * as Result from "effect/Result";
 import { msg, T, useGT, useMessages, Var } from "gt-react";
 import { m } from "~/i18n/messages";
-import { type ReactNode, useEffect, useEffectEvent, useState } from "react";
+import { type ReactNode, useState } from "react";
 
-import { checkReachability, readLinkState } from "~/cloud/linkEnvironmentAtoms";
-import { isManagedTunnelActive } from "~/cloud/t3ConnectState";
-import { hasCloudPublicConfig } from "~/cloud/publicConfig";
-import { readCachedCloudLinkState } from "~/cloud/cloudLinkState";
-import { useCloudLinkController } from "~/cloud/useCloudLinkController";
-import { isDesktopLocalConnectionTarget } from "~/connection/desktopLocal";
+import { refreshY3ConnectState, useY3ConnectState } from "~/state/desktopY3Connect";
 import { isElectron } from "~/env";
-import { useT3ConnectTurnOn } from "~/cloud/useT3ConnectTurnOn";
 import {
   namedClipboardTarget,
   useCopyToClipboard,
@@ -49,10 +39,7 @@ import { useManagedPolicy } from "~/state/managedPolicy";
 import { mintMcpApprovalCodeOn } from "~/state/peerPairingCode";
 import { peerLinkEnvironment } from "~/state/peerLinks";
 import { useEnvironmentQuery } from "~/state/query";
-import { relayEnvironmentDiscovery } from "~/state/relay";
 import { useEnvironmentScope, useEnvironmentSessionState } from "~/state/session";
-import { useAtomCommand } from "~/state/use-atom-command";
-import { useT3ConnectAuthPrompt } from "../clerk/useT3ConnectAuthPrompt";
 import { CommandBlock } from "../CommandBlock";
 import { AccessOption, accessConfig } from "../auth/ConnectAgentSurface";
 import { useAccessEnvironment } from "../settings/useAccessEnvironment";
@@ -62,7 +49,7 @@ import { RadioGroup } from "../ui/radio-group";
 import { Spinner } from "../ui/spinner";
 import { toastManager } from "../ui/toast";
 import { WizardFooter, WizardHeader, WizardPanel, WizardPopup, WizardSteps } from "../ui/wizard";
-import { afterFailedCheck, resolveMcpGate } from "./mcpGate";
+import { resolveMcpGate } from "./mcpGate";
 import { MCP_APPS, type McpApp, mcpHandoffAction, OTHER_MCP_APP_STEPS } from "./mcpApps";
 
 const requestAtom = Atom.make<{ readonly environmentId: EnvironmentId | null } | null>(null).pipe(
@@ -86,23 +73,17 @@ export function UseInAnotherAppDialogHost() {
 function UseInAnotherAppDialog({ requested }: { readonly requested: EnvironmentId | null }) {
   const { environment, label } = useAccessEnvironment(requested);
   const gt = useGT();
-  const title = `${gt("Use T3 Code in another app (MCP)")} · ${label ?? "T3 Code"}`;
+  const title = `${gt("Use Y3 Code in another app (MCP)")} · ${label ?? "Y3 Code"}`;
   return (
     <Dialog open onOpenChange={(open) => (open ? undefined : close())}>
       <WizardPopup>
-        {environment !== null && hasCloudPublicConfig() ? (
+        {environment !== null ? (
           <Wizard key={environment.environmentId} environment={environment} title={title} />
         ) : (
           <>
             <WizardHeader title={title} />
             <WizardPanel>
-              <GateMessage
-                title={
-                  environment === null
-                    ? gt("Connect to an environment first.")
-                    : gt("T3 Connect is not available in this build.")
-                }
-              />
+              <GateMessage title={gt("Connect to an environment first.")} />
             </WizardPanel>
           </>
         )}
@@ -116,7 +97,6 @@ const STEPS = [
   msg("Access", { $context: "wizard step: choose the access level" }),
   msg("Connect", { $context: "wizard step: connect the app" }),
 ] as const;
-const HOSTED_APPROVAL_STEPS = [STEPS[0], STEPS[2]] as const;
 type Step = 0 | 1 | 2;
 type Choice = McpApp | "other";
 
@@ -129,19 +109,28 @@ function Wizard({
 }) {
   const gt = useGT();
   const m = useMessages();
-  const gate = useGate(environment);
+  const status = useY3ConnectState();
+  const desktopHost =
+    environment.environmentId === usePrimaryEnvironmentId() &&
+    typeof window.desktopBridge?.getY3ConnectState === "function";
+  const gate = resolveMcpGate({
+    environmentId: environment.environmentId,
+    connected: environment.connection.phase === "connected",
+    approvalCodes:
+      environment.serverConfig === null
+        ? undefined
+        : environment.serverConfig.environment.capabilities.mcpApprovalCodes === true,
+    desktopHost,
+    state:
+      status._tag === "Success" ? status.value : status._tag === "Failure" ? "failed" : "checking",
+  });
   const levels = useGrantableLevels(environment);
   const [step, setStep] = useState<Step>(0);
   const [choice, setChoice] = useState<Choice | null>(null);
   const [picked, setPicked] = useState<AuthMcpClientAccess | null>(null);
   const access = picked ?? DEFAULT_LEVELS.find((level) => levels.get(level) === undefined) ?? null;
-  const open = gate.gate.kind === "open";
-  // The level is picked on the sign-in page, so the wizard neither asks for it nor needs a code.
-  const hostedApproval =
-    environment.serverConfig?.environment.capabilities.mcpHostedApproval === true;
-  const steps = hostedApproval ? HOSTED_APPROVAL_STEPS : STEPS;
-  const shownStep = hostedApproval && step === 2 ? 1 : step;
-  const next = () => setStep(step === 0 ? (hostedApproval ? 2 : 1) : 2);
+  const open = gate.kind === "open";
+  const next = () => setStep(step === 0 ? 1 : 2);
   const levelsHeading =
     choice === null || choice === "other"
       ? gt("What can the app do?")
@@ -151,15 +140,15 @@ function Wizard({
       <WizardHeader title={title}>
         {open ? (
           <WizardSteps
-            steps={steps.map((label) => m(label))}
-            currentStep={shownStep}
-            isStepDisabled={(index) => index > shownStep}
-            onStepChange={(index) => setStep(hostedApproval && index === 1 ? 2 : (index as Step))}
+            steps={STEPS.map((label) => m(label))}
+            currentStep={step}
+            isStepDisabled={(index) => index > step}
+            onStepChange={(index) => setStep(index as Step)}
           />
         ) : null}
       </WizardHeader>
       <WizardPanel>
-        {gate.gate.kind !== "open" ? (
+        {gate.kind !== "open" ? (
           <GateScreen environment={environment} gate={gate} />
         ) : step === 0 ? (
           <AppStep choice={choice} onChoose={setChoice} />
@@ -186,12 +175,12 @@ function Wizard({
               ))}
             </RadioGroup>
           </section>
-        ) : choice !== null && (hostedApproval || access !== null) ? (
+        ) : choice !== null && access !== null ? (
           <ConnectStep
             environment={environment}
-            mcpUrl={gate.gate.mcpUrl}
+            mcpUrl={gate.mcpUrl}
             choice={choice}
-            access={hostedApproval ? null : access}
+            access={access}
           />
         ) : null}
       </WizardPanel>
@@ -258,272 +247,62 @@ function useGrantableLevels(environment: EnvironmentPresentation) {
   );
 }
 
-function useGate(environment: EnvironmentPresentation) {
-  const environmentId = environment.environmentId;
-  const { isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
-  const controller = useCloudLinkController(environmentId);
-  const canReadRelay = useEnvironmentScope(environmentId, AuthRelayReadScope);
-  const thisMachine =
-    environmentId === usePrimaryEnvironmentId() ||
-    isDesktopLocalConnectionTarget(environment.entry.target);
-  const discovery = useAtomValue(relayEnvironmentDiscovery.stateValueAtom);
-  const refreshDiscovery = useAtomCommand(relayEnvironmentDiscovery.refresh, {
-    reportFailure: false,
-  });
-  const runCheck = useAtomCommand(checkReachability, { reportFailure: false });
-  const readState = useAtomCommand(readLinkState, { reportFailure: false });
-  const m = useMessages();
-  // The gate opens on a check it ran, or on a newer one the link state reports. A failed run
-  // counts only server checks newer than `since` (see afterFailedCheck); null waits for a retry.
-  const [check, setCheck] = useState<
-    | "idle"
-    | "running"
-    | { readonly result: EnvironmentConnectReachability | null; readonly since: string | null }
-  >("idle");
-  const [connecting, setConnecting] = useState(false);
-  const linkState = controller.linkState.data;
-  const reported = linkState?.reachability;
-  const serverConfig = environment.serverConfig;
-  const connected = environment.connection.phase === "connected";
-  const relayEntry = discovery.environments.get(environmentId);
-  const gate = resolveMcpGate(
-    {
-      signedIn: isSignedIn,
-      connected,
-      approvalCodes:
-        serverConfig === null
-          ? undefined
-          : serverConfig.environment.capabilities.mcpApprovalCodes === true,
-      canReadRelay,
-      linkState,
-      linkStateError: controller.linkState.error,
-      thisMachine,
-      relay:
-        !discovery.refreshing && (discovery.offline || Option.isSome(discovery.error))
-          ? { status: "failed" }
-          : discovery.listed
-            ? {
-                status: "listed",
-                endpoint: relayEntry?.environment.endpoint,
-                availability: relayEntry?.availability,
-              }
-            : { status: "loading" },
-      reachability:
-        typeof check === "string"
-          ? "checking"
-          : reported !== undefined && check.since !== null && reported.checkedAt > check.since
-            ? reported
-            : check.result,
-    },
-    m,
-  );
-  const runReachabilityCheck = async () => {
-    setCheck("running");
-    // A saved machine's address comes from T3 Connect's list, which can be stale.
-    if (!thisMachine) void refreshDiscovery();
-    const prior = readCachedCloudLinkState({ environmentId });
-    const result = await runCheck({ target: { environmentId } });
-    controller.linkState.refresh();
-    if (result._tag === "Success") {
-      setCheck({ result: result.value, since: result.value.checkedAt });
-      return;
-    }
-    const latest = await readState({ target: { environmentId } });
-    setCheck(afterFailedCheck(prior, latest._tag === "Success" ? latest.value : null));
-  };
-  const turnOn = async () => {
-    setConnecting(true);
-    const ok = await controller.reconcileCloudState({
-      managedTunnel: true,
-      publish: controller.publishAgentActivity,
-    });
-    if (!ok) setConnecting(false);
-  };
-  // A cached link state can name a tunnel on a disconnected machine; checking it would fail and
-  // spend the one automatic check.
-  const canCheck = connected && linkState !== null && isManagedTunnelActive(linkState, undefined);
-  const checkOnce = useEffectEvent(() => {
-    if (check === "idle") void runReachabilityCheck();
-  });
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- asks the server to check its tunnel once one exists
-  useEffect(() => {
-    if (canCheck) queueMicrotask(checkOnce);
-  }, [canCheck]);
-  // T3 Connect lists machines only once something asks, and a saved machine's gate reads that list.
-  const discoverIfUnasked = useEffectEvent(() => {
-    if (!thisMachine && !discovery.listed && !discovery.refreshing) void refreshDiscovery();
-  });
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- asks T3 Connect for its machine list once the wizard opens signed in
-  useEffect(() => {
-    if (isSignedIn) discoverIfUnasked();
-  }, [isSignedIn]);
-  const waiting = gate.kind === "offline" || (connecting && gate.kind === "turn-on");
-  const refreshLinkState = useEffectEvent(() => controller.linkState.refresh());
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- polls the server's link state while the tunnel starts; the server has no push for it
-  useEffect(() => {
-    if (!waiting) return;
-    const interval = window.setInterval(() => refreshLinkState(), 5_000);
-    return () => window.clearInterval(interval);
-  }, [waiting]);
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- stops showing Connecting once a started tunnel has had time to come up
-  useEffect(() => {
-    if (!connecting) return;
-    const timeout = window.setTimeout(() => setConnecting(false), 90_000);
-    return () => window.clearTimeout(timeout);
-  }, [connecting]);
-  return {
-    gate,
-    connecting: connecting && gate.kind !== "open",
-    check: runReachabilityCheck,
-    // A disconnected machine cannot be checked; its list entry says when it is back.
-    refreshList: () => void refreshDiscovery(),
-    turnOn,
-    operationError: controller.operationError,
-    tunnelLimit: controller.tunnelLimit,
-  };
-}
-
-type Gate = ReturnType<typeof useGate>;
-
 function GateScreen({
   environment,
-  gate: { gate, connecting, check, refreshList, turnOn, operationError, tunnelLimit },
+  gate,
 }: {
   readonly environment: EnvironmentPresentation;
-  readonly gate: Gate;
+  readonly gate: Exclude<ReturnType<typeof resolveMcpGate>, { readonly kind: "open" }>;
 }) {
-  const name = environment.label;
   const gt = useGT();
-  const turnOnHere = useT3ConnectTurnOn(environment.environmentId);
-  const { openAuthPrompt } = useT3ConnectAuthPrompt();
-  const retry = (onClick: () => void) => (
-    <Button variant="outline" onClick={onClick}>
-      <T>Check again</T>
-    </Button>
-  );
-  const offlineTitle = gt("{environment}''s T3 Connect is offline", { environment: name });
-  const cannotCheckTitle = gt("Can't check T3 Connect on {environment}", { environment: name });
-  const checkAgain = retry(() => void check());
   switch (gate.kind) {
     case "checking":
       return (
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <Spinner size="sm" tone="muted" />
-          <T>Checking T3 Connect…</T>
+          <T>Checking Y3 Connect…</T>
         </p>
       );
-    case "sign-in":
+    case "disconnected":
       return (
         <GateMessage
-          title={gt("Sign in to T3 Connect")}
-          lines={[
-            gt(
-              "Apps like Poke and Claude run in the cloud. They need a public address to reach {environment}.",
-              { environment: name },
-            ),
-            gt("T3 Connect gives {environment} that address. Each app still needs your approval.", {
-              environment: name,
-            }),
-          ]}
+          title={gt("Connect to {environment} first.", { environment: environment.label })}
+        />
+      );
+    case "update":
+      return (
+        <GateMessage
+          title={gt("Update Y3 Code on {environment}", { environment: environment.label })}
+        />
+      );
+    case "on-host":
+      return <GateMessage title={gt("Open this setup in Y3 Code on the host.")} />;
+    case "error":
+    case "offline":
+      return (
+        <GateMessage
+          title={
+            gate.kind === "offline" ? gt("Y3 Connect is offline") : gt("Could not check Y3 Connect")
+          }
         >
-          {/* Clerk's sign-in is its own modal, so this dialog closes first. */}
-          <Button
-            onClick={() => {
-              close();
-              openAuthPrompt();
-            }}
-          >
-            <T>Sign in to T3 Connect</T>
+          <Button variant="outline" onClick={refreshY3ConnectState}>
+            <T>Check again</T>
           </Button>
         </GateMessage>
       );
-    case "disconnected":
-      return gate.relay === null ? (
-        <GateMessage title={gt("Connect to {environment} first.", { environment: name })} />
-      ) : (
-        <GateMessage title={gate.relay === "offline" ? offlineTitle : cannotCheckTitle}>
-          {retry(refreshList)}
-        </GateMessage>
-      );
-    case "update":
-      return <GateMessage title={gt("Update T3 Code on {environment}", { environment: name })} />;
-    case "no-relay-read":
-      return (
-        <GateMessage
-          title={cannotCheckTitle}
-          lines={[
-            gt("This device needs the View relay permission on {environment}.", {
-              environment: name,
-            }),
-          ]}
-        />
-      );
-    case "error":
-      return (
-        <GateMessage title={cannotCheckTitle} lines={[gate.message]}>
-          {checkAgain}
-        </GateMessage>
-      );
     case "turn-on":
-    case "offline": {
-      if (gate.kind === "offline" && !connecting) {
-        const reachability = gate.reachability;
-        return (
-          <GateMessage
-            title={reachability ? offlineTitle : cannotCheckTitle}
-            lines={
-              reachability ? [reachability.reason, gt("Fix: {fix}", { fix: reachability.fix })] : []
-            }
-          >
-            {checkAgain}
-          </GateMessage>
-        );
-      }
       return (
         <GateMessage
-          title={gt("Turn on T3 Connect for {environment}", { environment: name })}
+          title={gt("Turn on Y3 Connect")}
           lines={[
-            gt("{environment} gets a public https address, with no router setup.", {
-              environment: name,
-            }),
-            gt("Only apps you approve can use it. You can turn it off in Settings."),
+            gt(
+              "Apps that run in the cloud need a public address for this environment. Each app still needs your approval.",
+            ),
           ]}
         >
-          {turnOnHere.kind === "here" ? (
-            <div className="space-y-2">
-              <Button disabled={connecting} onClick={() => void turnOn()}>
-                {connecting ? gt("Connecting…") : gt("Turn on")}
-              </Button>
-              {operationError ? (
-                <p className="text-xs text-destructive-foreground">{operationError}</p>
-              ) : null}
-              {tunnelLimit !== null ? (
-                <>
-                  <p className="text-sm text-destructive-foreground">
-                    <T>Your T3 Connect account is out of tunnels.</T>
-                  </p>
-                  <ManageAccessButton environment={environment} label={gt("Manage tunnels")} />
-                </>
-              ) : null}
-            </div>
-          ) : turnOnHere.kind === "policy" ? (
-            <p className="text-sm text-muted-foreground">{turnOnHere.reason}</p>
-          ) : (
-            <div className="space-y-2 text-sm">
-              <CommandBlock command="t3 connect link" />
-              <p>
-                <T>
-                  Restart T3 Code on <Var>{name}</Var>.
-                </T>
-              </p>
-              {checkAgain}
-            </div>
-          )}
+          <ManageAccessButton environment={environment} label={gt("Open Sharing & access")} />
         </GateMessage>
       );
-    }
-    case "open":
-      return null;
   }
 }
 
@@ -604,33 +383,20 @@ function ConnectStep({
   readonly environment: EnvironmentPresentation;
   readonly mcpUrl: string;
   readonly choice: Choice;
-  /** Null when the sign-in page asks for the level, so no code is needed. */
-  readonly access: AuthMcpClientAccess | null;
+  readonly access: AuthMcpClientAccess;
 }) {
   const [anotherWay, setAnotherWay] = useState(choice === "other");
   const gt = useGT();
   const m = useMessages();
   const app = choice === "other" ? null : choice;
-  const code =
-    access === null ? (
-      <p className="text-sm text-muted-foreground">
-        {app === null
-          ? gt(
-              "When the app opens the sign-in page, choose what it may do and approve with your T3 Connect account.",
-            )
-          : gt(
-              "When {app} opens the sign-in page, choose what it may do and approve with your T3 Connect account.",
-              { app: app.name },
-            )}
-      </p>
-    ) : (
-      <ApprovalCode
-        key={access}
-        environmentId={environment.environmentId}
-        name={environment.label}
-        access={access}
-      />
-    );
+  const code = (
+    <ApprovalCode
+      key={access}
+      environmentId={environment.environmentId}
+      name={environment.label}
+      access={access}
+    />
+  );
   if (anotherWay || app === null) {
     const message = app?.handoff.kind === "copy-message" ? app.handoff.message(mcpUrl) : null;
     return (
@@ -883,8 +649,7 @@ function LinkedLine({
   access,
 }: {
   readonly environment: EnvironmentPresentation;
-  /** Null when the level is picked later; each link then shows its own. */
-  readonly access: AuthMcpClientAccess | null;
+  readonly access: AuthMcpClientAccess;
 }) {
   const offered = offersLinkedEnvironments(environment.serverConfig);
   const links = useEnvironmentQuery(
@@ -901,8 +666,7 @@ function LinkedLine({
       identities.find((identity) => identity.environmentId === link.environmentId)?.label ??
       link.label;
     // A forwarded call keeps the lower of the app's level and the link's own.
-    const level =
-      access === null || levelRank(link.access) < levelRank(access) ? link.access : access;
+    const level = levelRank(link.access) < levelRank(access) ? link.access : access;
     return `${name} · ${link.status === "expired" ? gt("Expired") : m(accessConfig[level].label)}`;
   });
   return (
@@ -912,7 +676,6 @@ function LinkedLine({
   );
 }
 
-/** Opens Sharing & access on this environment, where its clients and T3 Connect tunnels live. */
 function ManageAccessButton({
   environment,
   label,

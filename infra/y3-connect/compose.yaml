@@ -1,0 +1,15 @@
+services:
+  gateway:
+    build:
+      context: ../..
+      dockerfile: infra/y3-connect/Dockerfile
+    restart: unless-stopped
+    environment:
+      Y3_CONNECT_ROUTES: ${Y3_CONNECT_ROUTES:?Set the HTTPS origin to environment ID map}
+    ports:
+      - "127.0.0.1:17890:17890"
+    volumes:
+      - gateway-state:/data
+
+volumes:
+  gateway-state:

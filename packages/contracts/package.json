@@ -18,6 +18,10 @@
     "./relay": {
       "types": "./src/relay.ts",
       "import": "./src/relay.ts"
+    },
+    "./y3Connect": {
+      "types": "./src/y3Connect.ts",
+      "import": "./src/y3Connect.ts"
     }
   },
   "scripts": {

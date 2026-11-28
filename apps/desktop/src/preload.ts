@@ -231,6 +231,8 @@ contextBridge.exposeInMainWorld("desktopBridge", {
   },
   resolveSshPasswordPrompt: (requestId, password) =>
     ipcRenderer.invoke(IpcChannels.RESOLVE_SSH_PASSWORD_PROMPT_CHANNEL, { requestId, password }),
+  getY3ConnectState: () => ipcRenderer.invoke(IpcChannels.GET_Y3_CONNECT_STATE_CHANNEL),
+  setY3Connect: (input) => ipcRenderer.invoke(IpcChannels.SET_Y3_CONNECT_CHANNEL, input),
   getServerExposureState: () => ipcRenderer.invoke(IpcChannels.GET_SERVER_EXPOSURE_STATE_CHANNEL),
   setServerExposureMode: (mode) =>
     ipcRenderer.invoke(IpcChannels.SET_SERVER_EXPOSURE_MODE_CHANNEL, mode),

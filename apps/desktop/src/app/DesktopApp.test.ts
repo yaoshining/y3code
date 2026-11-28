@@ -76,6 +76,8 @@ import * as LoopbackTunnel from "../preview/LoopbackTunnel.ts";
 import * as PreviewManager from "../preview/Manager.ts";
 import * as AppleSpeech from "../speech/AppleSpeech.ts";
 
+import { DesktopY3Connect } from "../backend/DesktopY3Connect.ts";
+
 interface StubbedDesktop {
   readonly localEnvironmentEnabled: boolean;
   readonly environment: Partial<DesktopEnvironment.DesktopEnvironment["Service"]>;
@@ -95,6 +97,17 @@ const runStubbedDesktop = (stub: StubbedDesktop) =>
     const runApp = DesktopApp.program
       .pipe(
         Effect.provide(NodeCrypto.layer),
+        Effect.provideService(DesktopY3Connect, {
+          restore: Effect.void,
+          getState: Effect.succeed({
+            enabled: false,
+            online: false,
+            serverOrigin: null,
+            environmentId: null,
+            problem: null,
+          }),
+          change: () => Effect.succeed({ ok: false, problem: "not-bound" }),
+        }),
         Effect.provideService(DesktopAppIdentity.DesktopAppIdentity, {
           resolveUserDataPath: Effect.succeed("/isolated/userdata"),
           configure: stub.record("identity"),

@@ -2061,7 +2061,6 @@
   "42fd195574793f9e": "Code",
   "51b31345c7bed6f0": "Code d’appairage",
   "e1cb1c8599e84e26": "Créez un code d’appairage sur {environment}, dans ses Paramètres → Partage et accès ou avec `t3 auth pairing create`, puis saisissez-le ici.",
-  "7d6f419f8ab7f779": "Pour les machines de votre réseau local ou de votre tailnet. La machine garde ses propres identifiants de fournisseur.",
   "36f32bd159bdc0d1": "Scanner un code QR",
   "11fd02455d938901": "Scannez le code de {command} ou des paramètres Connexions du bureau",
   "68b43e17c7e5f4b3": "Se connecter à {product}",
@@ -5707,5 +5706,6 @@
   "99451a5d2d40440f": "Retirée par {by}.",
   "3ee30a50b70fffab": "Retirée par {by} : {reason}",
   "201490988858b511": "retirée par {by}",
-  "46d614fa7b4bf1e5": "Exécutions de workflow"
+  "46d614fa7b4bf1e5": "Exécutions de workflow",
+  "3fe1ce4db810d638": "Connectez-vous via votre réseau local, votre tailnet ou une passerelle Y3 Connect. Les identifiants des fournisseurs restent sur la machine."
 }

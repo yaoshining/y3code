@@ -1420,6 +1420,14 @@ export const SETTINGS_SEARCH_ITEMS = [
     wslAvailableOnly: true,
   },
   {
+    id: "y3-connect",
+    title: msg("Y3 Connect"),
+    to: "/settings/access",
+    searchTerms: [msg("self-hosted gateway tunnel mobile pairing remote access")],
+    desktopOnly: true,
+    localBackendManagementOnly: true,
+  },
+  {
     id: "t3-connect",
     localEnvironmentOnly: true,
     title: msg("T3 Connect"),
@@ -1428,6 +1436,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: [msg("managed tunnel cloud other devices remote tunnels limit t3 chat")],
     desktopOnly: true,
     cloudOnly: true,
+    managedTunnelOnly: true,
   },
   {
     id: "connect-device-approval",

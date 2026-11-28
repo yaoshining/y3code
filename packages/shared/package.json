@@ -459,6 +459,14 @@
       "types": "./src/claudeCompaction.ts",
       "import": "./src/claudeCompaction.ts"
     },
+    "./y3ConnectConnector": {
+      "types": "./src/y3ConnectConnector.ts",
+      "import": "./src/y3ConnectConnector.ts"
+    },
+    "./y3ConnectTransport": {
+      "types": "./src/y3ConnectTransport.ts",
+      "import": "./src/y3ConnectTransport.ts"
+    },
     "./nodeSqliteClient": {
       "types": "./src/nodeSqliteClient.ts",
       "import": "./src/nodeSqliteClient.ts"
@@ -697,6 +705,7 @@
     "test": "vp test run --config ../../vite.config.ts --dir ."
   },
   "dependencies": {
+    "@effect/platform-node": "catalog:",
     "@noble/curves": "catalog:",
     "@noble/hashes": "catalog:",
     "@t3tools/contracts": "workspace:*",
@@ -722,7 +731,6 @@
     "yaml": "catalog:"
   },
   "devDependencies": {
-    "@effect/platform-node": "catalog:",
     "@effect/vitest": "catalog:",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",

@@ -2129,6 +2129,72 @@ describe("EnvironmentSupervisor", () => {
 });
 
 describe("EnvironmentSupervisor routes", () => {
+  it.effect("falls back to a saved HTTPS gateway when LAN drops and returns to LAN", () =>
+    Effect.gen(function* () {
+      const gateway = new BearerConnectionTarget({
+        environmentId: LAN_TARGET.environmentId,
+        label: LAN_TARGET.label,
+        connectionId: "bearer:y3-gateway",
+      });
+      const entry: ConnectionCatalogEntry = {
+        ...LAN_ENTRY,
+        alternateRoutes: [
+          {
+            target: gateway,
+            profile: Option.some(
+              new BearerConnectionProfile({
+                connectionId: gateway.connectionId,
+                environmentId: gateway.environmentId,
+                label: gateway.label,
+                httpBaseUrl: "https://connect.example.com/",
+                wsBaseUrl: "wss://connect.example.com/",
+              }),
+            ),
+          },
+        ],
+      };
+      const hasLan = yield* Ref.make(true);
+      const isLan = (target: ConnectionTarget) =>
+        connectionRouteId(target) === LAN_TARGET.connectionId;
+      const harness = yield* makeHarness({
+        checkRoute: (route) =>
+          Ref.get(hasLan).pipe(
+            Effect.map((nearby): ConnectionDriver.RouteCheck =>
+              isLan(route.target) && !nearby ? "silent" : "answered",
+            ),
+          ),
+        prepare: (_attempt, target) =>
+          Ref.get(hasLan).pipe(
+            Effect.flatMap((nearby) =>
+              isLan(target) && !nearby
+                ? Effect.fail(transient("LAN unavailable"))
+                : Effect.succeed(preparedFor(target)),
+            ),
+          ),
+      });
+      const supervisor = yield* EnvironmentSupervisor.make(entry, { initiallyDesired: true }).pipe(
+        Effect.provide(harness.dependencies),
+      );
+      const expectRoute = Effect.fnUntraced(function* (generation: number, id: string) {
+        yield* awaitState(
+          supervisor.state,
+          (state) => state.phase === "connected" && state.generation === generation,
+        );
+        const { target } = Option.getOrThrow(yield* SubscriptionRef.get(supervisor.prepared));
+        expect(connectionRouteId(target)).toBe(id);
+        expect(target.environmentId).toBe(gateway.environmentId);
+      });
+      yield* expectRoute(1, LAN_TARGET.connectionId);
+      yield* Ref.set(hasLan, false);
+      yield* harness.closeLatestSession();
+      yield* TestClock.adjust("10 seconds");
+      yield* expectRoute(2, gateway.connectionId);
+      yield* Ref.set(hasLan, true);
+      yield* harness.wake("network-changed");
+      yield* expectRoute(3, LAN_TARGET.connectionId);
+    }).pipe(Effect.provide(TestClock.layer())),
+  );
+
   it.effect("connects over relay before a slow LAN reachability check times out", () =>
     Effect.gen(function* () {
       const checkingLan = yield* Deferred.make<void>();

@@ -398,21 +398,24 @@ describe("connection onboarding", () => {
     }).pipe(Effect.provide(layerPairingOnboarding({ exchangeGate })));
   });
 
-  it.effect("adds a new address as a route when pairing targets that environment", () =>
+  it.effect("keeps a LAN pairing and a gateway pairing in one saved environment", () =>
     Effect.gen(function* () {
       const registry = yield* EnvironmentRegistry.EnvironmentRegistry;
       const onboarding = yield* Onboarding.ConnectionOnboarding;
-      yield* registerSwitchedOffEnvironment;
+      const environmentId = yield* onboarding.registerPairing(PAIRING_INPUT);
+      expect(environmentId).toBe(PAIRED_ENVIRONMENT_ID);
 
       yield* onboarding.registerPairing({
-        host: "lan.example.test",
-        pairingCode: "pairing-token",
-        expectedEnvironmentId: PAIRED_ENVIRONMENT_ID,
+        host: "http://192.168.1.10:3773",
+        pairingCode: "separate-lan-code",
+        expectedEnvironmentId: environmentId,
       });
 
-      const entry = (yield* SubscriptionRef.get(registry.entries)).get(PAIRED_ENVIRONMENT_ID);
+      const entries = yield* SubscriptionRef.get(registry.entries);
+      expect(entries.size).toBe(1);
+      const entry = entries.get(environmentId);
       expect(entry === undefined ? [] : connectionRoutes(entry).map(routeHttpBaseUrl)).toEqual(
-        expect.arrayContaining(["https://remote.example.test/", "https://lan.example.test/"]),
+        expect.arrayContaining(["https://remote.example.test/", "http://192.168.1.10:3773/"]),
       );
     }).pipe(Effect.provide(layerPairingOnboarding())),
   );

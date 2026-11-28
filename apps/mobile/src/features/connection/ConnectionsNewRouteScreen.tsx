@@ -285,7 +285,7 @@ function PairingForm({
                       { environment: linked.label },
                     )
                   : gt(
-                      "For machines on your local network or tailnet. The machine keeps its own provider credentials.",
+                      "Connect over your local network, tailnet, or a Y3 Connect gateway. The machine keeps its own provider credentials.",
                     ))}
             </Text>
           </View>
