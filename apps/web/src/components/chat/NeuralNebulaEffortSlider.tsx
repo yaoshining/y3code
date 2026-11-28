@@ -91,7 +91,6 @@ function mountTrack({
   let layers: ReturnType<typeof createNebulaLayers> | null = null;
   let visible = false;
   let frame = 0,
-    timer = 0,
     last = 0,
     time = 0;
   let selection = initial;
@@ -109,14 +108,11 @@ function mountTrack({
   }
 
   function pause() {
-    clearTimeout(timer);
     cancelAnimationFrame(frame);
-    frame = timer = last = 0;
+    frame = last = 0;
   }
 
   function wake() {
-    clearTimeout(timer);
-    timer = 0;
     if (allowed() && !frame) frame = requestAnimationFrame(draw);
   }
 
@@ -188,12 +184,10 @@ function mountTrack({
       palette,
       layers,
     );
-    if (reduced) {
-      last = 0;
-    } else if (drag || position !== target || intensity !== targetIntensity) {
-      frame = requestAnimationFrame(draw);
+    if (!reduced && (position !== target || velocity !== 0 || intensity !== targetIntensity)) {
+      wake();
     } else {
-      timer = window.setTimeout(wake, Math.max(0, 50 - (performance.now() - now) - 8));
+      last = 0;
     }
   }
 

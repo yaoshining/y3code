@@ -11,7 +11,7 @@ import { page, userEvent } from "vite-plus/test/browser";
 
 import "~/index.css";
 
-import { render } from "../../../test/render";
+import { act, fakeTimers, render } from "../../../test/render";
 import { ComposerEffortColumn, describeComposerEffort } from "./ComposerModelEffort";
 import type { TraitsSelectionInput } from "./TraitsPicker";
 
@@ -149,6 +149,30 @@ it("renders the canvas and lets the track and horizontal keys choose the same le
   await expect.element(low).toHaveFocus();
   await userEvent.keyboard("{End}{Enter}");
   await expect.element(high).toHaveAttribute("aria-checked", "true");
+});
+
+it("redraws the nebula when the level changes, then stops drawing", async () => {
+  using _timers = fakeTimers();
+  await using screen = await render(<Column />, { router: false }); // no routes involved
+  const lens = screen.container.querySelectorAll<HTMLCanvasElement>(
+    "[data-nebula-track] canvas",
+  )[1]!;
+  await vi.waitFor(() => {
+    expect(lens.width).toBe(Math.ceil(lens.clientWidth * Math.min(devicePixelRatio, 2)));
+  });
+  vi.advanceTimersByTime(1_000);
+
+  using draw = vi.spyOn(lens.getContext("2d")!, "drawImage");
+  vi.advanceTimersByTime(200);
+  expect(draw.mock.calls).toHaveLength(0);
+
+  const high = screen.getByRole("radio", { name: "High" }).element() as HTMLButtonElement;
+  await act(() => high.click());
+  vi.advanceTimersByTime(1_000);
+  const settledDraws = draw.mock.calls.length;
+  expect(settledDraws).toBeGreaterThan(0);
+  vi.advanceTimersByTime(200);
+  expect(draw.mock.calls).toHaveLength(settledDraws);
 });
 
 it("focuses a reasoning level by its first letter without selecting it", async () => {
