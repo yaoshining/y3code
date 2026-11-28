@@ -44,6 +44,9 @@ it("only offers a device QR after the desktop verifies the gateway", async () =>
     },
   });
   const change = vi.fn(async (input: Y3ConnectChange): Promise<Y3ConnectChangeResult> => {
+    if (input.action === "bind" && input.bindingCode === "ipc-error") {
+      throw new Error("IPC unavailable");
+    }
     if (input.action === "bind" && input.bindingCode === "wrong") {
       return { ok: false, problem: "binding" };
     }
@@ -100,8 +103,14 @@ it("only offers a device QR after the desktop verifies the gateway", async () =>
   const bindingCode = dialog.getByLabelText("Host binding code");
   await expect.element(origin).toHaveValue("");
   await origin.fill(address);
+  const bind = dialog.getByRole("button", { name: "Bind and enable" });
+  await bindingCode.fill("ipc-error");
+  await bind.click();
+  await expect.element(dialog.getByText("Could not read or update Y3 Connect.")).toBeVisible();
+  await expect.element(bind).toBeEnabled();
+
   await bindingCode.fill("wrong");
-  await dialog.getByRole("button", { name: "Bind and enable" }).click();
+  await bind.click();
   await expect
     .element(
       dialog.getByText(
@@ -112,7 +121,7 @@ it("only offers a device QR after the desktop verifies the gateway", async () =>
   expect(showQr.query()).toBeNull();
 
   await bindingCode.fill("a".repeat(32));
-  await dialog.getByRole("button", { name: "Bind and enable" }).click();
+  await bind.click();
   await expect.element(toggle).toBeChecked();
   await showQr.click();
   await expect

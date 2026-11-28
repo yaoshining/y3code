@@ -101,10 +101,9 @@ export function Y3ConnectRow({
       }
     } catch {
       setError("ipc");
-    } finally {
-      setSaving(false);
-      refreshY3ConnectState();
     }
+    setSaving(false);
+    refreshY3ConnectState();
   };
   const openSetup = () => {
     setError(null);
