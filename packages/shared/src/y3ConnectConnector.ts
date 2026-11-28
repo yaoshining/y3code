@@ -14,6 +14,8 @@ import {
   websocketLimits,
 } from "./y3ConnectTransport.ts";
 
+const heartbeatMs = 5_000;
+
 export function openConnector(input: {
   serverOrigin: URL;
   hostToken: string;
@@ -28,6 +30,21 @@ export function openConnector(input: {
     headers: { authorization: `Bearer ${input.hostToken}` },
   });
   socket.once("open", () => {
+    let awaitingPong = false;
+    socket.on("pong", () => {
+      awaitingPong = false;
+    });
+    // @effect-diagnostics-next-line globalTimers:off -- The heartbeat follows the native socket lifecycle.
+    const heartbeat = setInterval(() => {
+      if (socket.readyState !== NodeWS.WebSocket.OPEN) return;
+      if (awaitingPong) {
+        socket.terminate();
+        return;
+      }
+      awaitingPong = true;
+      socket.ping();
+    }, heartbeatMs).unref();
+
     const server = NodeHttp2.createServer({
       settings: { maxConcurrentStreams: maxStreamsPerHost },
     });
@@ -70,6 +87,7 @@ export function openConnector(input: {
     });
     server.on("error", () => socket.terminate());
     socket.once("close", () => {
+      clearInterval(heartbeat);
       session?.destroy();
       server.close();
     });
