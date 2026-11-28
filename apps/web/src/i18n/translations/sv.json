@@ -13041,5 +13041,22 @@
   "ec4fd13e8062703e": "Ingen kontextanvändning rapporterades.",
   "54f54c45f49624d8": "Öppna kontext och kvoter",
   "89eea7a81e420886": "Välkommen till Y3 Code",
-  "3fb9f5581a8d4614": "Komplement"
+  "3fb9f5581a8d4614": "Komplement",
+  "3ab002fe08aee2bf": "Step {current}/{total}",
+  "c1068125f9f3c92d": "Completed",
+  "ea289be8082be055": "Running",
+  "867d303cc0bf844b": "Pending",
+  "3e04181c173c015f": "Respond without extra reasoning.",
+  "bb90684a0f1b6b9e": "Use just enough reasoning for straightforward tasks.",
+  "0fcda8d8a2169f29": "Answer quick questions and make simple changes.",
+  "97930bd09d4b38c8": "Handle everyday code changes and focused debugging.",
+  "f7fd1ea8c4c1dfe8": "Reason through multi-file changes and refactors.",
+  "831b1daf8b0743f6": "Investigate complex dependencies and cross-module problems.",
+  "b89c37a0996bb98b": "Spend more time reasoning through difficult changes.",
+  "559cff48eca29967": "Use the most reasoning for complex architecture and debugging.",
+  "660780eb368574cc": "Let the provider choose the reasoning level.",
+  "6dddc961d4837f65": "Med",
+  "9349947378c5f725": "Auto",
+  "b671f547b12cee48": "Switch model",
+  "485a654456aebbd1": "Reasoning & execution"
 }

@@ -157,6 +157,17 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --silk-selection-mark: inset 2px 0 0 var(--silk-violet);
   --silk-led-glow: 0 0 5px rgb(195 171 255 / 28%);
   --silk-card-shadow: 0 5px 18px rgb(5 3 13 / 32%);
+  --silk-progress-bg: linear-gradient(105deg, rgb(30 20 46 / 82%), rgb(13 17 31 / 88%));
+  --silk-progress-glow: 0 0 10px rgb(164 111 254 / 62%);
+  --silk-picker-sidebar-bg: linear-gradient(#72426a18, #30264c22);
+  --silk-provider-ready-glow: 0 0 6px #61e5b57a;
+  --silk-model-check: #a6f8ea;
+  --silk-violet-glyph-glow: 0 0 4px var(--silk-violet);
+  --silk-cyan-glyph-glow: 0 0 4px var(--silk-cyan);
+  --silk-amber-tick-glow: 0 0 5px var(--silk-amber);
+  --silk-overload-bg: linear-gradient(100deg, #ffdfb6, #ffc587);
+  --silk-overload-shadow: 0 0 14px #ffc58750;
+  --silk-effort-hint-bg: linear-gradient(135deg, rgb(56 38 71 / 65%), rgb(41 33 63 / 65%));
   --desktop-window-right-resize-inset: 0px;
   --app-shell-frame-inset: 0px;
   --workspace-topbar-height: 52px;
@@ -224,6 +235,8 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
 
 @theme inline {
   --color-silk-chat-glass: #140e22;
+  --color-silk-picker-search: #100d1f;
+  --color-silk-picker-model: #171225;
   --color-silk-row-hover: rgb(236 220 255 / 11%);
 
   /* Two steps below Tailwind's text-xs (12px) for dense UI: metadata rows,
@@ -833,6 +846,152 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
 
   @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     background: var(--popover) !important;
+  }
+}
+
+@utility silk-model-picker-surface {
+  &[data-slot="popover-popup"] {
+    background:
+      radial-gradient(ellipse 340px 250px at 3% 0%, #b83a9e2e, transparent 74%),
+      radial-gradient(ellipse 320px 250px at 98% 100%, #2bb5d624, transparent 68%),
+      linear-gradient(155deg, rgb(24 18 42 / 96%), rgb(15 12 29 / 97%) 58%, rgb(20 16 38 / 96%));
+    border-color: rgb(212 169 255 / 28%);
+    box-shadow:
+      inset 0 1px rgb(243 220 255 / 16%),
+      0 24px 68px -16px rgb(0 0 0 / 88%),
+      0 0 36px rgb(168 85 247 / 18%);
+  }
+}
+
+@utility silk-model-picker-active {
+  position: relative;
+  border-color: #cc90e375;
+  background-image: linear-gradient(100deg, #522e4a, #3e2c56 75%, #2c3b50);
+  box-shadow: 0 0 12px rgb(173 98 225 / 20%);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: 3px;
+    inset-inline-start: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(#ffb3dd, #a786ee 55%, #78e8fa);
+    box-shadow: 0 0 5px rgb(206 155 248 / 60%);
+    pointer-events: none;
+  }
+}
+
+@layer components {
+  .nebula-effort {
+    --nebula-stop-inset: min(35px, 21%);
+    --nebula-bezel-hi: color-mix(in srgb, var(--card) 70%, white);
+    --nebula-bezel-lo: color-mix(in srgb, var(--muted) 60%, var(--muted-foreground));
+    --nebula-base: var(--border);
+    --nebula-rim: rgb(255 255 255 / 45%);
+    --nebula-gold: #efd397;
+
+    @variant stock-dark {
+      --nebula-silk: 1;
+      --nebula-bezel-hi: #9380bf;
+      --nebula-bezel-lo: #372952;
+      --nebula-base: #090714;
+      --nebula-rim: #e4d4ff45;
+      --nebula-gold: #ffd27a;
+    }
+  }
+
+  .nebula-effort-track {
+    background: linear-gradient(
+      174deg,
+      var(--nebula-bezel-hi),
+      var(--nebula-bezel-lo) 22%,
+      var(--nebula-base) 49%,
+      var(--nebula-bezel-lo) 71%,
+      var(--nebula-bezel-hi) 105%
+    );
+    box-shadow:
+      0 8px 15px -7px #140921a6,
+      inset 0 1px 2px var(--nebula-rim);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 1px solid var(--nebula-gold);
+      border-radius: inherit;
+      opacity: calc(var(--nebula-trim, 0) * 0.6);
+      box-shadow: 0 0 14px color-mix(in srgb, var(--nebula-gold) 40%, transparent);
+    }
+  }
+
+  .nebula-effort-well {
+    background: #11111f;
+    box-shadow:
+      0 1px 1px var(--nebula-rim),
+      0 -1px 2px #352942aa;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow:
+        inset 0 3px 8px #01000bd4,
+        inset 0 -2px 6px #01000b99;
+    }
+  }
+
+  .nebula-effort-lens {
+    left: var(--nebula-lens-position, var(--nebula-initial-position));
+    outline: 1px solid #ffffffb8;
+    outline-offset: -1px;
+    background: #11111f;
+    box-shadow:
+      0 6px 13px #0d0516a8,
+      0 2px 4px #0d0516b8;
+
+    @variant stock-dark {
+      outline-color: #e8daffc7;
+    }
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    &::before {
+      inset: 0;
+      border-radius: inherit;
+      background:
+        radial-gradient(ellipse at 42% 36%, transparent 47%, #b4a2eb10 65%, #ece0ff83 98%),
+        linear-gradient(153deg, #ecdcff3d, transparent 39%, transparent 68%, #eac2ff28);
+      box-shadow:
+        inset 0 0 0 1px #f1dbff42,
+        inset 0 0 4px 2px #130e29b8;
+    }
+
+    &::after {
+      width: 78%;
+      height: 72%;
+      left: 11%;
+      top: 6%;
+      border-radius: 50%;
+      border-top: 1px solid #f9efffc4;
+      transform: rotate(-27deg);
+      background: radial-gradient(ellipse at 35% 0%, #f4e7ff49, transparent 53%);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: scale 135ms ease;
+
+      [data-grabbing] & {
+        scale: 1.035 0.96;
+      }
+    }
   }
 }
 

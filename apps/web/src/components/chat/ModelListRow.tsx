@@ -14,6 +14,7 @@ import { SharedTooltipTrigger } from "../ui/shared-tooltip";
 
 export const ModelListRow = memo(function ModelListRow(props: {
   index: number;
+  docked?: boolean;
   slug: string;
   name: string;
   subProvider?: string | undefined;
@@ -45,7 +46,7 @@ export const ModelListRow = memo(function ModelListRow(props: {
   const row = (
     <ComboboxItem
       hideIndicator
-      variant="model"
+      variant={props.docked ? "docked-model" : "model"}
       selectedFill={false}
       index={props.index}
       value={modelPickerModelKey(props.instanceId, props.slug)}
@@ -84,7 +85,12 @@ export const ModelListRow = memo(function ModelListRow(props: {
         </div>
         {props.isSelected ? (
           <CheckIcon
-            className="size-3.5 shrink-0 stock-dark:text-(--silk-violet)"
+            className={cn(
+              "size-3.5 shrink-0",
+              props.docked
+                ? "stock-dark:text-(--silk-model-check)"
+                : "stock-dark:text-(--silk-violet)",
+            )}
             aria-hidden="true"
           />
         ) : null}
@@ -95,7 +101,11 @@ export const ModelListRow = memo(function ModelListRow(props: {
         ) : null}
         {props.showNewBadge ? (
           <span
-            className="shrink-0 rounded border border-update/35 bg-update/15 px-0.5 py-px text-3xs font-bold uppercase leading-none tracking-wide text-update-foreground"
+            className={cn(
+              "shrink-0 rounded border border-update/35 bg-update/15 px-0.5 py-px text-3xs font-bold uppercase leading-none tracking-wide text-update-foreground",
+              props.docked &&
+                "stock-dark:border-(--silk-selection-edge) stock-dark:bg-(image:--silk-cta-bg) stock-dark:text-(--silk-cta-foreground)",
+            )}
             aria-label={gt("New model")}
           >
             {gt("New", { $context: "badge on a newly added model" })}

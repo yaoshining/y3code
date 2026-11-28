@@ -34,6 +34,8 @@ import {
   useTraitsSelection,
 } from "./TraitsPicker";
 import { SharedTooltipTrigger } from "../ui/shared-tooltip";
+import { Kbd } from "../ui/kbd";
+import { NeuralNebulaEffortSlider } from "./NeuralNebulaEffortSlider";
 
 type SelectDescriptor = Extract<ProviderOptionDescriptor, { type: "select" }>;
 type BooleanDescriptor = Extract<ProviderOptionDescriptor, { type: "boolean" }>;
@@ -279,9 +281,18 @@ function moveBetweenRows(event: KeyboardEvent<HTMLElement>) {
 function EffortLevels(props: { traits: TraitsSelectionInput }) {
   const traits = useTraitsSelection(props.traits);
   const { effort, others } = columnControls(traits.selectDescriptors, traits.booleanDescriptors);
+  const gt = useGT();
+  const picker = use(DockedPickerContext);
+  const title =
+    effort?.descriptor.label ??
+    (others.length
+      ? gt("Options", { $context: "heading for model options" })
+      : gt("Effort", { $context: "heading for reasoning effort levels" }));
+  const heading = <EffortColumnHeading title={title} modelLabel={picker.modelLabel} />;
   if (traits.modelIsUnavailable) {
     return (
       <>
+        {heading}
         {traits.descriptors.map((descriptor) => {
           const value = traits.currentLabel(descriptor);
           return value ? (
@@ -294,13 +305,23 @@ function EffortLevels(props: { traits: TraitsSelectionInput }) {
       </>
     );
   }
-  if (!effort && others.length === 0) return <NoEffortRow />;
+  if (!effort && others.length === 0)
+    return (
+      <>
+        {heading}
+        <NoEffortRow />
+      </>
+    );
   // Ultrathink in the prompt locks the levels; the first option then holds the tab stop.
   const locked =
     effort?.descriptor.id === traits.primarySelectDescriptor?.id && traits.ultrathinkInBodyText;
   return (
     <>
-      {effort ? <EffortRows control={effort} traits={traits} locked={locked} /> : null}
+      {effort ? (
+        <EffortRows control={effort} traits={traits} locked={locked} heading={heading} />
+      ) : (
+        heading
+      )}
       {others.length > 0 ? (
         <div
           className={cn(
@@ -333,59 +354,87 @@ function EffortLevels(props: { traits: TraitsSelectionInput }) {
 
 type TraitsSelection = ReturnType<typeof useTraitsSelection>;
 
-function EffortRows(props: { control: ColumnControl; traits: TraitsSelection; locked: boolean }) {
+function EffortRows(props: {
+  control: ColumnControl;
+  traits: TraitsSelection;
+  locked: boolean;
+  heading: ReactNode;
+}) {
   const gt = useGT();
   const messages = useMessages();
   const { control, traits } = props;
+  const picker = use(DockedPickerContext);
   const { descriptor } = control;
   if (control.kind === "boolean") {
     return (
-      <div role="radiogroup" aria-label={descriptor.label} className="flex flex-col gap-0.5">
-        {([true, false] as const).map((value) => (
-          <ColumnRow
-            key={String(value)}
-            label={
-              value
-                ? gt("On", { $context: "option state" })
-                : gt("Off", { $context: "option state" })
-            }
-            selected={(control.descriptor.currentValue === true) === value}
-            tabStop={(control.descriptor.currentValue === true) === value}
-            onPick={() => traits.changeBoolean(descriptor.id, value)}
-          />
-        ))}
-      </div>
+      <>
+        {props.heading}
+        <div role="radiogroup" aria-label={descriptor.label} className="flex flex-col gap-0.5">
+          {([true, false] as const).map((value) => (
+            <ColumnRow
+              key={String(value)}
+              label={
+                value
+                  ? gt("On", { $context: "option state" })
+                  : gt("Off", { $context: "option state" })
+              }
+              selected={(control.descriptor.currentValue === true) === value}
+              tabStop={(control.descriptor.currentValue === true) === value}
+              onPick={() => traits.changeBoolean(descriptor.id, value)}
+            />
+          ))}
+        </div>
+      </>
     );
   }
   const { locked } = props;
   const value = traits.selectValue(control.descriptor);
   const choices = selectableProviderOptionChoices(control.descriptor);
+  const linear = choices.filter((option) => option.id !== "default");
+  if (!locked && linear.length >= 2 && linear.length <= 7) {
+    return (
+      <NeuralNebulaEffortSlider
+        label={descriptor.label}
+        choices={choices}
+        linear={linear}
+        value={value}
+        open={picker.open}
+        onPick={(next) => traits.changeSelect(control.descriptor, next)}
+      />
+    );
+  }
   // An "Ultrathink:" prefix selects a level the column does not offer.
   const shown = choices.some((option) => option.id === value);
   return (
-    <div role="radiogroup" aria-label={descriptor.label} className="flex flex-col gap-0.5">
-      {locked ? (
-        <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
-          {messages(ULTRATHINK_IN_BODY_NOTE)}
-        </div>
-      ) : null}
-      {choices.map((option, index) => (
-        <ColumnRow
-          key={option.id}
-          label={option.label}
-          selected={option.id === value}
-          tabStop={shown ? option.id === value : index === 0}
-          description={option.description}
-          isDefault={option.isDefault}
-          disabled={locked}
-          onPick={() => traits.changeSelect(control.descriptor, option.id)}
-        />
-      ))}
-    </div>
+    <>
+      {props.heading}
+      <div role="radiogroup" aria-label={descriptor.label} className="flex flex-col gap-0.5">
+        {locked ? (
+          <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
+            {messages(ULTRATHINK_IN_BODY_NOTE)}
+          </div>
+        ) : null}
+        {choices.map((option, index) => (
+          <ColumnRow
+            key={option.id}
+            label={option.label}
+            selected={option.id === value}
+            tabStop={shown ? option.id === value : index === 0}
+            description={option.description}
+            isDefault={option.isDefault}
+            disabled={locked}
+            onPick={() => traits.changeSelect(control.descriptor, option.id)}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
-const OPTION_ROW = cn(COLUMN_ROW, "h-auto py-1");
+const OPTION_ROW = cn(
+  COLUMN_ROW,
+  "h-auto py-1 stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-silk-chat-glass/30",
+);
 
 /** An option's name over its current value. */
 function OptionRowText(props: { label: string; value: string }) {
@@ -541,47 +590,41 @@ function NoEffortRow() {
 }
 
 /** The model picker's effort column: the selected model's levels and its other options. */
+function EffortColumnHeading({ title, modelLabel }: { title: string; modelLabel: string }) {
+  return (
+    <div className="mb-1 flex min-h-8 shrink-0 items-center gap-2 border-b border-border/70 px-1 pb-1.5 text-sm stock-dark:border-(--silk-soft-edge)">
+      <span className="text-muted-foreground">{title}</span>
+      <span className="ms-auto min-w-0 truncate text-xs text-muted-foreground">{modelLabel}</span>
+    </div>
+  );
+}
+
 export function ComposerEffortColumn(props: { traits: TraitsSelectionInput | null }) {
   const gt = useGT();
-  const messages = useMessages();
   const picker = use(DockedPickerContext);
-  const visibility = props.traits
-    ? getTraitsSectionVisibility({ ...props.traits, resolve: messages })
-    : null;
-  const controls =
-    props.traits && visibility
-      ? columnControls(visibility.selectDescriptors, visibility.booleanDescriptors)
-      : null;
   return (
-    <>
-      {/* Matches the search row's box, so one rule runs across the top of the popup. */}
-      <div className="shrink-0 px-3 pt-2.5">
-        <div className="flex h-8.25 -translate-y-px items-center gap-2 border-b border-border/70 pb-1.5 text-sm stock-dark:border-(--silk-soft-edge)">
-          <span className="text-muted-foreground">
-            {controls?.effort?.descriptor.label ??
-              (controls?.others.length
-                ? gt("Options", { $context: "heading for model options" })
-                : gt("Effort", { $context: "heading for reasoning effort levels" }))}
-          </span>
-          <span className="ms-auto min-w-0 truncate text-muted-foreground text-xs">
-            {picker.modelLabel}
-          </span>
-        </div>
-      </div>
-      {/* pt-2.5 puts the first level on the same line as the first model. */}
-      <div
-        className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 pt-2.5 pb-1.5"
-        // Capture, so Up and Down on an option row move rows instead of opening its menu.
-        onKeyDownCapture={moveBetweenRows}
-      >
-        {props.traits ? <EffortLevels traits={props.traits} /> : <NoEffortRow />}
-      </div>
-    </>
+    <div
+      className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-3 pt-3 pb-2 sm:px-4"
+      // Capture, so Up and Down on an option row move rows instead of opening its menu.
+      onKeyDownCapture={moveBetweenRows}
+    >
+      {props.traits ? (
+        <EffortLevels traits={props.traits} />
+      ) : (
+        <>
+          <EffortColumnHeading
+            title={gt("Effort", { $context: "heading for reasoning effort levels" })}
+            modelLabel={picker.modelLabel}
+          />
+          <NoEffortRow />
+        </>
+      )}
+    </div>
   );
 }
 
 const FOOTER_SEGMENT =
-  "flex h-6 cursor-pointer items-center justify-center gap-1 px-2 text-muted-foreground text-xs outline-none first:rounded-l-md last:rounded-r-md hover:text-foreground data-checked:bg-input/72 data-checked:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset";
+  "flex h-6 cursor-pointer items-center justify-center gap-1 px-2 text-muted-foreground text-xs outline-none first:rounded-l-md last:rounded-r-md hover:text-foreground data-checked:bg-input/72 data-checked:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset stock-dark:rounded-md stock-dark:data-checked:bg-(--silk-surface-selected) stock-dark:data-checked:text-(--silk-violet) stock-dark:data-checked:ring-1 stock-dark:data-checked:ring-inset stock-dark:data-checked:ring-(--silk-selection-edge)";
 
 function SpeedSegment(props: {
   checked: boolean;
@@ -628,7 +671,7 @@ function SpeedControl(props: { traits: TraitsSelectionInput }) {
     <div
       role="radiogroup"
       aria-label={speedSelect?.label ?? fastToggle?.label}
-      className="flex rounded-lg bg-input/40 p-0.5"
+      className="flex rounded-lg bg-input/40 p-0.5 stock-dark:bg-silk-chat-glass/50 stock-dark:ring-1 stock-dark:ring-inset stock-dark:ring-(--silk-soft-edge)"
     >
       {speedSelect
         ? selectableProviderOptionChoices(speedSelect).map((option) => (
@@ -665,7 +708,7 @@ function UltracodeControl(props: { traits: TraitsSelectionInput }) {
   if (traits.modelIsUnavailable || !ultracodeToggle) return null;
   const on = ultracodeToggle.currentValue === true;
   return (
-    <div className="flex rounded-lg bg-input/40 p-0.5">
+    <div className="flex rounded-lg bg-input/40 p-0.5 stock-dark:bg-silk-chat-glass/50 stock-dark:ring-1 stock-dark:ring-inset stock-dark:ring-(--silk-soft-edge)">
       <button
         type="button"
         aria-pressed={on}
@@ -704,7 +747,7 @@ function PermissionsMenu(props: {
             type="button"
             data-composer-permissions-trigger
             aria-label={gt("Permissions: {mode}", { mode: current.label })}
-            className="ms-auto flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-muted-foreground text-xs outline-none hover:bg-foreground/[0.09] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset data-popup-open:bg-foreground/[0.09] data-popup-open:text-foreground"
+            className="ms-auto flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-muted-foreground text-xs outline-none hover:bg-foreground/[0.09] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset data-popup-open:bg-foreground/[0.09] data-popup-open:text-foreground stock-dark:bg-silk-chat-glass/30 stock-dark:ring-1 stock-dark:ring-inset stock-dark:ring-(--silk-soft-edge) stock-dark:data-popup-open:bg-(--silk-surface-selected) stock-dark:data-popup-open:text-(--silk-violet) stock-dark:data-popup-open:ring-(--silk-selection-edge)"
           />
         }
       >
@@ -730,8 +773,14 @@ export function ComposerPickerFooter(props: {
   runtimeModeOptions: ReadonlyArray<RuntimeModeOption>;
   onRuntimeModeChange: (mode: RuntimeMode) => void;
 }) {
+  const { docked } = use(DockedPickerContext);
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t border-border/70 bg-muted/40 px-3 py-2 stock-dark:border-(--silk-soft-edge) stock-dark:bg-(--silk-surface-recessed)">
+    <div
+      className={cn(
+        "flex shrink-0 flex-wrap items-center gap-2 border-t border-border/70 bg-muted/40 px-3 py-2 stock-dark:border-(--silk-soft-edge)",
+        docked ? "stock-dark:bg-silk-chat-glass/30" : "stock-dark:bg-(--silk-surface-recessed)",
+      )}
+    >
       {props.traits ? <SpeedControl traits={props.traits} /> : null}
       {props.traits ? <UltracodeControl traits={props.traits} /> : null}
       <PermissionsMenu
@@ -739,6 +788,13 @@ export function ComposerPickerFooter(props: {
         options={props.runtimeModeOptions}
         onChange={props.onRuntimeModeChange}
       />
+      {docked ? (
+        <span aria-hidden="true" className="hidden items-center gap-1 sm:stock-dark:flex">
+          <Kbd>↑↓</Kbd>
+          <Kbd>↔</Kbd>
+          <Kbd>Enter</Kbd>
+        </span>
+      ) : null}
     </div>
   );
 }

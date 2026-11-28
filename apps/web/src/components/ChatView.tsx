@@ -319,6 +319,8 @@ import type { AssistantCitationRequest } from "./chat/AssistantCitationSource";
 import { useCitedHistory } from "./chat/citationProcedure";
 import type { MessagesTimelineHistoryControls } from "./chat/MessagesTimeline";
 import { ThreadTimeline } from "./chat/ThreadTimeline";
+import { ActiveStepsBar } from "./chat/ActiveStepsBar";
+import { deriveActiveSteps } from "./chat/ActiveStepsBar.logic";
 import { NativeChildWorkDialog } from "./chat/NativeChildWorkDialog";
 import { ProviderSubagentBar } from "./chat/ProviderSubagentBar";
 import { getTriggerDisplayModelName } from "./chat/providerIconUtils";
@@ -2166,6 +2168,17 @@ export default function ChatView(props: ChatViewProps) {
       )
     : linkedThreadPullRequestKey;
   const activeRunningTurnId = activeRuntime?.activeRunId ?? null;
+  const activeSteps = isDraftHeroState
+    ? null
+    : deriveActiveSteps(
+        serverVisibleTurnItems,
+        isWorking
+          ? (activeRunningTurnId ??
+              (activeActivityRun && ACTIVE_RUN_STATUSES.has(activeActivityRun.status)
+                ? activeActivityRun.runId
+                : null))
+          : null,
+      );
   useProactivePanels({
     threadRef: isServerThread && !embedded ? activeThreadRef : null,
     enabled: settings.proactivePanelsEnabled && !shouldUsePlanSidebarSheet && !embedded,
@@ -3692,6 +3705,14 @@ export default function ChatView(props: ChatViewProps) {
               className="relative flex min-h-0 flex-1 flex-col bg-background stock-dark:bg-transparent"
             >
               <WorkspaceMutationIdContext value={workspaceMutationId}>
+                {activeSteps ? (
+                  <ActiveStepsBar
+                    key={`${activeThreadKey}:${activeSteps.id}`}
+                    progress={activeSteps}
+                    activeWorkStartedAt={activeWorkStartedAt}
+                    environmentId={activeThread.environmentId}
+                  />
+                ) : null}
                 <ThreadTimeline
                   pendingApprovals={pendingApprovals}
                   heldApprovalRequestIds={heldApprovalRequestIds}

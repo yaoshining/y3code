@@ -104,13 +104,26 @@ function ComboboxInput({
   );
 }
 
-function ComboboxSearchInput(props: React.ComponentProps<typeof ComboboxInput>) {
+function ComboboxSearchInput({
+  variant = "default",
+  ...props
+}: React.ComponentProps<typeof ComboboxInput> & { variant?: "default" | "well" }) {
   return (
     <label className="block min-w-0 shrink-0 cursor-text px-3 pt-2.5">
-      <div className="relative -translate-y-px border-b border-border/70 pb-1.5 transition-colors focus-within:border-ring">
+      <div
+        className={cn(
+          "relative -translate-y-px border-b border-border/70 pb-1.5 transition-colors focus-within:border-ring",
+          variant === "well" &&
+            "stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-silk-picker-search/80 stock-dark:px-2 stock-dark:py-1 stock-dark:focus-within:border-(--silk-cyan)/70",
+        )}
+      >
         <SearchIcon
           aria-hidden="true"
-          className="pointer-events-none absolute top-1.5 left-0 size-4 shrink-0 text-muted-foreground/55"
+          className={cn(
+            "pointer-events-none absolute top-1.5 left-0 size-4 shrink-0 text-muted-foreground/55",
+            variant === "well" &&
+              "stock-dark:top-1/2 stock-dark:left-2 stock-dark:-translate-y-1/2 stock-dark:text-(--silk-violet)",
+          )}
         />
         <ComboboxInput
           {...props}
@@ -196,7 +209,7 @@ function ComboboxItem({
   hideIndicator?: boolean;
   /** Off for rows that mark selection themselves, so a fill only means hover or highlight. */
   selectedFill?: boolean;
-  variant?: "default" | "model";
+  variant?: "default" | "model" | "docked-model";
 }) {
   return (
     <ComboboxPrimitive.Item
@@ -205,6 +218,8 @@ function ComboboxItem({
         selectedFill && "data-selected:bg-foreground/[0.06]",
         variant === "model" &&
           "stock-dark:data-selected:bg-(--silk-surface-selected) stock-dark:data-selected:inset-shadow-(--silk-selection-mark) stock-dark:data-highlighted:bg-(--silk-surface-hover) stock-dark:[&[data-highlighted][data-selected]]:bg-(--silk-surface-hover)",
+        variant === "docked-model" &&
+          "stock-dark:rounded-lg stock-dark:border stock-dark:border-(--silk-soft-edge) stock-dark:bg-silk-picker-model/70 stock-dark:data-selected:silk-model-picker-active stock-dark:data-highlighted:silk-model-picker-active stock-dark:[&[data-highlighted][data-selected]]:silk-model-picker-active",
         className,
       )}
       data-slot="combobox-item"

@@ -6,8 +6,10 @@ import {
 } from "@t3tools/contracts";
 import { createModelCapabilities } from "@t3tools/shared/model";
 import { useState } from "react";
-import { expect, it } from "vite-plus/test";
+import { expect, it, vi } from "vite-plus/test";
 import { page, userEvent } from "vite-plus/test/browser";
+
+import "~/index.css";
 
 import { render } from "../../../test/render";
 import { ComposerEffortColumn, describeComposerEffort } from "./ComposerModelEffort";
@@ -121,6 +123,32 @@ it("draws an agent's reasoning as bars and keeps its mode out of the levels", as
     .element(screen.getByRole("button", { name: "Session Mode: Plan" }))
     .toBeInTheDocument();
   await expect.element(page.getByRole("menuitemradio")).not.toBeInTheDocument();
+});
+
+it("renders the canvas and lets the track and horizontal keys choose the same levels", async () => {
+  await using screen = await render(<Column />, { router: false }); // no routes involved
+  const track = screen.container.querySelector<HTMLElement>("[data-nebula-track]")!;
+  const lens = track.querySelectorAll("canvas")[1]!;
+  await vi.waitFor(() => {
+    const pixels = lens.getContext("2d")!.getImageData(0, 0, lens.width, lens.height).data;
+    expect(pixels.some((channel, index) => index % 4 !== 3 && channel > 80)).toBe(true);
+  });
+
+  await userEvent.click(track, { position: { x: 5, y: 30 } });
+  const levels = screen.getByRole("radiogroup", { name: "Thinking" });
+  const low = levels.getByRole("radio", { name: "Low" });
+  const medium = levels.getByRole("radio", { name: "Medium" });
+  const high = levels.getByRole("radio", { name: "High" });
+  await expect.element(low).toHaveFocus();
+  await expect.element(low).toHaveAttribute("aria-checked", "true");
+  await userEvent.keyboard("{ArrowRight}");
+  await expect.element(medium).toHaveFocus();
+  await userEvent.keyboard("{End}");
+  await expect.element(high).toHaveFocus();
+  await userEvent.keyboard("{Home}");
+  await expect.element(low).toHaveFocus();
+  await userEvent.keyboard("{End}{Enter}");
+  await expect.element(high).toHaveAttribute("aria-checked", "true");
 });
 
 it("focuses a reasoning level by its first letter without selecting it", async () => {

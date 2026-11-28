@@ -24,11 +24,13 @@ export function WorkLogBlock({
   return (
     <div
       className={
-        continues || layout === "group-header"
+        layout === "group-header"
           ? "pb-0"
-          : layout === "group-content"
-            ? "pb-1"
-            : "pb-2"
+          : continues
+            ? "pb-0 stock-dark:pb-1.5"
+            : layout === "group-content"
+              ? "pb-1"
+              : "pb-2"
       }
     >
       {children}
