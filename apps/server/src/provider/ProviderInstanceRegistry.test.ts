@@ -205,7 +205,14 @@ describe("ProviderInstanceRegistry — multi-instance codex slice", () => {
         ProviderEventLoggers.NoOpProviderEventLoggers,
       ),
     ),
-    Layer.provideMerge(ProviderLatestVersions.layer),
+    // Registry tests don't need npm lookups writing to the scoped test directory.
+    Layer.provideMerge(
+      Layer.succeed(ProviderLatestVersions.ProviderLatestVersions, {
+        cached: () => Effect.succeed(null),
+        invalidate: () => Effect.void,
+        invalidateAll: Effect.void,
+      }),
+    ),
     Layer.provideMerge(McpProviderSessions.layer),
     Layer.provideMerge(ProviderInstallationGate.layer),
     Layer.provideMerge(ModelManifest.layerTest),
